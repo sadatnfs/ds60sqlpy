@@ -533,6 +533,16 @@ Chromium with `python -m playwright install --with-deps chromium`, then run:
 python scripts/check_classroom_browser.py --url CLASSROOM_URL --confirm-disposable --report work/browser-receipts.json
 ```
 
+`.github/workflows/browser-acceptance.yml` runs the complete desktop gate on a
+GitHub-hosted runner: it builds a disposable starter classroom from the commit,
+runs this probe with `--axe-script` (axe-core 4.14.1, verified against its
+published sha512 integrity), the Python Core error and timeout-recovery flows,
+and the `--restart-stage write`/`verify` draft-preservation pair around a
+classroom container restart. It fails unless every receipt reports success,
+uploads the receipts and removes the project with its volumes. Start it with
+`gh workflow run browser-acceptance.yml --ref main`, or push a candidate commit
+to the `ci/browser-acceptance` branch.
+
 Use `--fixtures-only --report work/browser-fixtures.json` to execute just the
 isolated JavaScript browser references. A unit test of the probe's helpers is
 not a substitute for this real Chromium run. The browser probe writes its own
