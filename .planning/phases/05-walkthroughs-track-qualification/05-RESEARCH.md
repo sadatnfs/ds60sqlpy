@@ -99,12 +99,12 @@ Server guard [VERIFIED: src/ds60sqlpy/lab.py:364-371]:
 
 Client gate [VERIFIED: src/ds60sqlpy/assets/classroom-guide.js:54-58]:
 ```javascript
-  function stepLanguage() {
-    if (typeof current !== "object" || !current || current.engine !== "legacy") return null;
-    if (current.runtime_profile === "reading" || current.execution_mode === "draft") return null;
-    const language = contextOf()?.language;
-    return language === "python" || language === "sql" ? language : null;
-  }
+function stepLanguage() {
+  if (typeof current !== "object" || !current || current.engine !== "legacy") return null;
+  if (current.runtime_profile === "reading" || current.execution_mode === "draft") return null;
+  const language = contextOf()?.language;
+  return language === "python" || language === "sql" ? language : null;
+}
 ```
 
 Module actions route to `ModuleService` before the `step-through` branch (`lab.py:144-150`), and `ModuleService.action` has no step action; its last branch raises `"Unknown module action."` [VERIFIED: src/ds60sqlpy/module_service.py:233-390]. The `module-lesson` payload already carries `runtime_profile`, `verification_id`, `execution_mode` (`"draft"` or `"run"`) and `capability` [VERIFIED: module_service.py:277-330].
@@ -321,11 +321,11 @@ Accepted lists: a criterion may be `accepted-gap` only when the record lists the
     {
       "track": "go",
       "family": "module",
-      "runtime": {"...": "see ledger"},
-      "walkthrough": {"route": "authored", "floor": 3, "count": 3},
+      "runtime": { "...": "see ledger" },
+      "walkthrough": { "route": "authored", "floor": 3, "count": 3 },
       "criteria": {
-        "R7": {"status": "accepted-gap", "lessons": ["go-012"], "justification": "..."},
-        "R6": {"status": "pass"}
+        "R7": { "status": "accepted-gap", "lessons": ["go-012"], "justification": "..." },
+        "R6": { "status": "pass" }
       },
       "reviewed": "2026-11-18"
     }
@@ -441,8 +441,8 @@ EOF
 
 Existing render dispatch to extend [VERIFIED: classroom-guide.js:236-237]:
 ```javascript
-    if (walk.kind === "sql") renderSql(steps, position);
-    else renderPython(steps, position);
+if (walk.kind === "sql") renderSql(steps, position);
+else renderPython(steps, position);
 ```
 
 Proposed validator core (sketch, names are new):

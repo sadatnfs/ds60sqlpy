@@ -361,18 +361,41 @@ lesson payload (classroom-index / module-lesson / lab lesson)
 function workspaceMode(lesson, cap) {
   const profile = (cap && cap.profile) || lesson.runtime_profile || lesson.language;
   if (lesson.execution_mode === "draft")
-    return { kind: "draft", run: null, results: "offline", ready: true,
-             empty: "", where: "Comparison below the editor" };
+    return {
+      kind: "draft",
+      run: null,
+      results: "offline",
+      ready: true,
+      empty: "",
+      where: "Comparison below the editor",
+    };
   if (profile === "reading")
-    return { kind: "reading", run: null, results: "none", ready: true,
-             empty: "", where: "Your worksheet is saved with this lesson" };
+    return {
+      kind: "reading",
+      run: null,
+      results: "none",
+      ready: true,
+      empty: "",
+      where: "Your worksheet is saved with this lesson",
+    };
   if (["javascript-browser", "html-browser"].includes(profile))
-    return { kind: "browser", run: "Run browser preview", results: "preview",
-             ready: !!cap.ready, where: "Preview frame in this browser tab",
-             empty: "No preview yet. Press Run browser preview." };
+    return {
+      kind: "browser",
+      run: "Run browser preview",
+      results: "preview",
+      ready: !!cap.ready,
+      where: "Preview frame in this browser tab",
+      empty: "No preview yet. Press Run browser preview.",
+    };
   // legacy save-only and not-ready worker branches follow the same shape
-  return { kind: "worker", run: "Run code", results: "console", ready: !!cap.ready,
-           where: "Result panel", empty: "No run yet. Press Run code to try this lesson." };
+  return {
+    kind: "worker",
+    run: "Run code",
+    results: "console",
+    ready: !!cap.ready,
+    where: "Result panel",
+    empty: "No run yet. Press Run code to try this lesson.",
+  };
 }
 ```
 The kind names and copy above are illustrative [ASSUMED]. The only payload values the function relies on are `execution_mode === "draft"`, `runtime_profile === "reading"`, `"javascript-browser"` and `"html-browser"` [VERIFIED: classroom.js:1502-1503 and 1516].
@@ -450,7 +473,7 @@ button.addEventListener("click", () => {
 # Source: scripts/check_classroom_browser.py:250-301 (learner_snapshot, assert_learning_state_unchanged, assert_no_execution_requests)
 before = learner_snapshot(page, lesson)
 requests = []  # collected by the existing request listener
-open_oldest_saved_run(page)            # new helper, keyboard only
+open_oldest_saved_run(page)  # new helper, keyboard only
 assert_no_execution_requests(requests)
 assert_learning_state_unchanged(before, learner_snapshot(page, lesson))
 audit.preserved(name, before_sha, after_sha)  # Audit, lines 100-128

@@ -557,3 +557,17 @@ def test_fixed_bridge_import_is_independent_of_legacy_bridge_module(
     checks = importlib.import_module("check_processes")
     assert checks.PreparedTMB is bridge.PreparedTMB
     assert sys.modules["bridge"] is legacy
+
+
+def test_running_treats_a_process_reaped_mid_read_as_stopped(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    registered_modules()
+    checks = importlib.import_module("check_processes")
+
+    def reaped(*_args: object, **_kwargs: object) -> str:
+        raise ProcessLookupError(3, "No such process")
+
+    monkeypatch.setattr(checks.sys, "platform", "linux")
+    monkeypatch.setattr(checks.Path, "read_text", reaped)
+    assert checks.running(2**22) is False

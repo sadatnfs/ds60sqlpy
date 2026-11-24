@@ -230,15 +230,33 @@ The DB and Java DB are downloaded once per job in a separate step (`trivy image 
 ```json
 {
   "schema": 1,
-  "context": {"revision": "...", "run_id": "...", "run_attempt": "...", "version": "1.4.3"},
+  "context": { "revision": "...", "run_id": "...", "run_attempt": "...", "version": "1.4.3" },
   "architecture": "amd64",
-  "scanner": {"image": "aquasec/trivy@sha256:8f6bb947...", "version": "0.76.2",
-              "db_updated_at": "...", "db_next_update": "...", "java_db_updated_at": "..."},
+  "scanner": {
+    "image": "aquasec/trivy@sha256:8f6bb947...",
+    "version": "0.76.2",
+    "db_updated_at": "...",
+    "db_next_update": "...",
+    "java_db_updated_at": "..."
+  },
   "policy_sha256": "...",
-  "images": [{"profile": "app", "tested_image_id": "sha256:...",
-              "counts": {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0, "UNKNOWN": 0},
-              "unresolved": [], "suppressed": [{"id": "CVE-...", "package": "...", "policy_status": "no_fix_available", "expires_at": "..."}],
-              "report_sha256": "..."}]
+  "images": [
+    {
+      "profile": "app",
+      "tested_image_id": "sha256:...",
+      "counts": { "CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0, "UNKNOWN": 0 },
+      "unresolved": [],
+      "suppressed": [
+        {
+          "id": "CVE-...",
+          "package": "...",
+          "policy_status": "no_fix_available",
+          "expires_at": "..."
+        }
+      ],
+      "report_sha256": "..."
+    }
+  ]
 }
 ```
 
@@ -399,17 +417,35 @@ pillow 13, filelock 4 and soupsieve 4 are major bumps. Run full qualification an
 ```python
 # scripts/image_scan.py (sketch, DS60 style)
 def unresolved(report: dict, policy: list[dict], profile: str, today: date) -> list[dict]:
-    live = [e for e in policy if date.fromisoformat(e["expires_at"]) >= today
-            and (not e.get("profiles") or profile in e["profiles"])]
+    live = [
+        e
+        for e in policy
+        if date.fromisoformat(e["expires_at"]) >= today
+        and (not e.get("profiles") or profile in e["profiles"])
+    ]
     out = []
     for result in report.get("Results", []):
         for v in result.get("Vulnerabilities") or []:
-            match = next((e for e in live if e["id"] == v["VulnerabilityID"]
-                          and (not e.get("packages") or v["PkgName"] in e["packages"])), None)
+            match = next(
+                (
+                    e
+                    for e in live
+                    if e["id"] == v["VulnerabilityID"]
+                    and (not e.get("packages") or v["PkgName"] in e["packages"])
+                ),
+                None,
+            )
             if match is None or (match["status"] == "no_fix_available" and v.get("FixedVersion")):
-                out.append({"id": v["VulnerabilityID"], "package": v["PkgName"],
-                            "installed": v["InstalledVersion"], "fixed": v.get("FixedVersion", ""),
-                            "severity": v["Severity"], "target": result["Target"]})
+                out.append(
+                    {
+                        "id": v["VulnerabilityID"],
+                        "package": v["PkgName"],
+                        "installed": v["InstalledVersion"],
+                        "fixed": v.get("FixedVersion", ""),
+                        "severity": v["Severity"],
+                        "target": result["Target"],
+                    }
+                )
     return out
 ```
 

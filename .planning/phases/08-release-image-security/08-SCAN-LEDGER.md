@@ -88,17 +88,17 @@ plus the postgres reference. Nineteen groups means nineteen marker commits.
 | `[build-test-c-go]` | c17, go | `45365632612` at `25d34ad2` | success | success |
 | `[build-test-csharp]` | csharp-dotnet | `45365630097` at `727192be` | success | success |
 | `[build-test-swift]` | swift-linux | `45365628998` at `f06c3e34` | success | success |
-| `[build-test-javascript-typescript]` | javascript-node, typescript-node | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
-| `[build-test-scala-spark]` | scala-jvm, spark-local-scala, spark-local-python | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
-| `[build-test-tensorflow]` | tensorflow-cpu | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
-| `[build-test-pytorch]` | llm-torch-cpu | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
-| `[build-test-data-engineering]` | data-engineering, dbt-duckdb | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
-| `[build-test-stan]` | stan-cpu | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
-| `[build-test-julia]` | julia | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
-| `[build-test-jax]` | jax-cpu | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
-| `[build-test-bayesian]` | bayesian-cpu | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
-| `[build-test-r]` | r-statistics | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
-| `[build-test-data-platforms]` | data-platforms-python, rust-stable | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
+| `[build-test-javascript-typescript]` | javascript-node, typescript-node | `45381423045` at `9a649710` | success | success |
+| `[build-test-scala-spark]` | scala-jvm, spark-local-scala, spark-local-python | `45381445310` at `bfe1d265` | success | success |
+| `[build-test-tensorflow]` | tensorflow-cpu | `45381398146` at `943814a0` | success | success |
+| `[build-test-pytorch]` | llm-torch-cpu | `45390075438` at `09c196a6` | success | success |
+| `[build-test-data-engineering]` | data-engineering, dbt-duckdb | `45381381179` at `af359781` | success | success |
+| `[build-test-stan]` | stan-cpu | `45381388531` at `704e0b7c` | success | success |
+| `[build-test-julia]` | julia | `45381434097` at `6b1fcf79` | success | success |
+| `[build-test-jax]` | jax-cpu | `45381407945` at `7e7e53c3` | success | success |
+| `[build-test-bayesian]` | bayesian-cpu | `45381370240` at `6636f196` | success | success |
+| `[build-test-r]` | r-statistics | `45381452266` at `7277bd55` | success | success |
+| `[build-test-data-platforms]` | data-platforms-python, rust-stable | `45381414464` at `5a729150` | success | success |
 
 Artifacts to capture per run: `scan-reports-*` and `scan-evidence*.json` uploads, plus
 `r-build-logs-*` for the r group.

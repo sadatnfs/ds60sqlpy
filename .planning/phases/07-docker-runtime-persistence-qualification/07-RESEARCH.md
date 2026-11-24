@@ -378,30 +378,51 @@ Harness skeleton (new code; names of new functions are `[ASSUMED]`; launcher fla
 PROJECT_RE = re.compile(r"^ds60-(p7|ci)-[a-z0-9-]+$")
 FORBIDDEN = {"ds60-classroom", "ds60-phase1-browser", "ds60-livetest-pg"}
 
+
 def guard(project: str) -> None:
     if project in FORBIDDEN or not PROJECT_RE.fullmatch(project):
         raise SystemExit(f"refusing non-disposable project {project!r}")
-    for argv in (["volume", "ls", "-q", "--filter", f"label=com.docker.compose.project={project}"],
-                 ["ps", "-aq", "--filter", f"label=com.docker.compose.project={project}"]):
+    for argv in (
+        ["volume", "ls", "-q", "--filter", f"label=com.docker.compose.project={project}"],
+        ["ps", "-aq", "--filter", f"label=com.docker.compose.project={project}"],
+    ):
         if docker(argv).strip():
             raise SystemExit(f"{project} already has resources; pick a new name")
 
+
 def launch(project: str, tag: str, *extra: str) -> None:
-    run(["./classroom", *extra, "--project", project, "--local-build", "--tag", tag,
-         "--port", "0", "--database-port", "0", "--no-browser"], timeout=STEP_TIMEOUT)
+    run(
+        [
+            "./classroom",
+            *extra,
+            "--project",
+            project,
+            "--local-build",
+            "--tag",
+            tag,
+            "--port",
+            "0",
+            "--database-port",
+            "0",
+            "--no-browser",
+        ],
+        timeout=STEP_TIMEOUT,
+    )
+
 
 def snapshot(project: str) -> dict[str, object]:
     # container IDs per service, volume CreatedAt per volume,
     # sha256 of /workspace/.learning/progress.json, sentinel row, token sha256 (never the token)
     ...
 
+
 STEPS = [
-    ("fresh",    lambda: launch(P, TAG, "--starter")),
-    ("stop",     lambda: run(["./classroom", "stop", "--project", P])),
-    ("resume",   lambda: run(["./classroom", "resume", "--project", P, "--no-browser"])),
-    ("restart",  lambda: launch(P, TAG)),
-    ("recreate", lambda: (compose(P, "down"), launch(P, TAG))),   # no -v
-    ("rebuild",  lambda: launch(P, TAG, "--rebuild")),
+    ("fresh", lambda: launch(P, TAG, "--starter")),
+    ("stop", lambda: run(["./classroom", "stop", "--project", P])),
+    ("resume", lambda: run(["./classroom", "resume", "--project", P, "--no-browser"])),
+    ("restart", lambda: launch(P, TAG)),
+    ("recreate", lambda: (compose(P, "down"), launch(P, TAG))),  # no -v
+    ("rebuild", lambda: launch(P, TAG, "--rebuild")),
 ]
 # after each non-stop step: check_lab_http.py --url <classroom.url> --confirm-disposable --check-persistence,
 # sentinel query, snapshot diff; finally: owner marker check, compose -p P down -v --remove-orphans.

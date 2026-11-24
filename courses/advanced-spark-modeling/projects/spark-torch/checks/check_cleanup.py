@@ -20,7 +20,8 @@ def running(pid: int) -> bool:
         # init's reap; it cannot execute learner code in that state.
         state = path.read_text().rsplit(")", 1)[1].split()[0]
         return state != "Z"
-    except FileNotFoundError:
+    except (FileNotFoundError, ProcessLookupError):
+        # A process reaped mid-read reports ESRCH instead of a missing file.
         return False
 
 
