@@ -149,7 +149,7 @@ select = ["E", "F", "I", "UP", "B", "SIM", "C4", "PTH"]
 python_version = "3.11"
 strict = true
 explicit_package_bases = true
-mypy_path = ["src", "packages/spark-likelihood/src"]
+mypy_path = ["src", "packages/spark-likelihood/src", "docker/workers", "docker/workers/spark"]
 files = [
   "docker/init_module_runtime.py",
   "src",
