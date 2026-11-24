@@ -1583,8 +1583,15 @@ def test_hub_all_profiles_prepares_complete_catalog_without_local_builds(
     )
     assert result.returncode == 0, result.stdout + result.stderr
     calls = launcher.calls()
-    assert not hub_local_builds(calls) and built_services(calls) == ["postgres"]
+    assert not hub_local_builds(calls) and built_services(calls) == []
     pulls = [call for call in calls if "pull" in call["args"] and "up" not in call["args"]]
+    database = [call for call in pulls if call["args"][-1] == "postgres"]
+    assert len(database) == 1
+    assert (
+        database[0]["image_env"]["DS60_POSTGRES_IMAGE"]
+        == f"exampleuser/ds60sqlpy:{RELEASE_VERSION}-postgres"
+    )
+    pulls = [call for call in pulls if call not in database]
     assert [call["args"][-1] for call in pulls] == [
         "lab",
         *[service for _, service in ORDINARY_PROFILE_SERVICES],
@@ -1727,11 +1734,17 @@ def test_latest_resolves_once_then_pins_all_services_and_resume(
         for call in calls
         if call["args"][0] == "compose" and "pull" in call["args"] and "up" not in call["args"]
     ]
-    assert {call["args"][-1] for call in service_pulls} == {"lab", "python-core-worker"}
+    assert {call["args"][-1] for call in service_pulls} == {
+        "lab",
+        "postgres",
+        "python-core-worker",
+    }
     assert all(
         call["image_env"]["DS60_LAB_IMAGE"] == f"exampleuser/ds60sqlpy:{RELEASE_VERSION}"
         and call["image_env"]["DS60_WORKER_PYTHON_CORE_IMAGE"]
         == f"exampleuser/ds60sqlpy:{RELEASE_VERSION}-worker-python-core"
+        and call["image_env"]["DS60_POSTGRES_IMAGE"]
+        == f"exampleuser/ds60sqlpy:{RELEASE_VERSION}-postgres"
         for call in service_pulls
     )
     saved = launcher.directory / ".classroom/ds60-classroom/images.env"

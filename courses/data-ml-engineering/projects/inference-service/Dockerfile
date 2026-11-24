@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ds60sqlpy-worker-llm-torch-cpu:1.4.3
+ARG BASE_IMAGE=ds60sqlpy-worker-llm-torch-cpu:2.0.0
 FROM ${BASE_IMAGE}
 USER root
 COPY requirements.lock /tmp/inference-requirements.lock

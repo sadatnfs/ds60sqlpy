@@ -18,7 +18,7 @@ x-classroom-worker: &classroom-worker
 services:
   postgres:
     extends: { file: compose.yaml, service: postgres }
-    image: ${DS60_POSTGRES_IMAGE:-ds60sqlpy-postgres:1.4.3}
+    image: ${DS60_POSTGRES_IMAGE:-ds60sqlpy-postgres:2.0.0}
     networks: [default, module-private]
     # Host ports can be engine-selected while the app keeps its fixed inner port.
     ports: !override
@@ -26,7 +26,7 @@ services:
       - "127.0.0.1:${DS60_CLASSROOM_PORT:-${DS60_LAB_PORT:-8765}}:${DS60_LAB_PORT:-8765}"
 
   classroom-init:
-    image: ${DS60_LAB_IMAGE:-ds60sqlpy-lab:1.4.3}
+    image: ${DS60_LAB_IMAGE:-ds60sqlpy-lab:2.0.0}
     pull_policy: never
     build:
       context: .

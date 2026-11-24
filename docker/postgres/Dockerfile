@@ -23,7 +23,7 @@ RUN tar -xzf /tmp/gosu.tar.gz --strip-components=1 \
 
 FROM ${DS60_POSTGRES_BASE_IMAGE}
 LABEL org.opencontainers.image.title="DS60 PostgreSQL" \
-    org.opencontainers.image.version="1.4.3" \
+    org.opencontainers.image.version="2.0.0" \
     org.opencontainers.image.description="PostgreSQL 17 for the DS60 classroom with Debian security updates and gosu rebuilt from source" \
     org.opencontainers.image.source="https://github.com/sadatnfs/ds60sqlpy" \
     org.opencontainers.image.url="https://github.com/sadatnfs/ds60sqlpy" \

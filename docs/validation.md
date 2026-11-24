@@ -686,7 +686,7 @@ for unfixed findings and never for fixable ones. Check the file with
 `python scripts/image_scan.py validate-policy`.
 
 Scan a local image read-only with `make scan` (defaults
-`IMAGE=ds60sqlpy-lab:1.4.3 PROFILE=app`). It downloads the vulnerability DB
+`IMAGE=ds60sqlpy-lab:2.0.0 PROFILE=app`). It downloads the vulnerability DB
 and the Java DB into `~/.cache/ds60sqlpy/trivy` (caches never live in the
 repository), writes the raw report to `work/p8-scan/reports/` and writes
 evidence to `work/p8-scan/<profile>.json`. Evidence binds each verdict to the
