@@ -119,6 +119,8 @@ jobs:
         run: uv run --no-sync python scripts/audit_lesson_depth.py --write-report
       - name: Check lesson depth report drift
         run: git diff --exit-code -- docs/lesson-depth-report.md
+      - name: Check catalog coverage matrix drift
+        run: uv run --no-sync python scripts/build_coverage_matrix.py --check
       - name: Check reviewed prose and mathematical typesetting inputs
         run: uv run --no-sync python scripts/normalize_lesson_prose.py
       - name: Check complete source and generated example-fence coverage

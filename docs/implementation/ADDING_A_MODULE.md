@@ -74,6 +74,9 @@ Define vocabulary, explain mechanisms and syntax, show worked examples,
 progress through distinct practice, and state expected behavior and failures.
 Six exercises are the ordinary module floor; quantity is not a substitute for
 teaching quality. Do not use empty headings or repeated task wording.
+After adding lessons, run `python scripts/build_coverage_matrix.py --write`
+and review the new rows in [the coverage matrix](../coverage-matrix.md); each
+gap code names what the lesson still lacks.
 
 A reading-only practice lesson uses `language: markdown` and
 `runtime_profile: reading`, plus a separate explanatory solution. It has no

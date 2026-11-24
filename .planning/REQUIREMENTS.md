@@ -23,7 +23,7 @@
 
 ### Curriculum Quality
 
-- [ ] **CURR-01**: A maintained catalog-driven matrix accounts for every current subject and lesson, distinguishing authored, planned, reading-only, and runnable content and recording source, profile, dependencies, and known gaps.
+- [x] **CURR-01**: A maintained catalog-driven matrix accounts for every current subject and lesson, distinguishing authored, planned, reading-only, and runnable content and recording source, profile, dependencies, and known gaps.
 - [ ] **CURR-02**: Every authored lesson states observable learning outcomes, direct prerequisites, essential terms, and enough context to orient a new learner while preserving stable lesson identity.
 - [ ] **CURR-03**: Every authored lesson includes an accurate, substantive worked example with explanation and interpretation appropriate to its subject; non-code lessons use an appropriate non-code artifact.
 - [ ] **CURR-04**: Every practice lesson progresses from supported reasoning or modification toward appropriate independent application and includes a solution or feedback that explains the reasoning.
@@ -83,7 +83,7 @@ Deferred until the existing course quality floor and core classroom workflows ar
 | WALK-02 | Phase 1 | Complete |
 | WALK-03 | Phase 5 | Pending |
 | WALK-04 | Phase 1 | Complete |
-| CURR-01 | Phase 2 | Pending |
+| CURR-01 | Phase 2 | Complete |
 | CURR-02 | Phase 3 | Pending |
 | CURR-03 | Phase 4 | Pending |
 | CURR-04 | Phase 4 | Pending |

@@ -13,6 +13,9 @@ The legacy practice baseline remains immutable; added legacy IDs belong in
 The [extension playbook](curriculum-extension-playbook.md) and repository skill
 explain how to add a subject without renumbering existing work.
 
+For per-lesson depth gaps across every core and module lesson, use the
+generated [coverage matrix](coverage-matrix.md).
+
 ## Use the coverage index
 
 - A checked item has dedicated learning artifacts. It does not certify learner mastery.

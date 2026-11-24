@@ -23,6 +23,7 @@ generate:
 	$(PYTHON) scripts/build_catalog.py
 	$(PYTHON) scripts/audit_practice.py --write-report
 	$(PYTHON) scripts/audit_lesson_depth.py --write-report
+	$(PYTHON) scripts/build_coverage_matrix.py --write
 	$(PYTHON) accomplishments/index.py build --repo .
 	$(PYTHON) scripts/build_course_guide.py
 	$(PYTHON) scripts/compile_lesson_tex.py

@@ -7,7 +7,7 @@ Qualify the unfinished release 1.4.4 classroom-guide and Python/SQL walkthrough 
 ## Phases
 
 - [ ] **Phase 1: Qualify 1.4.4 Guide & Python/SQL Walkthroughs** - Complete checkpoint qualification for the guide, tour, and reference walkthrough flows.
-- [ ] **Phase 2: Catalog-wide Coverage Matrix** - Establish source-backed coverage and acceptance evidence for every existing course and lesson.
+- [x] **Phase 2: Catalog-wide Coverage Matrix** - Establish source-backed coverage and acceptance evidence for every existing course and lesson.
 - [ ] **Phase 3: Lesson Foundations & Source Integrity** - Bring authored lessons across all tracks to clear outcomes, prerequisites, and consistent source identity.
 - [ ] **Phase 4: Worked Examples & Practice** - Improve course-specific examples, scaffolded practice, and explanatory solutions across the catalog.
 - [ ] **Phase 5: Walkthroughs & Track Qualification** - Verify course-appropriate walkthroughs, runnable examples, and each track's quality threshold.
@@ -55,7 +55,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Every current subject, track, lesson, and sequence is accounted for in a maintained catalog-driven matrix.
   2. Each entry distinguishes authored from planned and reading-only from runnable content, and records its source, profile, dependencies, artifacts, and known gaps.
-**Plans**: TBD
+**Plans**: 1 plan
+
+**Wave 1**
+- [x] 02-01-PLAN.md: Generate and gate the catalog coverage matrix
 
 ### Phase 3: Lesson Foundations & Source Integrity
 **Goal:** Learners entering any existing authored track can understand what a lesson teaches and what it expects, while maintainers can trace the displayed lesson back to its stable source identity.
@@ -146,7 +149,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Qualify 1.4.4 Guide & Python/SQL Walkthroughs | 5/5 | In Progress | - |
-| 2. Catalog-wide Coverage Matrix | 0/TBD | Not started | - |
+| 2. Catalog-wide Coverage Matrix | 1/1 | Complete | 2026-11-23 |
 | 3. Lesson Foundations & Source Integrity | 0/TBD | Not started | - |
 | 4. Worked Examples & Practice | 0/TBD | Not started | - |
 | 5. Walkthroughs & Track Qualification | 0/TBD | Not started | - |

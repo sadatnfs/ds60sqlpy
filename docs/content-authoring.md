@@ -309,6 +309,10 @@ plain text, static HTML and the unified classroom.
   every explanatory-solution artifact.
 - Run `python scripts/audit_practice.py` after changing practice content. The
   generated `docs/practice-coverage.md` must agree with the live audit.
+- Run `python scripts/build_coverage_matrix.py --write` (or `make generate`)
+  after adding or changing any core or module lesson. The generated
+  [coverage matrix](coverage-matrix.md) lists each lesson's execution kind,
+  verification and remaining gaps; CI fails when it drifts.
 - Count real learner actions, questions, predictions, diagnoses, and
   explanations. Repeated sub-bullets, headings, hints, and answer steps do not
   become separate exercises merely to satisfy the count.

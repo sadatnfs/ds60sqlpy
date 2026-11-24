@@ -316,6 +316,7 @@ python scripts/build_lesson_readers.py</code></pre>
 <ul>
 <li>Treat <code>curriculum/practice_baseline.json</code> as immutable audit evidence, not a target to edit downward. Every cataloged lesson must contain at least <code>max(6, 2 × baseline)</code> distinct numbered prompts on the learner, guide, and every explanatory-solution artifact.</li>
 <li>Run <code>python scripts/audit_practice.py</code> after changing practice content. The generated <code>docs/practice-coverage.md</code> must agree with the live audit.</li>
+<li>Run <code>python scripts/build_coverage_matrix.py --write</code> (or <code>make generate</code>) after adding or changing any core or module lesson. The generated <a href="coverage-matrix.md.html">coverage matrix</a> lists each lesson&#x27;s execution kind, verification and remaining gaps; CI fails when it drifts.</li>
 <li>Count real learner actions, questions, predictions, diagnoses, and explanations. Repeated sub-bullets, headings, hints, and answer steps do not become separate exercises merely to satisfy the count.</li>
 <li>Sequence practice from retrieval and prediction through implementation, debugging, edge cases, and transfer to a new context.</li>
 <li>Keep learner exercises answer-free.</li>

@@ -1,19 +1,19 @@
 ---
 gsd_state_version: "1.0"
-current_phase: 01
-current_phase_name: Qualify 1.4.4 Guide & Python/SQL Walkthroughs
-current_plan: 5
-status: verifying
-stopped_at: Phase-1-complete
+current_phase: 02
+current_phase_name: Catalog-wide Coverage Matrix
+current_plan: 1
+status: complete
+stopped_at: Phase-2-complete
 last_updated: "2026-11-24T02:34:35.980Z"
-last_activity: 2026-11-24; Plan 01-05 complete; SQL solution walks replay trusted setup and browser preservation evidence is recorded.
+last_activity: 2026-11-23; Plan 02-01 complete; catalog coverage matrix generated, tested and gated in CI.
 state_head: 2c465c7d1729c289c83534aea48bdea5d96a44c3
 progress:
   total_phases: 10
-  completed_phases: 0
-  total_plans: 5
-  completed_plans: 5
-  percent: 100
+  completed_phases: 1
+  total_plans: 6
+  completed_plans: 6
+  percent: 20
 ---
 
 # Project State
@@ -23,17 +23,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-11-23)
 
 **Core value:** Learners can understand, practice, run, and keep their work in any DS60 course without installing toolchains or losing learning state.
-**Current focus:** Phase 1; Qualify 1.4.4 Guide & Python/SQL Walkthroughs
+**Current focus:** Phase 3; Lesson Foundations & Source Integrity
 
 ## Current Position
 
-Phase: 01 (Qualify 1.4.4 Guide & Python/SQL Walkthroughs): EXECUTING
-Current Plan: 5
-Total Plans in Phase: 5
-Status: Phase complete, verified with one human check outstanding
-Last activity: 2026-11-24; Plan 01-05 complete; SQL solution walks replay trusted setup and browser preservation evidence is recorded.
+Phase: 02 (Catalog-wide Coverage Matrix): COMPLETE
+Current Plan: 1
+Total Plans in Phase: 1
+Status: Phase 2 complete and verified. Phase 1 still has one human check outstanding.
+Last activity: 2026-11-23; Plan 02-01 complete; catalog coverage matrix generated, tested and gated in CI.
 
-Progress: [██████████] 100%
+Progress: [██░░░░░░░░] 20%
 
 ## Performance Metrics
 
@@ -61,6 +61,7 @@ Progress: [██████████] 100%
 | Phase 01 P03 | 2h | 3 tasks | 5 files |
 | Phase 01 P04 | 40m | 2 tasks | 4 files |
 | Phase 01 P05 | 3sessions | 3 tasks | 12 files |
+| Phase 02 P01 | 1 session | 6 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,7 @@ Progress: [██████████] 100%
 - All existing language and subject tracks are in scope. Python and SQL are a quality reference and checkpoint, not a scope boundary.
 - Preserve desktop-only delivery, local Docker and trusted-local-code boundaries, stable lesson IDs, learner state, and capability distinctions.
 - Keep runtime builds, image scans, registry publication, and cleanup as separately verified gates.
+- The coverage matrix (`curriculum/coverage-matrix.json`) is the work queue for Phases 3 to 5. Gaps never fail CI; only drift or missing cataloged files do.
 
 ### Pending Todos
 
