@@ -40,11 +40,20 @@ LOCKING_QUERY = (
     "so use Run for it."
 )
 UNBALANCED = "Check the parentheses in this query, then try Step through again."
+UNSUPPORTED_SQL = (
+    "Step-through can't split this query into clauses, so use Run for it. "
+    "If Run reports an error, check that the clauses are complete and in order: "
+    "SELECT, FROM, WHERE, GROUP BY, HAVING, ORDER BY, LIMIT."
+)
 
 _PYTHON_TRACE_BODY = r"""
 import io, json, sys, types, warnings, _thread
 
-warnings.filterwarnings('ignore', message=r'FigureCanvasAgg is non-interactive, and thus cannot be shown', category=UserWarning)
+warnings.filterwarnings(
+    'ignore',
+    message=r'FigureCanvasAgg is non-interactive, and thus cannot be shown',
+    category=UserWarning,
+)
 
 SOURCE_PATH, RESULT_PATH, BACKEND = sys.argv[1], sys.argv[2], sys.argv[3]
 MAIN_THREAD = _thread.get_ident()
@@ -202,7 +211,8 @@ def raw_bounded(value, depth):
         return repr(value)
     if kind is int:
         if value.bit_length() > 300:
-            return "int with about " + format(int(value.bit_length() * 0.30103) + 1, ",") + " digits"
+            digits = int(value.bit_length() * 0.30103) + 1
+            return "int with about " + format(digits, ",") + " digits"
         return repr(value)
     if kind in (str, bytes, bytearray):
         return repr(value[: VALUE_LIMIT + 1])
@@ -503,7 +513,8 @@ def main():
         code = compile(source, "main.py", "exec", dont_inherit=True)
     except SyntaxError as exc:
         line = exc.lineno if type(exc.lineno) is int else None
-        finish({"type": type(exc).__name__, "message": short(str(exc.msg or exc), 500), "line": line})
+        message = short(str(exc.msg or exc), 500)
+        finish({"type": type(exc).__name__, "message": message, "line": line})
         return
     except (ValueError, OverflowError, MemoryError) as exc:
         finish({"type": type(exc).__name__, "message": short(str(exc), 500), "line": None})
@@ -527,14 +538,16 @@ def main():
         pass
     except SystemExit as exc:
         if not state["limit"] and exc.code not in (None, 0):
-            error = {"type": "SystemExit", "message": short(str(exc.code), 500), "line": learner_line(exc)}
+            message = short(str(exc.code), 500)
+            error = {"type": "SystemExit", "message": message, "line": learner_line(exc)}
     except BaseException as exc:
         if not state["limit"]:
             try:
                 message = str(exc)
             except Exception:
                 message = ""
-            error = {"type": type(exc).__name__, "message": short(message, 500), "line": learner_line(exc)}
+            message = short(message, 500)
+            error = {"type": type(exc).__name__, "message": message, "line": learner_line(exc)}
     finish(error)
 
 
@@ -1053,7 +1066,7 @@ def plan_sql(code: str, cursor_offset: int | None = None) -> SqlPlan:
     try:
         steps, unsupported = _Planner(statement, tokens).plan()
     except _Fallback:
-        steps, unsupported = [_whole_step(statement)], None
+        return SqlPlan(statement, start, (), UNSUPPORTED_SQL)
     if unsupported is not None:
         return SqlPlan(statement, start, (), unsupported)
     return SqlPlan(statement, start, tuple(_finalize(statement, steps)), None)
@@ -1488,9 +1501,7 @@ class _Planner:
                 if trailing == "FILTER" and close + 2 < len(tokens):
                     close = self.matching(close + 2)
                     trailing = tokens[close + 1].upper if close + 1 < len(tokens) else ""
-                if trailing == "WITHIN":
-                    aggregate = True
-                elif trailing != "OVER":
+                if trailing != "OVER":
                     aggregate = True
         return PlannedStep(
             "select",
@@ -1615,9 +1626,12 @@ class _Planner:
         select_items = self.split_items(select.body, select.last)
         if select_items and tokens[select_items[0][0]].upper in {"DISTINCT", "ALL"}:
             first, last = select_items[0]
-            if tokens[first].upper == "DISTINCT" and first + 1 <= last:
-                if tokens[first + 1].upper == "ON":
-                    return fallback
+            if (
+                tokens[first].upper == "DISTINCT"
+                and first + 1 <= last
+                and tokens[first + 1].upper == "ON"
+            ):
+                return fallback
             select_items[0] = (first + 1, last)
         keys: list[str] = []
         rewritten: list[str] = []
@@ -1726,7 +1740,10 @@ def explain(detail: dict[str, Any], count: int | None, previous: int | None, fai
     if kind == "from":
         source = detail.get("source")
         if source == "list":
-            lead = "FROM lists several sources, and every row of one is paired with every row of the next."
+            lead = (
+                "FROM lists several sources, and every row of one is paired with every row "
+                "of the next."
+            )
             return lead if not known or count is None else f"{lead} That gives {_count(count)}."
         if source == "subquery":
             lead = "FROM runs the subquery and reads its rows."
@@ -1768,7 +1785,10 @@ def explain(detail: dict[str, Any], count: int | None, previous: int | None, fai
     if kind == "order":
         if not known or count is None:
             return "ORDER BY sorts the rows. Sorting does not change the row count."
-        return f"ORDER BY sorted the rows. Sorting does not change the row count, so there are still {_count(count)}."
+        return (
+            "ORDER BY sorted the rows. Sorting does not change the row count, so there are "
+            f"still {_count(count)}."
+        )
     if kind == "limit":
         return _explain_limit(detail, count if known else None, previous)
     if not known or count is None:
@@ -1842,9 +1862,15 @@ def _explain_select(detail: dict[str, Any], count: int | None, previous: int | N
         text += "." if count is None else f", giving {_count(count)}."
     elif detail.get("aggregate") and not detail.get("distinct"):
         if count is None:
-            text = "SELECT computed the output columns. The aggregate functions collapse the rows into one row."
+            text = (
+                "SELECT computed the output columns. The aggregate functions collapse the rows "
+                "into one row."
+            )
         elif previous is None:
-            text = f"SELECT computed the output columns. The aggregate functions collapsed the rows into {_count(count)}."
+            text = (
+                "SELECT computed the output columns. The aggregate functions collapsed the rows "
+                f"into {_count(count)}."
+            )
         else:
             text = (
                 "SELECT computed the output columns. The aggregate functions collapsed "
@@ -1854,7 +1880,10 @@ def _explain_select(detail: dict[str, Any], count: int | None, previous: int | N
         if count is None:
             text = "SELECT computed the output columns, and DISTINCT removed duplicate rows."
         elif previous is None:
-            text = f"SELECT computed the output columns, and DISTINCT removed duplicate rows, leaving {_count(count)}."
+            text = (
+                "SELECT computed the output columns, and DISTINCT removed duplicate rows, "
+                f"leaving {_count(count)}."
+            )
         else:
             text = (
                 "SELECT computed the output columns, and DISTINCT removed duplicate rows, "
@@ -1912,16 +1941,17 @@ def sql_response(
     steps: list[dict[str, Any]] = []
     previous: int | None = None
     for index, planned in enumerate(plan.steps):
-        record = results.get(index)
-        if record is None:
+        result = results.get(index)
+        if result is None:
             break
-        error = _text(record.get("error"), redact)
-        count = record.get("row_count")
+        error = _text(result.get("error"), redact)
+        count = result.get("row_count")
         count = count if type(count) is int and error is None else None
         kind = planned.detail.get("kind")
         reference = None if kind in {"cte", "branch"} else previous
-        columns = record.get("columns") if isinstance(record.get("columns"), list) else []
-        rows = record.get("rows") if isinstance(record.get("rows"), list) else []
+        raw_columns, raw_rows = result.get("columns"), result.get("rows")
+        columns: list[Any] = raw_columns if isinstance(raw_columns, list) else []
+        rows: list[Any] = raw_rows if isinstance(raw_rows, list) else []
         steps.append(
             {
                 "clause": planned.clause,
@@ -1934,7 +1964,7 @@ def sql_response(
                 else [],
                 "rows": [_redact_value(row, redact) for row in rows] if error is None else [],
                 "row_count": count,
-                "rows_truncated": record.get("rows_truncated") is True and error is None,
+                "rows_truncated": result.get("rows_truncated") is True and error is None,
                 "error": error,
             }
         )

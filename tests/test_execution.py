@@ -887,3 +887,154 @@ def test_step_through_python_reports_output_step_limits_and_errors(
     assert "after" not in noisy["output"]
     assert noisy["error"] is None and noisy["step_limit_reached"] is False
     assert all(step["output_length"] <= len(noisy["output"]) for step in noisy["steps"])
+
+
+def test_plan_sql_fallback_is_explicitly_unsupported(
+    course: Catalog, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = "-- Clauses out of order\nSELECT 1 ORDER BY 1 WHERE true"
+    statement = "SELECT 1 ORDER BY 1 WHERE true"
+    plan = stepping.plan_sql(source)
+    assert (plan.steps, plan.unsupported) == ((), stepping.UNSUPPORTED_SQL)
+    assert plan.statement == statement
+    assert source[plan.statement_offset :] == statement
+    for code, message in {
+        "UPDATE scores SET n = 0": stepping.NOT_A_QUERY,
+        "WITH gone AS (DELETE FROM scores RETURNING n) SELECT * FROM gone": (stepping.NOT_A_QUERY),
+        "SELECT * FROM scores FOR UPDATE": stepping.LOCKING_QUERY,
+        "SELECT (1": stepping.UNBALANCED,
+        "-- nothing to run": stepping.NO_QUERY,
+    }.items():
+        rejected = stepping.plan_sql(code)
+        assert (rejected.steps, rejected.unsupported) == ((), message)
+
+    runner = PadRunner(course)
+
+    def unexpected(*args: object, **kwargs: object) -> None:
+        raise AssertionError("An unsupported walkthrough launched the SQL worker.")
+
+    monkeypatch.setattr(runner, "_execute", unexpected)
+    assert runner.step_through("python-01", "sql", source) == {
+        "kind": "sql",
+        "statement": statement,
+        "statement_offset": source.index(statement),
+        "steps": [],
+        "unsupported": stepping.UNSUPPORTED_SQL,
+        "elapsed_seconds": 0.0,
+        "error": None,
+    }
+    assert not list(course.repo_root.rglob(".step-*"))
+
+
+SQUARES_SOURCE = (
+    "SELECT 0 AS warmup;\n\n"
+    "-- Squares above two, largest first\n"
+    "SELECT n, n * n AS square\n"
+    "FROM generate_series(1, 5) AS g(n)\n"
+    "WHERE n > 2\n"
+    "ORDER BY n DESC\n"
+    "LIMIT 2;\n"
+)
+SQUARES_CLAUSES = [
+    ("from", "FROM generate_series(1, 5) AS g(n)"),
+    ("where", "WHERE n > 2"),
+    ("select", "SELECT n, n * n AS square"),
+    ("order", "ORDER BY n DESC"),
+    ("limit", "LIMIT 2"),
+]
+
+
+def _source_clauses(source: str, offset: int, steps: Any) -> list[tuple[str, str]]:
+    clauses = []
+    for step in steps:
+        clause = step["clause"] if isinstance(step, dict) else step.clause
+        start, end = step["highlight"] if isinstance(step, dict) else step.highlight
+        clauses.append((clause, source[offset + start : offset + end]))
+    return clauses
+
+
+def test_step_through_sql_offsets_match_original_source() -> None:
+    source = SQUARES_SOURCE
+    start = source.index("SELECT n,")
+    for cursor in (None, source.index("WHERE"), source.index("LIMIT 2") + 3):
+        plan = stepping.plan_sql(source, cursor)
+        assert plan.unsupported is None
+        assert plan.statement_offset == start
+        assert source[start : start + len(plan.statement)] == plan.statement
+        assert plan.statement.endswith("LIMIT 2")
+        assert _source_clauses(source, start, plan.steps) == SQUARES_CLAUSES
+        assert plan.steps[-1].sql == plan.statement
+    warmup = stepping.plan_sql(source, 3)
+    assert (warmup.statement, warmup.statement_offset) == ("SELECT 0 AS warmup", 0)
+
+    wide = (
+        "-- \U0001f600 smile\nSELECT '\U0001f600' AS face\nFROM (VALUES (1)) AS v(n)\nWHERE n = 1"
+    )
+    plan = stepping.plan_sql(wide)
+    where = next(step for step in plan.steps if step.clause == "where")
+    begin, end = where.highlight
+    assert wide[plan.statement_offset + begin : plan.statement_offset + end] == "WHERE n = 1"
+
+
+def test_live_step_through_sql_results_and_rejection_preserve_database_state(
+    course: Catalog, live_database: LiveDatabase
+) -> None:
+    driver, target = live_database.driver, live_database.target
+    table = f"{live_database.schema}.step_sentinel_{uuid.uuid4().hex}"
+    sequence = f"{live_database.schema}.step_sequence_{uuid.uuid4().hex}"
+    with driver.connect(target, autocommit=True) as connection:
+        connection.execute(f"CREATE TABLE {table} (n int PRIMARY KEY)")
+        connection.execute(f"INSERT INTO {table} SELECT generate_series(1, 5)")
+        connection.execute(f"CREATE SEQUENCE {sequence}")
+
+    def snapshot() -> tuple[list[int], int, bool]:
+        with driver.connect(target, autocommit=True) as connection:
+            rows = [row[0] for row in connection.execute(f"SELECT n FROM {table} ORDER BY n")]
+            last, called = connection.execute(
+                f"SELECT last_value, is_called FROM {sequence}"
+            ).fetchone()
+        return rows, last, called
+
+    before = snapshot()
+    assert before == ([1, 2, 3, 4, 5], 1, False)
+    runner = PadRunner(course)
+
+    source = SQUARES_SOURCE.replace("generate_series(1, 5) AS g(n)", f"{table} AS g")
+    walk = runner.step_through("python-01", "sql", source, timeout_seconds=60)
+    assert walk["unsupported"] is None and walk["error"] is None, walk
+    start = walk["statement_offset"]
+    assert source[start : start + len(walk["statement"])] == walk["statement"]
+    expected_clauses = [
+        (clause, text.replace("generate_series(1, 5) AS g(n)", f"{table} AS g"))
+        for clause, text in SQUARES_CLAUSES
+    ]
+    assert _source_clauses(source, start, walk["steps"]) == expected_clauses
+    assert [
+        (step["columns"], step["rows"], step["row_count"], step["error"]) for step in walk["steps"]
+    ] == [
+        (["n"], [[1], [2], [3], [4], [5]], 5, None),
+        (["n"], [[3], [4], [5]], 3, None),
+        (["n", "square"], [[3, 9], [4, 16], [5, 25]], 3, None),
+        (["n", "square"], [[5, 25], [4, 16], [3, 9]], 3, None),
+        (["n", "square"], [[5, 25], [4, 16]], 2, None),
+    ]
+
+    for code, message in {
+        f"SELECT n FROM {table} ORDER BY n WHERE true": stepping.UNSUPPORTED_SQL,
+        f"DELETE FROM {table}": stepping.NOT_A_QUERY,
+        f"WITH gone AS (DELETE FROM {table} RETURNING n) SELECT * FROM gone": (
+            stepping.NOT_A_QUERY
+        ),
+        f"SELECT n FROM {table} FOR UPDATE": stepping.LOCKING_QUERY,
+    }.items():
+        rejected = runner.step_through("python-01", "sql", code, timeout_seconds=15)
+        assert (rejected["steps"], rejected["unsupported"]) == ([], message)
+        assert snapshot() == before
+
+    writer = runner.step_through(
+        "python-01", "sql", f"SELECT nextval('{sequence}') AS n", timeout_seconds=15
+    )
+    assert writer["steps"] and all(step["error"] for step in writer["steps"]), writer
+    assert all(step["rows"] == [] for step in writer["steps"])
+    assert "read-only" in writer["steps"][-1]["error"]
+    assert snapshot() == before
