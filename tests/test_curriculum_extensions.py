@@ -156,6 +156,8 @@ def test_future_topics_are_registered_without_claiming_an_executor(
         ("guide_path", "/etc/passwd"),
         ("guide_path", "courses\\reasoning-demo\\guide.md"),
         ("solution_paths", []),
+        ("outcome", "   "),
+        ("outcome", 7),
     ],
 )
 def test_bad_manifest_metadata_is_rejected_before_delivery(

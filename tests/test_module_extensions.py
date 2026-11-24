@@ -23,6 +23,7 @@ def book(root: Path) -> tuple[Path, dict[str, Any]]:
             {
                 "id": "statistics-001",
                 "title": "Inference",
+                "outcome": "Estimate a mean with an honest interval.",
                 "chapter_path": "courses/statistics-ml/one.md",
                 "example_paths": ["courses/statistics-ml/one.py"],
                 "topic_ids": ["stat-01-01"],
@@ -41,6 +42,7 @@ def test_unwritten_chapter_is_planned_until_guide_and_example_exist(tmp_path: Pa
     path, _ = book(tmp_path)
     result = load_book(tmp_path)
     assert result is not None and result[0]["lessons"][0]["learning_mode"] == "tutorial"
+    assert result[0]["lessons"][0]["outcome"] == "Estimate a mean with an honest interval."
     assert result[1]["lessons"] == []
     (path.parent / "one.md").write_text("# Inference\nA worked explanation.")
     assert load_book(tmp_path)[1]["lessons"] == []  # type: ignore[index]
@@ -63,6 +65,9 @@ def test_unwritten_chapter_is_planned_until_guide_and_example_exist(tmp_path: Pa
         ("example_paths", []),
         ("minutes", True),
         ("level", "expertish"),
+        ("outcome", None),
+        ("outcome", "   "),
+        ("outcome", ["Estimate a mean."]),
     ],
 )
 def test_book_rejects_invalid_paths_and_unusable_metadata(

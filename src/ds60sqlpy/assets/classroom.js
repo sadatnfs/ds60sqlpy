@@ -617,11 +617,50 @@ function values() {
 function sameFields(a, b) {
   return JSON.stringify(a) === JSON.stringify(b);
 }
+// The fingerprint of the server draft each workspace's browser backup is based on.
+const stashBases = new Map();
 function stashDraft(key, fields) {
   try {
-    localStorage.setItem("ds60.classroom.unsaved." + key, JSON.stringify(fields));
+    localStorage.setItem(
+      "ds60.classroom.unsaved." + key,
+      JSON.stringify({
+        ...fields,
+        stash_meta: {
+          base_sha256: stashBases.get(key) ?? null,
+          saved_at: new Date().toISOString(),
+          origin: "browser-backup",
+        },
+      }),
+    );
     return true;
   } catch (_) {
+    return false;
+  }
+}
+const CONFLICT_PREFIX = "ds60.classroom.conflict.";
+// Keys whose conflicting backup could not be moved to the conflict store. Autosave
+// keeps their unsaved stash, and this session keeps the list in memory.
+const conflictPinned = new Map();
+function readConflicts(key) {
+  if (conflictPinned.has(key)) return conflictPinned.get(key).slice();
+  let list = [];
+  try {
+    list = JSON.parse(localStorage.getItem(CONFLICT_PREFIX + key) || "[]");
+  } catch (_) {}
+  return (Array.isArray(list) ? list : [])
+    .filter((entry) => backupDecision(entry, null) !== "none")
+    .slice(0, 5);
+}
+function writeConflicts(key, list) {
+  list = list.slice(0, 5);
+  try {
+    if (list.length) localStorage.setItem(CONFLICT_PREFIX + key, JSON.stringify(list));
+    else localStorage.removeItem(CONFLICT_PREFIX + key);
+    conflictPinned.delete(key);
+    return true;
+  } catch (_) {
+    if (list.length) conflictPinned.set(key, list);
+    else conflictPinned.delete(key);
     return false;
   }
 }
@@ -692,6 +731,7 @@ function queueSave() {
     .then(async () => {
       try {
         await saveLesson(context, fields);
+        stashBases.set(context.key, draftFingerprint(fields));
         savedRevisions.set(context.key, revision);
         const sameView = workspaceKey() === context.key;
         const sameDraft =
@@ -700,11 +740,12 @@ function queueSave() {
           sameFields(values(), fields);
         if (sameDraft) {
           $("save-state").textContent = "Saved in your local learning workspace.";
-          try {
-            localStorage.removeItem("ds60.classroom.unsaved." + context.key);
-            if (context.engine === "module")
-              localStorage.removeItem("ds60.module.unsaved." + context.id);
-          } catch (_) {}
+          if (!conflictPinned.has(context.key))
+            try {
+              localStorage.removeItem("ds60.classroom.unsaved." + context.key);
+              if (context.engine === "module")
+                localStorage.removeItem("ds60.module.unsaved." + context.id);
+            } catch (_) {}
         } else if (sameView) {
           $("save-state").textContent = "Unsaved changes. Your newer draft is waiting to save.";
           stashDraft(context.key, values());
@@ -814,8 +855,9 @@ function subjectEntry(subject) {
     node("span", levelSpan(subject), "toc-levels"),
   );
   if (done) meta.append(node("span", done + " of " + authored + " done", "toc-progress"));
-  card.append(node("span", icon, "subject-icon"), main, meta);
-  card.setAttribute("aria-label", subject.title + ", " + authored + " lessons");
+  const mark = node("span", icon, "subject-icon");
+  mark.setAttribute("aria-hidden", "true");
+  card.append(mark, main, meta);
   card.addEventListener("click", () =>
     switchTrack(subject.id).catch((error) => status(error.message, true)),
   );
@@ -933,6 +975,7 @@ async function showHome(historyMode = "push") {
     return;
   }
   stopBrowserPreview("Stopped when returning to all subjects.");
+  removeDraftConflict();
   ++loadSequence;
   closeManualView();
   $("home-view").hidden = false;
@@ -1197,6 +1240,7 @@ async function openLesson(id, save = true, requested = {}) {
   const sequence = ++loadSequence;
   if (found.record.status === "planned") {
     stopBrowserPreview("Stopped when leaving the visualization workspace.");
+    removeDraftConflict();
     current = null;
     trackId = found.subject.id;
     lessonId = id;
@@ -1311,33 +1355,44 @@ async function openLesson(id, save = true, requested = {}) {
   $("offline-cases").replaceChildren();
   let recovered = false;
   const key = workspaceKey();
+  const serverFields = values();
+  stashBases.set(key, draftFingerprint(serverFields));
   try {
     const backup = JSON.parse(
       localStorage.getItem("ds60.classroom.unsaved." + key) ||
         (data.engine === "module" ? localStorage.getItem("ds60.module.unsaved." + id) : null) ||
         "null",
     );
-    if (
-      backup &&
-      ["source", "prediction", "explanation"].every((field) => typeof backup[field] === "string")
-    ) {
-      for (const field of ["source", "prediction", "explanation"]) $(field).value = backup[field];
-      if (tutorial && typeof backup.review === "string")
-        $("read-chapter").checked = backup.review === "read";
-      if (data.engine === "legacy" && backup.evidence) {
-        phaseNotes = Object.fromEntries(
-          phases.map((item) => [
-            item,
-            typeof backup.evidence[item] === "string"
-              ? backup.evidence[item]
-              : phaseNotes[item] || "",
-          ]),
-        );
-        $("phase-note").value = phaseNotes[phase];
-      }
+    const decision = backupDecision(backup, serverFields);
+    if (decision === "restore") {
+      $("source").value = backup.source;
+      applyDraftNotes(backup);
       recovered = true;
+    } else if (decision === "discard") {
+      localStorage.removeItem("ds60.classroom.unsaved." + key);
+      if (data.engine === "module") localStorage.removeItem("ds60.module.unsaved." + id);
+    } else if (decision === "conflict") {
+      const meta =
+        backup.stash_meta && typeof backup.stash_meta === "object" ? backup.stash_meta : {};
+      const entry = {
+        ...backupFields(backup),
+        stash_meta: {
+          base_sha256: typeof meta.base_sha256 === "string" ? meta.base_sha256 : null,
+          saved_at: typeof meta.saved_at === "string" ? meta.saved_at : null,
+          origin: "browser-backup",
+        },
+      };
+      if (writeConflicts(key, [entry, ...readConflicts(key)])) {
+        localStorage.removeItem("ds60.classroom.unsaved." + key);
+        if (data.engine === "module") localStorage.removeItem("ds60.module.unsaved." + id);
+      }
     }
   } catch (_) {}
+  const keptConflicts = readConflicts(key).filter(
+    (entry) => !sameFields(backupFields(entry), serverFields),
+  );
+  writeConflicts(key, keptConflicts);
+  renderDraftConflict(key);
   draftRevisions.set(key, (draftRevisions.get(key) || 0) + 1);
   savedRevisions.set(key, (draftRevisions.get(key) || 0) - (recovered ? 1 : 0));
   $("save-state").textContent = recovered
@@ -1498,9 +1553,24 @@ function updateControls() {
   if (!current) return;
   showCapability(current.capability);
 }
+function renderWorkspaceMode(mode) {
+  const rows = [
+    ["Lesson type", mode.label],
+    ["Code runs in", mode.runsIn],
+    ["Results appear in", mode.resultsIn],
+  ];
+  $("workspace-mode").replaceChildren(
+    ...rows.flatMap(([term, value]) => [node("dt", term), node("dd", value)]),
+  );
+  $("workspace-mode").hidden = false;
+}
 function showCapability(cap) {
-  const reading = current.runtime_profile === "reading";
-  const draft = current.execution_mode === "draft";
+  const mode = workspaceMode(current, cap);
+  renderWorkspaceMode(mode);
+  const reading = mode.kind === "reading";
+  const draft = mode.kind === "draft";
+  const browser = mode.kind === "browser";
+  const saveOnly = mode.kind === "save-only";
   $("prediction-label").textContent = draft
     ? "Predict before you compare"
     : "Predict before you run";
@@ -1508,47 +1578,44 @@ function showCapability(cap) {
     ? "Tab indents. Escape then Tab leaves the editor. Ctrl/Cmd+S saves. Use Open worked comparison to inspect the named reference."
     : "Tab indents. Escape then Tab leaves the editor. Ctrl/Cmd+S saves; Ctrl/Cmd+Enter runs.";
   $("runtime-summary").textContent = draft ? "About this offline workspace" : "How this code runs";
-  $("run").hidden = draft;
+  $("run").hidden = mode.runLabel === null;
   $("refresh").hidden = draft;
-  $("runtime-results").hidden = draft;
+  $("runtime-results").hidden = !mode.showResults;
   $("offline-workspace").hidden = !draft;
   if (draft && !activeJob) $("cancel").hidden = true;
-  const browser = ["javascript-browser", "html-browser"].includes(current.runtime_profile);
   const activity = activeJobRecord
     ? " A job for " + activeJobRecord.lesson_id + " is active or awaiting confirmation."
     : legacyRunActive
       ? " A bounded Python or SQL run is active. Wait for its result before running again."
       : "";
   const runtimeId = cap.profile || current.runtime_profile;
-  if (!draft && !reading && !cap.ready)
+  const notReady = !mode.ready && ["python", "sql", "worker", "browser"].includes(mode.kind);
+  if (notReady)
     // Name the runtime by the profile ID that the launcher's --profile option accepts.
     $("capability").replaceChildren(
       ...(runtimeId ? ["The ", node("code", runtimeId), " runtime"] : ["This lesson's runtime"]),
       " is not ready. " + (cap.detail || "") + activity,
     );
-  else
-    $("capability").textContent =
-      (draft
-        ? cap.detail
-        : reading
-          ? "Read the guide and record your reasoning. This lesson needs no code runtime."
-          : "Ready to run in your local classroom. " +
-            (current.engine === "legacy" ? cap.detail || "" : "")) + activity;
-  $("capability").className = "notice" + (!cap.ready && !reading ? " warn" : "");
+  else $("capability").textContent = mode.readyText + activity;
+  $("capability").className = "notice" + (notReady ? " warn" : "");
   $("runtime-setup").hidden =
-    cap.ready || reading || draft || (!current.setup_commands?.length && !current.runtime_guidance);
+    cap.ready ||
+    reading ||
+    draft ||
+    saveOnly ||
+    (!current.setup_commands?.length && !current.runtime_guidance);
   $("runtime-commands").textContent = (current.setup_commands || []).join("\n\n");
   $("runtime-setup-note").textContent =
     current.engine === "legacy" ? current.runtime_guidance || "" : "";
   $("run").disabled =
-    !cap.ready || reading || draft || activeJob !== null || submitInFlight || legacyRunActive;
-  $("run").textContent = reading
-    ? "Reading and reasoning"
-    : legacyRunActive
-      ? "Running..."
-      : browser
-        ? "Run browser preview"
-        : "Run code";
+    !cap.ready ||
+    reading ||
+    draft ||
+    saveOnly ||
+    activeJob !== null ||
+    submitInFlight ||
+    legacyRunActive;
+  $("run").textContent = legacyRunActive && !reading ? "Running..." : mode.runLabel || "";
   $("run-shortcut").hidden = $("run").hidden || reading || draft;
   $("source-label").textContent = reading ? "Worksheet" : draft ? "Draft" : "Your code";
   $("code-focus-toggle").hidden = browser;
@@ -1578,8 +1645,14 @@ function resetResult() {
   displayedJob = null;
   $("recover").hidden = true;
   $("reconnect").hidden = true;
-  $("job-status").textContent = "No run yet. Press Run code to try this lesson.";
-  outputNote("Press Run code. What your program prints, and any error messages, appear here.");
+  if (current) {
+    const mode = workspaceMode(current, current.capability);
+    $("job-status").textContent = mode.emptyStatus;
+    outputNote(mode.emptyOutput);
+  } else {
+    $("job-status").textContent = "No run yet for this lesson.";
+    outputNote("What your program prints, and any error messages, appear here.");
+  }
   $("raw-output").textContent = "";
   $("raw-log").hidden = true;
   $("raw-log").open = false;
@@ -1667,6 +1740,146 @@ function expandedCompilerLine(output, language, lineCount) {
   return Number.isSafeInteger(line) && line >= 1 && line <= lineCount ? line : null;
 }
 // END DIAGNOSTIC PURE HELPERS
+
+// BEGIN WORKSPACE MODE PURE HELPERS
+const GPU_PROFILES = ["cuda-cpp", "cuda-python", "pytorch-cuda", "tensorflow-cuda"];
+// One description of what a lesson's workspace does: its kind, what Run does,
+// where code runs, where results appear and the copy shown before any run.
+function workspaceMode(lesson, cap) {
+  const profile = (cap && cap.profile) || lesson.runtime_profile || lesson.language;
+  const detail = (cap && cap.detail) || "";
+  const legacy = lesson.engine === "legacy";
+  const runner = lesson.runner || {};
+  let kind = "worker";
+  if (lesson.execution_mode === "draft") kind = "draft";
+  else if (lesson.runtime_profile === "reading") kind = "reading";
+  else if (legacy && lesson.runner && runner.implemented === false) kind = "save-only";
+  else if (["javascript-browser", "html-browser"].includes(profile)) kind = "browser";
+  else if (legacy && runner.executor === "python") kind = "python";
+  else if (legacy && runner.executor === "sql") kind = "sql";
+  if (kind === "reading")
+    return {
+      kind,
+      label: "Reading lesson",
+      runLabel: "Reading and reasoning",
+      runsIn: "No code runs in this lesson.",
+      resultsIn: legacy
+        ? "No run results. Your reading notes are saved with this lesson."
+        : "No run results. Your worksheet is saved with this lesson.",
+      showResults: false,
+      ready: true,
+      readyText: "Read the guide and record your reasoning. This lesson needs no code runtime.",
+      emptyStatus: "",
+      emptyOutput: "",
+    };
+  const browser = kind === "browser";
+  if (kind === "draft")
+    return {
+      kind,
+      label: "Offline draft",
+      runLabel: null,
+      runsIn: "Nothing runs. You save, compare and export this draft.",
+      resultsIn: "The worked comparison below the editor",
+      showResults: false,
+      ready: true,
+      readyText: detail.trim(),
+      emptyStatus: "",
+      emptyOutput: "",
+    };
+  if (kind === "save-only") {
+    const title = runner.title || runner.id;
+    return {
+      kind,
+      label: "Save-only practice",
+      runLabel: "Save only",
+      runsIn: "Nothing runs here. This classroom saves " + title + " code but cannot run it.",
+      resultsIn: "No run results. Your code is saved with this lesson.",
+      showResults: false,
+      ready: false,
+      readyText: (
+        "Save only. Your " +
+        title +
+        " code is saved in your local learning workspace, but this classroom has no runner for it. " +
+        detail
+      ).trim(),
+      emptyStatus: "",
+      emptyOutput: "",
+    };
+  }
+  if (browser)
+    return {
+      kind,
+      label: "Browser preview",
+      runLabel: "Run browser preview",
+      runsIn: "The isolated preview in this browser tab",
+      resultsIn: "The preview frame in the code panel, with saved observations under Saved runs",
+      showResults: true,
+      ready: Boolean(cap && cap.ready),
+      readyText: ("Ready to preview in this browser tab. " + detail).trim(),
+      emptyStatus: "No preview yet. Press Run browser preview to try this lesson.",
+      emptyOutput:
+        "Press Run browser preview. The page renders in the preview frame. Save an observation to keep it under Saved runs.",
+    };
+  return {
+    kind,
+    label: "Code practice",
+    runLabel: "Run code",
+    runsIn:
+      kind === "python"
+        ? "The Python runner in your local classroom"
+        : kind === "sql"
+          ? "PostgreSQL in your local classroom"
+          : "The " +
+            profile +
+            " worker container on this computer" +
+            (GPU_PROFILES.includes(profile) ? " (uses your NVIDIA GPU)" : ""),
+    resultsIn: "The Result panel under your code",
+    showResults: true,
+    ready: Boolean(cap && cap.ready),
+    readyText: ("Ready to run in your local classroom. " + detail).trim(),
+    emptyStatus: "No run yet. Press Run code to try this lesson.",
+    emptyOutput: "Press Run code. What your program prints, and any error messages, appear here.",
+  };
+}
+// END WORKSPACE MODE PURE HELPERS
+// BEGIN DRAFT BACKUP PURE HELPERS
+// cyrb53 is a change detector for browser backups, not a security control.
+function draftFingerprint(fields) {
+  const text = JSON.stringify(fields);
+  let h1 = 0xdeadbeef,
+    h2 = 0x41c6ce57;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507);
+  h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507);
+  h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16);
+}
+function backupFields(backup) {
+  const copy = { ...backup };
+  delete copy.stash_meta;
+  return copy;
+}
+function backupDecision(backup, serverFields) {
+  if (!backup || typeof backup !== "object" || Array.isArray(backup)) return "none";
+  for (const field of ["source", "prediction", "explanation"])
+    if (typeof backup[field] !== "string" || backup[field].length > 2000000) return "none";
+  if (JSON.stringify(backupFields(backup)) === JSON.stringify(serverFields)) return "discard";
+  const meta = backup.stash_meta;
+  if (
+    meta &&
+    typeof meta === "object" &&
+    typeof meta.base_sha256 === "string" &&
+    meta.base_sha256 === draftFingerprint(serverFields)
+  )
+    return "restore";
+  return "conflict";
+}
+// END DRAFT BACKUP PURE HELPERS
 
 function sourceErrorLine(job) {
   if (
@@ -1904,6 +2117,7 @@ function enhanceGuideCode() {
       )
     : null;
   for (const pre of $("guide").querySelectorAll("pre")) {
+    scrollableCode(pre, "Code example");
     const code = pre.querySelector("code");
     if (!code || pre.parentElement?.classList.contains("code-block")) continue;
     const block = node("div", undefined, "code-block"),
@@ -1941,7 +2155,11 @@ async function tryExample(text) {
     if (!sameView(intent)) return;
     replaceSource(text.replace(/\s+$/, "") + "\n");
     resetResult();
-    status("The example is in the editor. Press Run code to try it, then change one thing.");
+    status(
+      "The example is in the editor. Press " +
+        (workspaceMode(current, current.capability).runLabel || "Run code") +
+        " to try it, then change one thing.",
+    );
     $("pad-title").scrollIntoView({ block: "start" });
   } catch (error) {
     status(error.message, true);
@@ -1956,6 +2174,136 @@ function replaceSource(text) {
   $("source").value = text;
   markDirty();
   return true;
+}
+function applyDraftNotes(entry) {
+  for (const field of ["prediction", "explanation"]) $(field).value = entry[field];
+  if (current?.learning_mode === "tutorial" && typeof entry.review === "string")
+    $("read-chapter").checked = entry.review === "read";
+  if (current?.engine === "legacy" && entry.evidence) {
+    phaseNotes = Object.fromEntries(
+      phases.map((item) => [
+        item,
+        typeof entry.evidence[item] === "string" ? entry.evidence[item] : phaseNotes[item] || "",
+      ]),
+    );
+    $("phase-note").value = phaseNotes[phase];
+  }
+}
+
+// Browser copies that differ from the saved draft. Each choice keeps the other
+// version recoverable, and nothing is deleted without a confirm.
+function conflictWhen(entry) {
+  const saved = entry.stash_meta?.saved_at;
+  const time = typeof saved === "string" ? Date.parse(saved) : NaN;
+  return Number.isNaN(time) ? "an earlier visit" : new Date(time).toLocaleString();
+}
+let draftConflictPanel = null;
+function removeDraftConflict() {
+  draftConflictPanel?.remove();
+  draftConflictPanel = null;
+}
+function renderDraftConflict(key) {
+  removeDraftConflict();
+  const list = readConflicts(key);
+  if (!list.length) return;
+  const entry = list[0],
+    replaced = entry.stash_meta?.origin === "replaced-draft",
+    when = conflictWhen(entry),
+    more = list.length - 1;
+  const panel = node("div", undefined, "notice warn");
+  panel.id = "draft-conflict";
+  panel.setAttribute("role", "group");
+  panel.setAttribute("aria-labelledby", "draft-conflict-text");
+  panel.dataset.key = key;
+  const text = node(
+    "p",
+    (replaced
+      ? "Your previous saved draft from " +
+        when +
+        " is kept in this browser. The editor shows the version you chose."
+      : "A browser copy of this lesson from " +
+        when +
+        " differs from your saved draft. Your saved draft is in the editor and nothing was replaced.") +
+      (more === 1
+        ? " 1 more browser copy is also kept."
+        : more > 1
+          ? " " + more + " more browser copies are also kept."
+          : ""),
+  );
+  text.id = "draft-conflict-text";
+  const actions = [
+    [replaced ? "Use previous draft" : "Use browser copy", () => useDraftConflict(key)],
+    ["Keep saved draft", () => keepDraftConflict()],
+    ["Discard browser copy", () => discardDraftConflict(key)],
+  ];
+  panel.append(text);
+  for (const [label, action] of actions) {
+    const button = node("button", label);
+    button.type = "button";
+    button.addEventListener("click", () =>
+      Promise.resolve(action()).catch((error) => status(error.message, true)),
+    );
+    panel.append(button);
+  }
+  $("save-state").before(panel);
+  draftConflictPanel = panel;
+}
+async function useDraftConflict(key) {
+  if (!current || workspaceKey() !== key || $("source").disabled) return;
+  const entry = readConflicts(key)[0];
+  if (!entry) return;
+  const intent = selectedViewIntent();
+  if (
+    !confirm(
+      "Replace the code and notes in the editor with the browser copy from " +
+        conflictWhen(entry) +
+        "? Your saved draft is saved first and kept as a browser copy. " +
+        "In the editor, Ctrl+Z (Cmd+Z on a Mac) also brings back the code.",
+    )
+  )
+    return;
+  await flushSave();
+  if (!sameView(intent)) return;
+  const list = readConflicts(key),
+    chosen = list.findIndex((item) => sameFields(item, entry));
+  if (chosen >= 0) list.splice(chosen, 1);
+  writeConflicts(key, [
+    {
+      ...values(),
+      stash_meta: {
+        base_sha256: null,
+        saved_at: new Date().toISOString(),
+        origin: "replaced-draft",
+      },
+    },
+    ...list,
+  ]);
+  replaceSource(entry.source);
+  applyDraftNotes(entry);
+  markDirty();
+  renderDraftConflict(key);
+  status("The browser copy is in the editor and is being saved.");
+  flushSave().catch(() => {});
+}
+function keepDraftConflict() {
+  removeDraftConflict();
+  $("save-state").textContent =
+    "Kept your saved draft. The browser copy is offered again the next time you open this lesson.";
+}
+function discardDraftConflict(key) {
+  const entry = readConflicts(key)[0];
+  if (!entry) return;
+  if (
+    !confirm(
+      "Delete the browser copy from " + conflictWhen(entry) + "? Your saved draft is not changed.",
+    )
+  )
+    return;
+  const list = readConflicts(key),
+    chosen = list.findIndex((item) => sameFields(item, entry));
+  if (chosen >= 0) list.splice(chosen, 1);
+  writeConflicts(key, list);
+  renderDraftConflict(key);
 }
 
 // Exercises: the lesson's problems beside the editor, with progressive hints,
@@ -2373,7 +2721,46 @@ function enhanceCodeBlocks(container) {
     tools.append(copy);
     pre.replaceWith(block);
     block.append(pre, tools);
+    scrollableCode(pre, "Code listing");
   }
+}
+// A listing wider or taller than its box scrolls. Only then is it a keyboard
+// stop, so the arrow keys can scroll it without a mouse; short listings stay
+// out of the Tab order. Listings built before they are shown are measured
+// again when the browser lays them out.
+let codeScrollWatch;
+function codeScrollObserver() {
+  if (codeScrollWatch === undefined)
+    codeScrollWatch =
+      typeof ResizeObserver === "function"
+        ? new ResizeObserver((entries) => {
+            for (const entry of entries) {
+              const pre = entry.target;
+              if (pre.isConnected) {
+                pre.dataset.scrollSeen = "1";
+                markScrollableCode(pre);
+              } else if (pre.dataset.scrollSeen) codeScrollWatch.unobserve(pre);
+            }
+          })
+        : null;
+  return codeScrollWatch;
+}
+function markScrollableCode(pre) {
+  const scrolls = pre.scrollWidth > pre.clientWidth + 1 || pre.scrollHeight > pre.clientHeight + 1;
+  if (scrolls) {
+    pre.tabIndex = 0;
+    pre.setAttribute("role", "group");
+    pre.setAttribute("aria-label", pre.dataset.scrollLabel || "Code");
+  } else {
+    pre.removeAttribute("tabindex");
+    pre.removeAttribute("role");
+    pre.removeAttribute("aria-label");
+  }
+}
+function scrollableCode(pre, label) {
+  pre.dataset.scrollLabel = label;
+  markScrollableCode(pre);
+  codeScrollObserver()?.observe(pre);
 }
 // BEGIN EXERCISE COMPARISON HELPERS
 // Lines are compared without trailing spaces, runs of spaces or blank lines, so
@@ -2812,6 +3199,7 @@ function showPlotArtifacts(artifacts, key, append = false, withheld = []) {
         pre.className = "highlighted-code language-json";
         pre.append(code);
         figure.append(pre);
+        scrollableCode(pre, "Figure data as JSON");
         if (new TextEncoder().encode(code.textContent).length <= 60000)
           classroom("classroom-highlight", { source: code.textContent, language: "json" })
             .then((result) => {
@@ -2878,9 +3266,15 @@ function showJob(job) {
     (job.truncated ? " · Log truncated; exit status and checks remain explicit." : "");
   $("run-storage-status").textContent = solution
     ? SOLUTION_JOB_NOTE
-    : $("run-storage-status").textContent === SOLUTION_JOB_NOTE
-      ? ""
-      : $("run-storage-status").textContent;
+    : finished.has(job.status)
+      ? "Saved run" +
+        (Number.isFinite(Date.parse(job.created_at))
+          ? " from " + new Date(job.created_at).toLocaleString()
+          : "") +
+        ". It keeps the code that produced it, so opening it later never changes your editor."
+      : $("run-storage-status").textContent === SOLUTION_JOB_NOTE
+        ? ""
+        : $("run-storage-status").textContent;
   if (job.output) programOutput(job.output);
   else
     outputNote(
@@ -3072,6 +3466,7 @@ function highlightedSourceBlock(source, highlightedHtml = null) {
   if (highlightedHtml === null) code.textContent = source;
   else code.innerHTML = highlightedHtml;
   pre.append(code);
+  scrollableCode(pre, "Code listing");
   return { pre, code };
 }
 function showLegacyResult(result, context, source) {

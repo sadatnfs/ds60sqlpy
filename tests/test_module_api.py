@@ -128,3 +128,47 @@ def test_lesson_guidance_distinguishes_reading_direct_cpp_and_fixed_verifier(
         assert "main is not the executed entry point" in verified["runtime_guidance"]
     finally:
         service.close()
+
+
+def test_module_walkthrough_action_and_availability(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from ds60sqlpy.exercises import REVEAL_MESSAGE
+    from ds60sqlpy.module_service import ModuleService
+
+    monkeypatch.setattr("ds60sqlpy.module_service.rendered_targets", lambda catalog: {})
+    service = ModuleService(Catalog.load(), tmp_path / "module-state")
+    monkeypatch.setattr(
+        service.jobs.client,
+        "readiness",
+        lambda profile: {"profile": profile, "ready": False, "detail": "Test fixture"},
+    )
+    monkeypatch.setattr(
+        service.jobs, "start", lambda *args, **kwargs: pytest.fail("walkthroughs never run code")
+    )
+    try:
+        with_walk = service.action({"action": "module-lesson", "lesson_id": "go-001"})
+        assert with_walk["walkthrough_available"] is True
+        without = service.action({"action": "module-lesson", "lesson_id": "go-002"})
+        assert without["walkthrough_available"] is False
+        before = service.state.read("go-001")
+        payload = service.action(
+            {"action": "module-walkthrough", "lesson_id": "go-001", "reveal": True}
+        )
+        assert payload["kind"] == "authored" and payload["executed"] is False
+        assert payload["label"] == "Authored steps, not a live trace"
+        assert payload["evidence"] == "authored"
+        assert payload["source_path"] == "courses/go/solutions/go-001_solution.go"
+        assert service.state.read("go-001") == before
+        with pytest.raises(ValueError, match=REVEAL_MESSAGE):
+            service.action({"action": "module-walkthrough", "lesson_id": "go-001"})
+        with pytest.raises(ValueError, match="no authored walkthrough"):
+            service.action({"action": "module-walkthrough", "lesson_id": "go-002", "reveal": True})
+        monkeypatch.setattr(
+            "ds60sqlpy.module_service.load_walkthroughs",
+            lambda *args: (_ for _ in ()).throw(ValueError("broken index")),
+        )
+        broken = service.action({"action": "module-lesson", "lesson_id": "go-001"})
+        assert broken["walkthrough_available"] is False
+    finally:
+        service.close()

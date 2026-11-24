@@ -5,6 +5,21 @@
 // the resizable spread gutter, sidebar and mobile navigation, reading progress,
 // the status slug and result reveal. Everything degrades to the plain page.
 (() => {
+  // BEGIN SHELL KEY HELPERS
+  // Cmd+K on macOS and Ctrl+K elsewhere. Never inside the code editor, so
+  // CodeMirror keeps its own Ctrl+K (delete to end of line on macOS).
+  function paletteShortcut(event, mac) {
+    if (!event || String(event.key).toLowerCase() !== "k") return false;
+    if (event.altKey || event.shiftKey) return false;
+    const target = event.target;
+    if (target && typeof target.closest === "function" && target.closest(".cm-editor"))
+      return false;
+    return mac
+      ? Boolean(event.metaKey && !event.ctrlKey)
+      : Boolean(event.ctrlKey && !event.metaKey);
+  }
+  // END SHELL KEY HELPERS
+  const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || "");
   const byId = (id) => document.getElementById(id);
   const store = {
     get(key, fallback) {
@@ -289,8 +304,9 @@
       if (event.target === dialog) closePalette();
     });
     const shortcut = byId("palette-button")?.querySelector(".search-kbd");
-    if (shortcut && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent))
-      shortcut.textContent = "⌘K";
+    if (shortcut && isMac) shortcut.textContent = "⌘K";
+    if (isMac)
+      for (const key of document.querySelectorAll(".palette-key")) key.textContent = "Cmd K";
   }
 
   // Keyboard shortcuts --------------------------------------------------------
@@ -299,7 +315,7 @@
     "keydown",
     (event) => {
       const mod = event.ctrlKey || event.metaKey;
-      if (mod && !event.altKey && !event.shiftKey && event.key.toLowerCase() === "k") {
+      if (paletteShortcut(event, isMac)) {
         event.preventDefault();
         event.stopPropagation();
         if (dialog?.open) closePalette();
@@ -314,6 +330,17 @@
     },
     true,
   );
+
+  // Skip to result -------------------------------------------------------------
+  // Lands on the Result heading when results are shown, otherwise on the
+  // capability note that explains why this lesson has no Result.
+  byId("skip-result")?.addEventListener("click", (event) => {
+    event.preventDefault();
+    const results = byId("runtime-results");
+    const shown = results && !results.hidden && results.offsetParent !== null;
+    const target = shown ? byId("results-title") : byId("capability");
+    target?.focus({ preventScroll: false });
+  });
 
   // Home quick starts ----------------------------------------------------------
   function updateQuickStarts() {

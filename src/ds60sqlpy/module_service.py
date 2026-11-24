@@ -17,6 +17,7 @@ from ds60sqlpy.lesson_reader import reference_relative_path, render_artifact, re
 from ds60sqlpy.module_drafts import DRAFT_PROFILES, draft_capability, worked_examples
 from ds60sqlpy.module_jobs import SERVICES, ModuleJobs, profile_readiness
 from ds60sqlpy.modules import ModuleCatalog, ModuleState
+from ds60sqlpy.walkthroughs import load_walkthroughs, walkthrough_payload
 from ds60sqlpy.worker_operations import PROFILES
 
 RUNTIME_GUIDANCE: dict[str, str] = {
@@ -327,6 +328,7 @@ class ModuleService:
                 else browser_capability(lesson.runtime_profile)
                 if lesson.runtime_profile in BROWSER_PROFILES
                 else self.jobs.client.readiness(lesson.runtime_profile),
+                "walkthrough_available": self._walkthrough_available(lesson.id, lesson.track_id),
             }
         if action == "module-save":
             return {"session": self.state.save(lesson.id, payload.get("fields"))}
@@ -387,7 +389,18 @@ class ModuleService:
                 repo_root=self.catalog.root,
                 targets=self.targets,
             )
+        if action == "module-walkthrough":
+            return walkthrough_payload(
+                self.catalog.root, self.catalog, lesson.id, payload.get("reveal") is True
+            )
         raise ValueError("Unknown module action.")
+
+    def _walkthrough_available(self, lesson_id: str, track: str) -> bool:
+        # An invalid index hides the button instead of breaking the lesson.
+        try:
+            return lesson_id in load_walkthroughs(self.catalog.root, self.catalog, track)
+        except (OSError, ValueError):
+            return False
 
     def close(self) -> None:
         self.jobs.close()

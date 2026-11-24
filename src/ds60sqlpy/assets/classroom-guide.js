@@ -1,6 +1,6 @@
 "use strict";
 // classroom.js loads first and defines these shared script globals.
-/* global current, exercise, contextOf, lab, solutionCode, solutionIsStandalone, manualOpen, hideManual, openLesson, lessonId, pref, remember, status */
+/* global current, exercise, contextOf, lab, api, intentVersion, solutionCode, solutionIsStandalone, manualOpen, hideManual, openLesson, lessonId, pref, remember, status */
 // Guided help layered over the workspace: the step-through player that walks a
 // beginner through Python or SQL one step at a time, and the page tour that
 // points at each part of a lesson. Both only read the page; neither saves code.
@@ -45,6 +45,10 @@
       next: byId("step-next"),
       last: byId("step-last"),
     };
+  // Module lessons get authored walkthroughs instead: steps written by the course
+  // about its reference program. Nothing runs and the learner's draft is untouched.
+  const authoredButton = byId("walk-reference"),
+    badge = byId("step-badge");
   let walk = null,
     position = 0,
     sequence = 0,
@@ -56,6 +60,14 @@
     if (current.runtime_profile === "reading" || current.execution_mode === "draft") return null;
     const language = contextOf()?.language;
     return language === "python" || language === "sql" ? language : null;
+  }
+  function authoredAvailable() {
+    return (
+      typeof current === "object" &&
+      Boolean(current) &&
+      current.engine === "module" &&
+      current.walkthrough_available === true
+    );
   }
   function solutionSteppable(view) {
     const language = stepLanguage();
@@ -76,6 +88,14 @@
       const view = typeof exercise === "object" ? exercise?.view : null;
       solutionButton.hidden = !solutionSteppable(view);
       solutionButton.disabled = blocked;
+    }
+    if (authoredButton) {
+      authoredButton.hidden = !authoredAvailable();
+      authoredButton.disabled = busy;
+      authoredButton.textContent =
+        current?.learning_mode === "tutorial"
+          ? "Walk through the reference"
+          : "Walk through the reference solution";
     }
   }
   if (typeof MutationObserver === "function")
@@ -137,6 +157,7 @@
     narration.textContent = "";
     body.replaceChildren();
     setControls(0);
+    if (badge) badge.hidden = true;
     openPanel();
     if (!code?.trim()) {
       showMessage(
@@ -193,6 +214,52 @@
   solutionButton?.addEventListener("click", () => startWalk("solution", solutionButton));
   byId("step-close")?.addEventListener("click", () => closePanel(true));
 
+  async function startAuthored(trigger) {
+    if (!authoredAvailable() || busy) return;
+    origin = trigger;
+    const ticket = ++sequence,
+      lessonAtStart = current.id,
+      version = intentVersion;
+    walk = null;
+    title.textContent = "Walk through the worked reference";
+    sourceLabel.textContent =
+      "Authored steps written by the course, not a live trace of your code. Your code is not run or changed.";
+    panel.dataset.kind = "authored";
+    if (badge) badge.hidden = false;
+    narration.textContent = "";
+    body.replaceChildren();
+    setControls(0);
+    openPanel();
+    busy = true;
+    syncButtons();
+    panel.setAttribute("aria-busy", "true");
+    showMessage("Opening the authored walkthrough. Nothing runs and your code is not changed...");
+    const stale = () =>
+      ticket !== sequence || current?.id !== lessonAtStart || version !== intentVersion;
+    try {
+      const result = await api("module-walkthrough", { lesson_id: lessonAtStart, reveal: true });
+      if (stale()) return;
+      if (result?.kind !== "authored" || result.lesson_id !== lessonAtStart)
+        throw new Error("The walkthrough did not match this lesson.");
+      walk = { ...result, code: result.source || "", lesson: lessonAtStart };
+      render(true);
+    } catch (error) {
+      if (stale()) return;
+      showMessage(
+        "The walkthrough could not open. " + error.message + " Your code was not changed.",
+        true,
+      );
+      title.focus();
+    } finally {
+      if (ticket === sequence) {
+        busy = false;
+        panel.removeAttribute("aria-busy");
+        syncButtons();
+      }
+    }
+  }
+  authoredButton?.addEventListener("click", () => startAuthored(authoredButton));
+
   function render(fresh = false) {
     if (!walk) return;
     const steps = walk.steps || [],
@@ -201,7 +268,7 @@
     if (walk.kind === "sql") {
       if (walk.unsupported) notes.push(walk.unsupported);
       else if (walk.error && !steps.length) notes.push(walk.error);
-    } else if (!steps.length) {
+    } else if (walk.kind !== "authored" && !steps.length) {
       notes.push(
         walk.error
           ? "The code stopped before its first step. " + describeError(walk.error)
@@ -220,9 +287,12 @@
     controls.first.disabled = controls.prev.disabled = position === 0 || !steps.length;
     controls.next.disabled = controls.last.disabled = position >= steps.length - 1;
     panel.dataset.kind = walk.kind;
+    if (badge) badge.hidden = walk.kind !== "authored";
     if (steps.length && walk.kind === "python") notes.push(...pythonEnding(position, steps));
     if (steps.length && walk.kind === "sql" && position === steps.length - 1)
       notes.push(sqlEnding(steps));
+    if (steps.length && walk.kind === "authored" && position === steps.length - 1)
+      notes.push(authoredEnding());
     showMessage(
       notes.join(" "),
       Boolean(!steps.length || (walk.kind === "sql" && walk.unsupported)),
@@ -234,6 +304,7 @@
       return;
     }
     if (walk.kind === "sql") renderSql(steps, position);
+    else if (walk.kind === "authored") renderAuthored(steps, position);
     else renderPython(steps, position);
     if (fresh) controls.next.disabled ? controls.prev.focus() : controls.next.focus();
   }
@@ -464,6 +535,68 @@
     return side;
   }
 
+  // Authored --------------------------------------------------------------------
+  function authoredEnding() {
+    const expected = Array.isArray(walk.expected_output) ? walk.expected_output : [];
+    return (
+      "That is the last authored step." +
+      (expected.length
+        ? " When the reference runs, its output includes: " + expected.join(" | ") + "."
+        : "") +
+      (walk.verified_by ? " " + walk.verified_by : "")
+    );
+  }
+  function renderAuthored(steps, index) {
+    const step = steps[index],
+      [start, end] = Array.isArray(step.lines) ? step.lines : [0, -1];
+    narration.replaceChildren(
+      make("strong", "Step " + (index + 1) + ": " + (step.title || "") + ". "),
+      make("span", step.explanation || ""),
+    );
+    const grid = make("div", null, "step-grid"),
+      listing = make("div", null, "step-listing"),
+      lines = make("ol", null, "step-code");
+    listing.setAttribute("aria-label", "Reference code with this step's lines marked");
+    listing.tabIndex = 0;
+    const source = (walk.code || "").replace(/\n$/, "").split("\n");
+    source.forEach((text, offset) => {
+      const number = offset + 1,
+        row = make("li");
+      row.append(make("span", String(number), "step-ln"), make("code", text || " "));
+      if (number >= start && number <= end) {
+        row.className = "is-current";
+        if (number === start) {
+          row.setAttribute("aria-current", "step");
+          row.prepend(make("span", "Explained in this step", "sr-only"));
+        }
+      }
+      lines.append(row);
+    });
+    listing.append(lines);
+    const side = make("div", null, "step-side"),
+      notice = make("section", null, "step-observe");
+    notice.append(
+      make("h4", "What to notice"),
+      make("p", step.observe || "", "step-explain"),
+      make(
+        "p",
+        (start === end ? "Line " + start : "Lines " + start + " to " + end) +
+          " of " +
+          (walk.source_path || "the reference") +
+          ".",
+        "step-empty",
+      ),
+    );
+    side.append(notice);
+    grid.append(listing, side);
+    body.replaceChildren(grid);
+    const marked = lines.querySelector(".is-current");
+    if (marked) {
+      const top = marked.offsetTop - listing.clientHeight / 2 + marked.offsetHeight / 2;
+      listing.scrollTop = Math.max(0, top);
+    }
+  }
+
   // SQL -------------------------------------------------------------------------
   function sqlEnding(steps) {
     const last = steps[steps.length - 1];
@@ -600,11 +733,23 @@
       text: "Printed output, tables and error messages appear here. An error names the line to look at.",
     },
   ];
+  // BEGIN TOUR INERT HELPER
+  // Makes every body child except `keep` inert and returns a function that
+  // undoes exactly those changes, leaving anything already inert untouched.
+  function inertBackground(doc, keep) {
+    const changed = Array.from(doc.body.children).filter((item) => item !== keep && !item.inert);
+    for (const item of changed) item.inert = true;
+    return () => {
+      for (const item of changed) item.inert = false;
+    };
+  }
+  // END TOUR INERT HELPER
   let tour = null;
   function endTour() {
     if (!tour) return;
-    const { layer, back, onMove } = tour;
+    const { layer, back, onMove, restoreInert } = tour;
     tour = null;
+    restoreInert?.();
     layer.remove();
     window.removeEventListener("resize", onMove);
     window.removeEventListener("scroll", onMove, true);
@@ -696,6 +841,7 @@
     spot.setAttribute("aria-hidden", "true");
     layer.append(spot, card);
     document.body.append(layer);
+    const restoreInert = inertBackground(document, layer);
     let frame = 0;
     const onMove = () => {
       if (frame) return;
@@ -704,7 +850,7 @@
         placeTour();
       });
     };
-    tour = { layer, spot, card, steps, index: 0, back, onMove };
+    tour = { layer, spot, card, steps, index: 0, back, onMove, restoreInert };
     window.addEventListener("resize", onMove);
     window.addEventListener("scroll", onMove, true);
     skip.addEventListener("click", endTour);

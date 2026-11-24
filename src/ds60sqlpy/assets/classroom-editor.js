@@ -36,6 +36,10 @@
     return;
   }
 
+  // Long code scrolls inside the editor; an explicit tab stop on the editable
+  // content tells assistive checks that the scrolling region is reachable.
+  editor.view?.contentDOM?.setAttribute("tabindex", "0");
+
   let languageKey = null;
   function syncLanguage() {
     const data = lesson();

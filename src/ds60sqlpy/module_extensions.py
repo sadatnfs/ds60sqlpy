@@ -188,6 +188,7 @@ def load_book(root: Path) -> tuple[dict[str, Any], dict[str, Any]] | None:
             raise ValueError("Invalid or duplicate tutorial chapter ID.")
         ids.add(key)
         title = _text(chapter.get("title"), "chapter title")
+        outcome = _text(chapter.get("outcome"), "chapter outcome").strip()
         level = {
             "foundation": "beginner",
             "intermediate": "intermediate",
@@ -228,7 +229,7 @@ def load_book(root: Path) -> tuple[dict[str, Any], dict[str, Any]] | None:
                 "prerequisites": prereqs,
                 "runtime": "python-core",
                 "concepts": [labels.get(topic, topic) for topic in topics],
-                "outcome": f"Understand {title.lower()}, assumptions and interpretation.",
+                "outcome": outcome,
                 "lab": (
                     "Read the theory and worked examples, then optionally run and adapt "
                     "the Python demonstrations."

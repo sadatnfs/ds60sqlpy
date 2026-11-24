@@ -33,6 +33,11 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "src"))
 from ds60sqlpy.http_server import LocalThreadingHTTPServer  # noqa: E402
 from scripts.check_classroom_profiles import ClassroomClient, classroom_origin  # noqa: E402
+from scripts.check_classroom_workspace import (  # noqa: E402
+    assert_axe_clean,
+    restart_stage,
+    workspace_checks,
+)
 
 
 def published_subjects(root: Path) -> set[str]:
@@ -105,6 +110,8 @@ class Audit:
         self.http_errors: list[str] = []
         self.outside_requests: list[str] = []
         self.preservation: list[dict[str, str | None]] = []
+        # Phase 6 receipt sections written by scripts/check_classroom_workspace.py.
+        self.workspace: dict[str, Any] = {}
 
     def passed(self, name: str) -> None:
         self.checks.append(name)
@@ -1026,7 +1033,18 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--confirm-disposable", action="store_true")
     parser.add_argument("--fixtures-only", action="store_true")
     parser.add_argument("--report", type=Path, required=True)
+    parser.add_argument("--axe-script", type=Path, help="Pinned axe.min.js to inject.")
+    parser.add_argument(
+        "--restart-stage",
+        choices=("write", "verify"),
+        help="Run only the draft write or verify stage around a classroom restart.",
+    )
+    parser.add_argument(
+        "--restart-marker", type=Path, default=Path("work/phase6-restart-marker.json")
+    )
     args = parser.parse_args(argv)
+    if args.restart_stage and args.fixtures_only:
+        parser.error("--restart-stage needs a classroom URL, not --fixtures-only.")
     if not args.fixtures_only and (not args.url or not args.confirm_disposable):
         parser.error("Classroom acceptance saves test work. Supply --url and --confirm-disposable.")
     origin = classroom_origin(args.url) if args.url else None
@@ -1041,10 +1059,22 @@ def main(argv: list[str] | None = None) -> int:
             browser = playwright.chromium.launch(headless=True, channel="chromium")
             browser_version = browser.version
             try:
-                if origin is not None and not args.fixtures_only:
-                    classroom_checks(browser, origin, audit, api.expect)
-                    saved_plot_viewer_checks(browser, origin, audit, api.expect)
-                fixture_checks(browser, audit, api.expect)
+                if origin is not None and args.restart_stage:
+                    restart_stage(
+                        browser,
+                        origin,
+                        audit,
+                        api.expect,
+                        args.restart_stage,
+                        args.restart_marker,
+                    )
+                else:
+                    if origin is not None and not args.fixtures_only:
+                        classroom_checks(browser, origin, audit, api.expect)
+                        saved_plot_viewer_checks(browser, origin, audit, api.expect)
+                        workspace_checks(browser, origin, audit, api.expect, args.axe_script)
+                    fixture_checks(browser, audit, api.expect)
+                    assert_axe_clean(audit)
                 audit.clean()
                 complete = True
             finally:
@@ -1058,9 +1088,24 @@ def main(argv: list[str] | None = None) -> int:
                     "complete": complete,
                     "browser": "Chromium",
                     "browser_version": browser_version,
-                    "scope": "fixtures" if args.fixtures_only else "classroom-and-fixtures",
+                    "scope": "fixtures"
+                    if args.fixtures_only
+                    else "restart-" + args.restart_stage
+                    if args.restart_stage
+                    else "classroom-and-fixtures",
                     "checks": audit.checks,
                     "preservation": audit.preservation,
+                    **{
+                        key: audit.workspace.get(key)
+                        for key in (
+                            "mode_samples",
+                            "keyboard",
+                            "focus_walk",
+                            "axe",
+                            "restart",
+                            "authored_walkthrough",
+                        )
+                    },
                 },
                 indent=2,
             )

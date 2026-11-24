@@ -27,6 +27,7 @@ sys.path.insert(0, str(ROOT))
 from ds60sqlpy.browser_runs import BROWSER_PROFILES  # noqa: E402
 from ds60sqlpy.gpu_runtime import GPU_PROFILES  # noqa: E402
 from ds60sqlpy.modules import LANGUAGES, MAX_SOURCE_BYTES, ModuleCatalog, ModuleLesson  # noqa: E402
+from ds60sqlpy.walkthroughs import executable_reference_path, load_walkthroughs  # noqa: E402
 from scripts.check_classroom_profiles import TERMINAL, ClassroomClient  # noqa: E402
 from scripts.check_scientific_artifacts import verify_figures  # noqa: E402
 from scripts.declared_outputs import load_contracts, verify_contract  # noqa: E402
@@ -69,6 +70,7 @@ class ReferenceCase:
     source_path: str
     source: str
     output_contract: dict[str, Any] | None = None
+    expected_output: tuple[str, ...] = ()
 
     @property
     def source_sha256(self) -> str:
@@ -84,20 +86,19 @@ class ReferenceCase:
             "verification_id": self.verification_id,
             "source_path": self.source_path,
             "expected_outputs": self.output_contract,
+            "walkthrough_expected_output": list(self.expected_output),
             "source_sha256": self.source_sha256,
         }
 
 
-def reference_case(catalog: ModuleCatalog, lesson: ModuleLesson) -> ReferenceCase:
+def reference_case(
+    catalog: ModuleCatalog,
+    lesson: ModuleLesson,
+    walkthroughs: dict[str, dict[str, Any]] | None = None,
+) -> ReferenceCase:
     """Choose the admitted worked example or separate executable reference."""
-    paths = (
-        [lesson.source_path]
-        if lesson.learning_mode == "tutorial"
-        else [path for path in lesson.solution_paths if Path(path).suffix != ".md"]
-    )
-    if len(paths) != 1:
-        raise ValueError(f"{lesson.id} must declare exactly one executable reference per variant.")
-    source_path = paths[0]
+    # Shared with walkthrough binding so the corpus and authored steps agree.
+    source_path = executable_reference_path(lesson)
     source = catalog.content_path(source_path, MAX_SOURCE_BYTES).read_text(encoding="utf-8")
     if not source.strip() or len(source.encode("utf-8")) > MAX_SOURCE_BYTES:
         raise ValueError(f"{lesson.id} has an empty or oversized executable reference.")
@@ -110,6 +111,9 @@ def reference_case(catalog: ModuleCatalog, lesson: ModuleLesson) -> ReferenceCas
             else ["table", "json"],
             "description_required": True,
         }
+    if walkthroughs is None:
+        walkthroughs = load_walkthroughs(catalog.root, catalog, lesson.track_id)
+    walkthrough = walkthroughs.get(lesson.id)
     return ReferenceCase(
         lesson.id,
         lesson.track_id,
@@ -120,6 +124,7 @@ def reference_case(catalog: ModuleCatalog, lesson: ModuleLesson) -> ReferenceCas
         source_path,
         source,
         contract,
+        tuple(walkthrough["expected_output"]) if walkthrough else (),
     )
 
 
@@ -130,6 +135,7 @@ def collect_cases(root: Path, profiles: list[str]) -> tuple[list[ReferenceCase],
     cases = []
     exclusions = []
     inventory: Counter[str] = Counter()
+    walkthroughs: dict[str, dict[str, dict[str, Any]]] = {}
     for lesson in sorted(catalog.lessons.values(), key=lambda item: item.id):
         inventory[lesson.runtime_profile] += 1
         if lesson.runtime_profile in EXTERNAL_REASONS:
@@ -141,7 +147,11 @@ def collect_cases(root: Path, profiles: list[str]) -> tuple[list[ReferenceCase],
                 }
             )
         elif lesson.runtime_profile in profiles:
-            cases.append(reference_case(catalog, lesson))
+            if lesson.track_id not in walkthroughs:
+                walkthroughs[lesson.track_id] = load_walkthroughs(
+                    catalog.root, catalog, lesson.track_id
+                )
+            cases.append(reference_case(catalog, lesson, walkthroughs[lesson.track_id]))
     empty = set(profiles) - {case.profile for case in cases}
     if empty:
         raise ValueError("No admitted executable cases for: " + ", ".join(sorted(empty)))
@@ -150,6 +160,7 @@ def collect_cases(root: Path, profiles: list[str]) -> tuple[list[ReferenceCase],
         "profiles": sorted(set(profiles)),
         "inventory_by_profile": dict(sorted(inventory.items())),
         "selected_cases": len(cases),
+        "walkthrough_outputs": sum(1 for case in cases if case.expected_output),
         "excluded_external_or_reading": exclusions,
         "unselected_ordinary_profiles": sorted(ORDINARY_PROFILES - set(profiles)),
         "results": [{**case.metadata(), "status": "pending"} for case in cases],
@@ -185,6 +196,10 @@ def verify_result(case: ReferenceCase, job_id: str, job: dict[str, Any]) -> None
         or not all(isinstance(check, dict) and check.get("passed") is True for check in checks)
     ):
         raise ValueError(f"{case.lesson_id} did not produce a successful source-bound receipt.")
+    output = str(job.get("output", ""))
+    for text in case.expected_output:
+        if text not in output:
+            raise ValueError(f"{case.lesson_id} walkthrough expected output not observed: {text}")
     verify_figures(case.lesson_id, case.source, job.get("artifacts"))
     verify_contract(case.output_contract, job.get("artifacts"))
 
@@ -345,7 +360,11 @@ def main(argv: list[str] | None = None) -> int:
         cases, report = collect_cases(args.root, args.profiles.split())
         if args.list_only:
             write_report(args.report, report)
-            print(f"Selected {len(cases)} executable module implementations; nothing executed.")
+            print(
+                f"Selected {len(cases)} executable module implementations; "
+                f"{report['walkthrough_outputs']} carry walkthrough expected output; "
+                "nothing executed."
+            )
             return 0
         return int(
             not run_cases(

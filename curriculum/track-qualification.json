@@ -1,0 +1,2710 @@
+{
+  "schema_version": 1,
+  "rubric_version": 1,
+  "tracks": [
+    {
+      "track": "advanced-spark-modeling",
+      "family": "module",
+      "rows": 38,
+      "runtime": {
+        "profiles": {
+          "reading": {
+            "route": "reading-only",
+            "label": "structure validated"
+          },
+          "spark-local-python": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "scala-spark"
+          },
+          "spark-local-scala": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "scala-spark"
+          }
+        },
+        "unavailable": [
+          {
+            "profile": "reading",
+            "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
+          }
+        ],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-examples; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R5": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with thin-guide; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R6": {
+          "status": "na",
+          "justification": "Every lesson in this track is a tutorial without practice exercises or separate solutions, so the practice ramp does not apply."
+        },
+        "R7": {
+          "status": "na",
+          "justification": "Every lesson in this track is a tutorial without practice exercises or separate solutions, so the solution reasoning criterion does not apply."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "apache-data-platforms",
+      "family": "module",
+      "rows": 88,
+      "runtime": {
+        "profiles": {
+          "data-platforms-python": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "data-platforms"
+          },
+          "reading": {
+            "route": "reading-only",
+            "label": "structure validated"
+          }
+        },
+        "unavailable": [
+          {
+            "profile": "reading",
+            "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
+          }
+        ],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-outcome or weak-outcome; Phase 3 (lesson foundations and source integrity) owns this work and 05-05 recomputes the status."
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-examples; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R5": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with thin-guide; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R6": {
+          "status": "na",
+          "justification": "Every lesson in this track is a tutorial without practice exercises or separate solutions, so the practice ramp does not apply."
+        },
+        "R7": {
+          "status": "na",
+          "justification": "Every lesson in this track is a tutorial without practice exercises or separate solutions, so the solution reasoning criterion does not apply."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "applied-science",
+      "family": "module",
+      "rows": 24,
+      "runtime": {
+        "profiles": {
+          "python-core": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "python-core"
+          }
+        },
+        "unavailable": [],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-examples; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R5": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with thin-guide; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R6": {
+          "status": "na",
+          "justification": "Every lesson in this track is a tutorial without practice exercises or separate solutions, so the practice ramp does not apply."
+        },
+        "R7": {
+          "status": "na",
+          "justification": "Every lesson in this track is a tutorial without practice exercises or separate solutions, so the solution reasoning criterion does not apply."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "bayesian-computing",
+      "family": "module",
+      "rows": 24,
+      "runtime": {
+        "profiles": {
+          "bayesian-cpu": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "bayesian"
+          },
+          "python-core": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "python-core"
+          },
+          "stan-cpu": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "stan"
+          }
+        },
+        "unavailable": [],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-examples; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R5": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with thin-guide; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R6": {
+          "status": "na",
+          "justification": "Every lesson in this track is a tutorial without practice exercises or separate solutions, so the practice ramp does not apply."
+        },
+        "R7": {
+          "status": "na",
+          "justification": "Every lesson in this track is a tutorial without practice exercises or separate solutions, so the solution reasoning criterion does not apply."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "bridge",
+      "family": "core",
+      "rows": 13,
+      "runtime": {
+        "profiles": {
+          "python": {
+            "route": "course-check",
+            "label": "complete artifact executed"
+          }
+        },
+        "unavailable": [],
+        "guide_examples": "Lesson and solution files are checked by the core course checks; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "live-python"
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "pass"
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "pass"
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "pass"
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "c",
+      "family": "module",
+      "rows": 42,
+      "runtime": {
+        "profiles": {
+          "c17": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "c-go"
+          }
+        },
+        "unavailable": [],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "pass"
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-solution or thin-solution; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "cpp",
+      "family": "module",
+      "rows": 42,
+      "runtime": {
+        "profiles": {
+          "cpp20": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "cpp"
+          },
+          "reading": {
+            "route": "reading-only",
+            "label": "structure validated"
+          }
+        },
+        "unavailable": [
+          {
+            "profile": "reading",
+            "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
+          }
+        ],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase. C++ worked examples are also compiled and compared with documented expected outputs by tests/test_cpp_worked_examples.py when a host compiler is present.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "pass"
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "csharp",
+      "family": "module",
+      "rows": 48,
+      "runtime": {
+        "profiles": {
+          "csharp-dotnet": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "csharp"
+          }
+        },
+        "unavailable": [],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "pass"
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-solution or thin-solution; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "cuda",
+      "family": "module",
+      "rows": 128,
+      "runtime": {
+        "profiles": {
+          "reading": {
+            "route": "reading-only",
+            "label": "structure validated"
+          }
+        },
+        "unavailable": [
+          {
+            "profile": "reading",
+            "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
+          }
+        ],
+        "guide_examples": "No ordinary executable reference exists for this track; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "na"
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-outcome or weak-outcome; Phase 3 (lesson foundations and source integrity) owns this work and 05-05 recomputes the status."
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-solution or thin-solution; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "na",
+          "justification": "This track has no ordinary-profile runnable lessons (reading, manual, owned-cluster or GPU work only), so no code walkthrough applies; no universal automatic tracer is claimed."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "custom-likelihood-pytorch",
+      "family": "module",
+      "rows": 20,
+      "runtime": {
+        "profiles": {
+          "llm-torch-cpu": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "pytorch"
+          }
+        },
+        "unavailable": [],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-examples; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R5": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with thin-guide; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R6": {
+          "status": "na",
+          "justification": "Every lesson in this track is a tutorial without practice exercises or separate solutions, so the practice ramp does not apply."
+        },
+        "R7": {
+          "status": "na",
+          "justification": "Every lesson in this track is a tutorial without practice exercises or separate solutions, so the solution reasoning criterion does not apply."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "data-ml-engineering",
+      "family": "module",
+      "rows": 72,
+      "runtime": {
+        "profiles": {
+          "data-engineering": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "data-engineering"
+          },
+          "llm-torch-cpu": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "pytorch"
+          },
+          "python-core": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "python-core"
+          },
+          "spark-local-python": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "scala-spark"
+          }
+        },
+        "unavailable": [],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-examples; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "na",
+          "justification": "Every lesson in this track is a tutorial without practice exercises or separate solutions, so the practice ramp does not apply."
+        },
+        "R7": {
+          "status": "na",
+          "justification": "Every lesson in this track is a tutorial without practice exercises or separate solutions, so the solution reasoning criterion does not apply."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "data-visualization",
+      "family": "module",
+      "rows": 8,
+      "runtime": {
+        "profiles": {
+          "python-core": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "python-core"
+          }
+        },
+        "unavailable": [],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with thin-guide; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-solution or thin-solution; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "dax",
+      "family": "module",
+      "rows": 60,
+      "runtime": {
+        "profiles": {
+          "dax-offline": {
+            "route": "hand-derived",
+            "label": "structure validated"
+          }
+        },
+        "unavailable": [
+          {
+            "profile": "dax-offline",
+            "reason": "Offline source editing and hand-derived references; no DAX execution engine."
+          }
+        ],
+        "guide_examples": "No ordinary executable reference exists for this track; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "hand-derived"
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "pass"
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-solution or thin-solution; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "pass"
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "dbt",
+      "family": "module",
+      "rows": 26,
+      "runtime": {
+        "profiles": {
+          "data-engineering": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "data-engineering"
+          }
+        },
+        "unavailable": [],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-solution or thin-solution; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "deep-learning-pytorch",
+      "family": "module",
+      "rows": 36,
+      "runtime": {
+        "profiles": {
+          "llm-torch-cpu": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "pytorch"
+          },
+          "reading": {
+            "route": "reading-only",
+            "label": "structure validated"
+          }
+        },
+        "unavailable": [
+          {
+            "profile": "reading",
+            "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
+          }
+        ],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "pass"
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "pass"
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "deep-learning-tensorflow",
+      "family": "module",
+      "rows": 36,
+      "runtime": {
+        "profiles": {
+          "python-core": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "python-core"
+          },
+          "reading": {
+            "route": "reading-only",
+            "label": "structure validated"
+          },
+          "tensorflow-cpu": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "tensorflow"
+          }
+        },
+        "unavailable": [
+          {
+            "profile": "reading",
+            "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
+          }
+        ],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "pass"
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "pass"
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "docker",
+      "family": "module",
+      "rows": 42,
+      "runtime": {
+        "profiles": {
+          "reading": {
+            "route": "reading-only",
+            "label": "structure validated"
+          }
+        },
+        "unavailable": [
+          {
+            "profile": "reading",
+            "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
+          }
+        ],
+        "guide_examples": "No ordinary executable reference exists for this track; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "na"
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-solution or thin-solution; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "na",
+          "justification": "This track has no ordinary-profile runnable lessons (reading, manual, owned-cluster or GPU work only), so no code walkthrough applies; no universal automatic tracer is claimed."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "go",
+      "family": "module",
+      "rows": 48,
+      "runtime": {
+        "profiles": {
+          "go": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "c-go"
+          }
+        },
+        "unavailable": [],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "pass"
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-solution or thin-solution; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-02 authors the go walkthroughs in this wave and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "java",
+      "family": "module",
+      "rows": 36,
+      "runtime": {
+        "profiles": {
+          "java21": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "java"
+          }
+        },
+        "unavailable": [],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "pass"
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "pass"
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "javascript-typescript",
+      "family": "module",
+      "rows": 66,
+      "runtime": {
+        "profiles": {
+          "javascript-browser": {
+            "route": "browser-workflow",
+            "label": "representative behavior executed"
+          },
+          "javascript-node": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "javascript-typescript"
+          },
+          "reading": {
+            "route": "reading-only",
+            "label": "structure validated"
+          },
+          "typescript-node": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "javascript-typescript"
+          }
+        },
+        "unavailable": [
+          {
+            "profile": "javascript-browser",
+            "reason": "Browser execution; qualified by the real Chromium D3 and Plotly workflows."
+          },
+          {
+            "profile": "reading",
+            "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
+          }
+        ],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase. JavaScript guide fences are also syntax checked with node --check by tests/test_javascript_lessons.py when a host Node is present.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-solution or thin-solution; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "jax",
+      "family": "module",
+      "rows": 34,
+      "runtime": {
+        "profiles": {
+          "jax-cpu": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "jax"
+          },
+          "reading": {
+            "route": "reading-only",
+            "label": "structure validated"
+          }
+        },
+        "unavailable": [
+          {
+            "profile": "reading",
+            "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
+          }
+        ],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-examples; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-solution or thin-solution; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "julia",
+      "family": "module",
+      "rows": 32,
+      "runtime": {
+        "profiles": {
+          "julia": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "julia"
+          }
+        },
+        "unavailable": [],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with thin-guide; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-solution or thin-solution; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "kubernetes",
+      "family": "module",
+      "rows": 66,
+      "runtime": {
+        "profiles": {
+          "k8s-kind": {
+            "route": "kubernetes-workflow",
+            "label": "representative behavior executed"
+          },
+          "reading": {
+            "route": "reading-only",
+            "label": "structure validated"
+          }
+        },
+        "unavailable": [
+          {
+            "profile": "k8s-kind",
+            "reason": "Owned-cluster operation; qualified by the separate Kubernetes workflow."
+          },
+          {
+            "profile": "reading",
+            "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
+          }
+        ],
+        "guide_examples": "No ordinary executable reference exists for this track; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "na"
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-solution or thin-solution; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "na",
+          "justification": "This track has no ordinary-profile runnable lessons (reading, manual, owned-cluster or GPU work only), so no code walkthrough applies; no universal automatic tracer is claimed."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "llm-applied",
+      "family": "module",
+      "rows": 24,
+      "runtime": {
+        "profiles": {
+          "llm-torch-cpu": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "pytorch"
+          },
+          "python-core": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "python-core"
+          },
+          "reading": {
+            "route": "reading-only",
+            "label": "structure validated"
+          }
+        },
+        "unavailable": [
+          {
+            "profile": "reading",
+            "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
+          }
+        ],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-outcome or weak-outcome; Phase 3 (lesson foundations and source integrity) owns this work and 05-05 recomputes the status."
+        },
+        "R3": {
+          "status": "pass"
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "pass"
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "llm-evaluation",
+      "family": "module",
+      "rows": 24,
+      "runtime": {
+        "profiles": {
+          "llm-torch-cpu": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "pytorch"
+          },
+          "python-core": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "python-core"
+          }
+        },
+        "unavailable": [],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-solution or thin-solution; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "llm-theory",
+      "family": "module",
+      "rows": 48,
+      "runtime": {
+        "profiles": {
+          "llm-torch-cpu": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "pytorch"
+          },
+          "python-core": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "python-core"
+          },
+          "reading": {
+            "route": "reading-only",
+            "label": "structure validated"
+          }
+        },
+        "unavailable": [
+          {
+            "profile": "reading",
+            "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
+          }
+        ],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-outcome or weak-outcome; Phase 3 (lesson foundations and source integrity) owns this work and 05-05 recomputes the status."
+        },
+        "R3": {
+          "status": "pass"
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "pass"
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "ml-engineering",
+      "family": "module",
+      "rows": 18,
+      "runtime": {
+        "profiles": {
+          "data-engineering": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "data-engineering"
+          }
+        },
+        "unavailable": [],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with thin-guide; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-solution or thin-solution; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "nlp",
+      "family": "module",
+      "rows": 24,
+      "runtime": {
+        "profiles": {
+          "python-core": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "python-core"
+          }
+        },
+        "unavailable": [],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-solution or thin-solution; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "polars",
+      "family": "module",
+      "rows": 18,
+      "runtime": {
+        "profiles": {
+          "data-engineering": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "data-engineering"
+          }
+        },
+        "unavailable": [],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with thin-guide; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-solution or thin-solution; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "python",
+      "family": "core",
+      "rows": 102,
+      "runtime": {
+        "profiles": {
+          "python": {
+            "route": "course-check",
+            "label": "complete artifact executed"
+          }
+        },
+        "unavailable": [],
+        "guide_examples": "Lesson and solution files are checked by the core course checks; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "live-python"
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-outcome or weak-outcome; Phase 3 (lesson foundations and source integrity) owns this work and 05-05 recomputes the status."
+        },
+        "R3": {
+          "status": "pass"
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "pass"
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "pass"
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "python-web",
+      "family": "module",
+      "rows": 72,
+      "runtime": {
+        "profiles": {
+          "python-web": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "python-web"
+          },
+          "reading": {
+            "route": "reading-only",
+            "label": "structure validated"
+          }
+        },
+        "unavailable": [
+          {
+            "profile": "reading",
+            "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
+          }
+        ],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-examples; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R5": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with thin-guide; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R6": {
+          "status": "na",
+          "justification": "Every lesson in this track is a tutorial without practice exercises or separate solutions, so the practice ramp does not apply."
+        },
+        "R7": {
+          "status": "na",
+          "justification": "Every lesson in this track is a tutorial without practice exercises or separate solutions, so the solution reasoning criterion does not apply."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "r",
+      "family": "module",
+      "rows": 60,
+      "runtime": {
+        "profiles": {
+          "r-statistics": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "r"
+          }
+        },
+        "unavailable": [],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "pass"
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with thin-guide; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-solution or thin-solution; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "rust",
+      "family": "module",
+      "rows": 48,
+      "runtime": {
+        "profiles": {
+          "rust-stable": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "data-platforms"
+          }
+        },
+        "unavailable": [],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "pass"
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-solution or thin-solution; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "scala-spark",
+      "family": "module",
+      "rows": 42,
+      "runtime": {
+        "profiles": {
+          "reading": {
+            "route": "reading-only",
+            "label": "structure validated"
+          },
+          "scala-jvm": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "scala-spark"
+          },
+          "spark-local-python": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "scala-spark"
+          },
+          "spark-local-scala": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "scala-spark"
+          }
+        },
+        "unavailable": [
+          {
+            "profile": "reading",
+            "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
+          }
+        ],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "pass"
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "pass"
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "spark-deployment",
+      "family": "module",
+      "rows": 18,
+      "runtime": {
+        "profiles": {
+          "reading": {
+            "route": "reading-only",
+            "label": "structure validated"
+          }
+        },
+        "unavailable": [
+          {
+            "profile": "reading",
+            "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
+          }
+        ],
+        "guide_examples": "No ordinary executable reference exists for this track; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "na"
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with thin-guide; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R6": {
+          "status": "na",
+          "justification": "Every lesson in this track is a tutorial without practice exercises or separate solutions, so the practice ramp does not apply."
+        },
+        "R7": {
+          "status": "na",
+          "justification": "Every lesson in this track is a tutorial without practice exercises or separate solutions, so the solution reasoning criterion does not apply."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "na",
+          "justification": "This track has no ordinary-profile runnable lessons (reading, manual, owned-cluster or GPU work only), so no code walkthrough applies; no universal automatic tracer is claimed."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "sql",
+      "family": "core",
+      "rows": 86,
+      "runtime": {
+        "profiles": {
+          "sql": {
+            "route": "course-check",
+            "label": "complete artifact executed"
+          }
+        },
+        "unavailable": [],
+        "guide_examples": "Lesson and solution files are checked by the core course checks; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "live-sql"
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-outcome or weak-outcome; Phase 3 (lesson foundations and source integrity) owns this work and 05-05 recomputes the status."
+        },
+        "R3": {
+          "status": "pass"
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "pass"
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "pass"
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "statistics-ml",
+      "family": "module",
+      "rows": 69,
+      "runtime": {
+        "profiles": {
+          "bayesian-cpu": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "bayesian"
+          },
+          "python-core": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "python-core"
+          }
+        },
+        "unavailable": [],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase. Statistics book fences are also checked for AST parity with the executed examples by scripts/sync_example_fences.py.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-outcome or weak-outcome; Phase 3 (lesson foundations and source integrity) owns this work and 05-05 recomputes the status."
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-examples; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R5": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with thin-guide; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R6": {
+          "status": "na",
+          "justification": "Every lesson in this track is a tutorial without practice exercises or separate solutions, so the practice ramp does not apply."
+        },
+        "R7": {
+          "status": "na",
+          "justification": "Every lesson in this track is a tutorial without practice exercises or separate solutions, so the solution reasoning criterion does not apply."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "swift",
+      "family": "module",
+      "rows": 48,
+      "runtime": {
+        "profiles": {
+          "swift-linux": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "swift"
+          }
+        },
+        "unavailable": [],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "pass"
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-solution or thin-solution; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "tmb-modeling",
+      "family": "module",
+      "rows": 48,
+      "runtime": {
+        "profiles": {
+          "r-statistics": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "r"
+          }
+        },
+        "unavailable": [],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-examples; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R5": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with thin-guide; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R6": {
+          "status": "na",
+          "justification": "Every lesson in this track is a tutorial without practice exercises or separate solutions, so the practice ramp does not apply."
+        },
+        "R7": {
+          "status": "na",
+          "justification": "Every lesson in this track is a tutorial without practice exercises or separate solutions, so the solution reasoning criterion does not apply."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    },
+    {
+      "track": "web-development",
+      "family": "module",
+      "rows": 60,
+      "runtime": {
+        "profiles": {
+          "html-browser": {
+            "route": "browser-workflow",
+            "label": "representative behavior executed"
+          },
+          "php-cli": {
+            "route": "reference-corpus",
+            "label": "complete artifact executed",
+            "ci_group": "php"
+          },
+          "reading": {
+            "route": "reading-only",
+            "label": "structure validated"
+          }
+        },
+        "unavailable": [
+          {
+            "profile": "html-browser",
+            "reason": "HTML/CSS browser execution; qualified by the real Chromium web workflow."
+          },
+          {
+            "profile": "reading",
+            "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
+          }
+        ],
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "walkthrough_outputs_checked": false
+      },
+      "walkthrough": {
+        "route": "authored",
+        "floor": 3
+      },
+      "criteria": {
+        "R1": {
+          "status": "pass"
+        },
+        "R2": {
+          "status": "pass"
+        },
+        "R3": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with few-terms; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R4": {
+          "status": "pass"
+        },
+        "R5": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with thin-guide; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R6": {
+          "status": "pass"
+        },
+        "R7": {
+          "status": "gap",
+          "justification": "The coverage matrix still lists lessons with missing-solution or thin-solution; Phase 4 (worked examples and practice) owns this work and 05-05 recomputes the status."
+        },
+        "R8": {
+          "status": "gap",
+          "justification": "The Phase 4 templated_words metric is not yet in the coverage matrix, so lesson-specific prose cannot be measured; 05-05 records the baseline."
+        },
+        "R9": {
+          "status": "gap",
+          "justification": "Authored walkthroughs do not yet cover every stage with an ordinary-profile lesson; 05-03 or 05-04 authors them and 05-05 recomputes coverage."
+        },
+        "R10": {
+          "status": "pass"
+        },
+        "R11": {
+          "status": "not-assessed",
+          "justification": "No named human reviewer has assessed this track for clarity yet; the status stays not-assessed until a reviewer and date are recorded."
+        }
+      },
+      "reviewed": "2026-11-23"
+    }
+  ]
+}

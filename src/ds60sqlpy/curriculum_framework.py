@@ -240,7 +240,11 @@ def load_extensions(root: Path) -> ExtensionData:
                 "network",
                 "runner",
             }
-            if not required <= item.keys() or set(item) - required - {"topics", "stateful_group"}:
+            if not required <= item.keys() or set(item) - required - {
+                "topics",
+                "stateful_group",
+                "outcome",
+            }:
                 raise ValueError(
                     f"Extension lesson has missing or unknown fields in {source.name}."
                 )
@@ -268,6 +272,10 @@ def load_extensions(root: Path) -> ExtensionData:
                 isinstance(value, str) for value in item["prerequisites"]
             ):
                 raise ValueError(f"{lesson_id} prerequisites must be a list of lesson IDs.")
+            if "outcome" in item and (
+                not isinstance(item["outcome"], str) or not item["outcome"].strip()
+            ):
+                raise ValueError(f"{lesson_id} outcome must be a nonempty string.")
             topics = item.get("topics", [])
             if item.get("stateful_group") is not None and (
                 not isinstance(item["stateful_group"], str) or not item["stateful_group"].strip()

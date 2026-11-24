@@ -13,6 +13,7 @@ from urllib.request import ProxyHandler, build_opener
 import pytest
 
 from scripts import check_classroom_browser as browser
+from scripts import check_classroom_workspace as workspace
 
 
 def test_contrast_uses_srgb_linearization_and_detects_dark_on_dark() -> None:
@@ -98,3 +99,220 @@ def test_lesson_metadata_selector_matches_only_a_complete_leading_id(
     identity: str, label: str, expected: bool
 ) -> None:
     assert bool(browser.lesson_label_pattern(identity).search(label)) is expected
+
+
+FIXTURE_INDEX = {
+    "tracks": [
+        {
+            "id": "python",
+            "lessons": [
+                {
+                    "id": "python-02",
+                    "engine": "legacy",
+                    "status": "authored",
+                    "runtime_profile": "python",
+                },
+                {
+                    "id": "python-01",
+                    "engine": "legacy",
+                    "status": "authored",
+                    "runtime_profile": "python",
+                },
+            ],
+        },
+        {
+            "id": "sql",
+            "lessons": [
+                {
+                    "id": "sql-start-02",
+                    "engine": "legacy",
+                    "status": "authored",
+                    "runtime_profile": "sql",
+                },
+            ],
+        },
+        {
+            "id": "mixed",
+            "lessons": [
+                {
+                    "id": "mod-b",
+                    "engine": "module",
+                    "status": "authored",
+                    "runtime_profile": "python-core",
+                },
+                {
+                    "id": "mod-a",
+                    "engine": "module",
+                    "status": "authored",
+                    "runtime_profile": "python-core",
+                },
+                {
+                    "id": "mod-r",
+                    "engine": "module",
+                    "status": "authored",
+                    "runtime_profile": "r-statistics",
+                },
+                {
+                    "id": "mod-read",
+                    "engine": "module",
+                    "status": "authored",
+                    "runtime_profile": "reading",
+                },
+                {
+                    "id": "mod-dax",
+                    "engine": "module",
+                    "status": "authored",
+                    "runtime_profile": "dax-offline",
+                },
+                {
+                    "id": "mod-web",
+                    "engine": "module",
+                    "status": "authored",
+                    "runtime_profile": "html-browser",
+                },
+                {
+                    "id": "mod-0-planned",
+                    "engine": "module",
+                    "status": "planned",
+                    "runtime_profile": "reading",
+                },
+            ],
+        },
+    ]
+}
+
+
+def test_axe_findings_split_serious_and_critical_from_recorded() -> None:
+    blocking, recorded = workspace.classify_axe(
+        {
+            "violations": [
+                {"id": "x", "impact": "serious", "nodes": [{"target": ["#a"]}]},
+                {"id": "y", "impact": "minor", "nodes": [{"target": ["#b"]}, {}]},
+                {"id": "z", "impact": "critical", "nodes": []},
+                {"id": "w", "impact": None, "nodes": [{"target": ["iframe", "#c"]}]},
+            ]
+        }
+    )
+    assert [item["id"] for item in blocking] == ["x", "z"]
+    assert recorded == [
+        {"id": "y", "impact": "minor", "nodes": 2, "targets": ["#b", ""]},
+        {"id": "w", "impact": None, "nodes": 1, "targets": ["iframe #c"]},
+    ]
+    many = {"violations": [{"id": "m", "impact": "serious", "nodes": [{}] * 9}]}
+    assert len(workspace.classify_axe(many)[0][0]["targets"]) == workspace.AXE_TARGET_LIMIT
+    assert workspace.classify_axe({}) == ([], [])
+
+
+def test_mode_samples_pick_the_first_authored_lesson_per_present_mode() -> None:
+    assert workspace.choose_mode_samples(FIXTURE_INDEX) == {
+        "legacy-python": "python-01",
+        "sql-snippet": "sql-start-02",
+        "sql-lesson": "sql-start-02",
+        "module-ready": "mod-a",
+        "module-not-ready": "mod-r",
+        "module-reading": "mod-read",
+        "dax-offline": "mod-dax",
+        "browser-preview": "mod-web",
+    }
+    only_python = {"tracks": [FIXTURE_INDEX["tracks"][0]]}
+    assert workspace.choose_mode_samples(only_python) == {"legacy-python": "python-01"}
+    assert workspace.choose_mode_samples({"tracks": []}) == {}
+    assert workspace.track_of(FIXTURE_INDEX, "mod-dax") == "mixed"
+
+
+def test_ready_profiles_decide_module_ready_and_not_ready_samples() -> None:
+    samples = workspace.choose_mode_samples(FIXTURE_INDEX, frozenset({"r-statistics"}))
+    assert samples["module-ready"] == "mod-r"
+    assert samples["module-not-ready"] == "mod-a"
+
+
+@pytest.mark.parametrize(
+    "style,expected",
+    [
+        ({"outlineStyle": "solid", "outlineWidth": "2px", "boxShadow": "none"}, True),
+        ({"outlineStyle": "solid", "outlineWidth": "1px", "boxShadow": "none"}, False),
+        ({"outlineStyle": "none", "outlineWidth": "0px", "boxShadow": "none"}, False),
+        (
+            {
+                "outlineStyle": "none",
+                "outlineWidth": "0px",
+                "boxShadow": "rgb(47, 63, 179) 0px -2px 0px 0px inset",
+            },
+            True,
+        ),
+        ({"outlineStyle": "auto", "outlineWidth": "2.5px", "boxShadow": ""}, True),
+        ({"outlineStyle": "hidden", "outlineWidth": "3px", "boxShadow": "none"}, False),
+    ],
+)
+def test_focus_cue_requires_a_two_pixel_outline_or_a_shadow(
+    style: dict[str, str], expected: bool
+) -> None:
+    assert workspace.focus_cue_ok(style) is expected
+
+
+def test_expected_strip_copy_matches_each_mode() -> None:
+    assert workspace.expected_strip("module-reading", "reading") == {
+        "label": "Reading lesson",
+        "run": "Reading and reasoning",
+        "runs_in": "No code runs in this lesson.",
+        "results_visible": False,
+    }
+    assert workspace.expected_strip("dax-offline", "dax-offline")["run"] is None
+    assert workspace.expected_strip("module-not-ready", "go")["runs_in"] == (
+        "The go worker container on this computer"
+    )
+    assert workspace.expected_strip("sql-lesson", "sql")["runs_in"] == (
+        "PostgreSQL in your local classroom"
+    )
+    assert workspace.expected_strip("browser-preview", "html-browser")["run"] == (
+        "Run browser preview"
+    )
+
+
+def test_module_actions_normalize_to_execution_names() -> None:
+    assert workspace.normalized_action("/api/modules", "module-run") == "run"
+    assert workspace.normalized_action("/api/modules", "module-walkthrough") == "walkthrough"
+    assert workspace.normalized_action("/api/lab", "step-through") == "step-through"
+    assert workspace.normalized_action("/api/classroom", "classroom-history") == (
+        "classroom:classroom-history"
+    )
+
+
+@pytest.mark.parametrize(
+    "extra",
+    [["--restart-stage", "rewind"], ["--fixtures-only", "--restart-stage", "write"]],
+)
+def test_restart_stage_options_are_validated_before_importing_browser(extra: list[str]) -> None:
+    with pytest.raises(SystemExit) as error:
+        browser.main(
+            [
+                "--url",
+                "http://127.0.0.1:8765/classroom",
+                "--confirm-disposable",
+                "--report",
+                "unused.json",
+                *extra,
+            ]
+        )
+    assert error.value.code == 2
+
+
+class _AxeAudit:
+    def __init__(self, axe: object) -> None:
+        self.workspace = {"axe": axe}
+        self.checks: list[str] = []
+
+    def passed(self, name: str) -> None:
+        self.checks.append(name)
+
+
+def test_axe_gate_fails_only_on_recorded_blocking_findings() -> None:
+    skipped = _AxeAudit({"skipped": "no --axe-script"})
+    workspace.assert_axe_clean(skipped)
+    assert skipped.checks == []
+    clean = _AxeAudit({"pages": ["home:light", "home:dark"], "blocking": []})
+    workspace.assert_axe_clean(clean)
+    assert clean.checks == ["axe-core 4.14.1: no serious or critical findings on 2 scans"]
+    dirty = _AxeAudit({"pages": ["home:dark"], "blocking": [{"id": "color-contrast"}]})
+    with pytest.raises(AssertionError, match="color-contrast"):
+        workspace.assert_axe_clean(dirty)

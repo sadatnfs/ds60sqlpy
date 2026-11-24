@@ -33,6 +33,9 @@ class Element {
   append(...children) {
     this.children.push(...children);
   }
+  prepend(...children) {
+    this.children.unshift(...children);
+  }
   replaceChildren(...children) {
     this.children = children;
   }
@@ -63,6 +66,15 @@ class Element {
   }
   dispatchEvent(event) {
     for (const fn of this.handlers[event.type] || []) fn({ ...event, target: this });
+  }
+  before(...nodes) {
+    (this.inserted ??= []).push(...nodes);
+    for (const item of nodes) item.insertedBefore = this;
+  }
+  remove() {
+    const list = this.insertedBefore?.inserted;
+    if (list) list.splice(list.indexOf(this), 1);
+    this.insertedBefore = null;
   }
 }
 function deferred() {
@@ -129,6 +141,7 @@ function environment({ browserPreviewClass } = {}) {
         documentHandlers.set(name, handlers);
       },
       body: element("body"),
+      contains: () => true,
       documentElement: element("documentElement"),
     },
     window: {
@@ -1272,33 +1285,63 @@ await test("typing during a lesson load preserves the newer source instead of re
   assert.equal(e.element("source").value, "newer while loading");
   assert.match(e.element("status").textContent, /edited.*loading/);
 });
-await test("old module browser drafts recover in the unified workspace without losing notes", async () => {
-  const e = environment(),
-    row = {
-      id: "llm-002",
-      title: "Tokens",
-      level: "beginner",
-      status: "authored",
-      prerequisites: [],
-    };
+const conflictRow = {
+  id: "llm-002",
+  title: "Tokens",
+  level: "beginner",
+  status: "authored",
+  prerequisites: [],
+};
+const serverDraft = { source: "llm-002", prediction: "", explanation: "" };
+async function openConflictFixture(e, stashes) {
   e.context.plan = {
-    tracks: [{ id: "llm-theory", engine: "module", lessons: [row] }],
+    tracks: [{ id: "llm-theory", engine: "module", lessons: [conflictRow] }],
   };
   e.run("index=plan;");
-  e.storage.set(
-    "ds60.module.unsaved.llm-002",
-    JSON.stringify({
+  for (const [key, value] of Object.entries(stashes)) e.storage.set(key, JSON.stringify(value));
+  const loading = e.run("openLesson('llm-002',false)");
+  e.resolve(e.next("module-lesson"), moduleData(conflictRow));
+  await loading;
+}
+const conflictPanel = (e) =>
+  (e.element("save-state").inserted || []).find((item) => item.id === "draft-conflict");
+const clickPanel = async (e, label) => {
+  const button = conflictPanel(e).children.find((item) => item.textContent === label);
+  assert.ok(button, "expected panel button " + label);
+  await Promise.all(button.handlers.click.map((fn) => fn({})));
+};
+await test("old module browser drafts are offered, not forced, without losing notes", async () => {
+  const e = environment();
+  await openConflictFixture(e, {
+    "ds60.module.unsaved.llm-002": {
       source: "old retained source",
       prediction: "old prediction",
       explanation: "old explanation",
-    }),
+    },
+  });
+  assert.equal(e.element("source").value, "llm-002");
+  assert.equal(conflictPanel(e).dataset.key, "llm-002");
+  assert.equal(e.requests.filter((r) => r.body.action === "module-save").length, 0);
+  assert.equal(e.storage.has("ds60.module.unsaved.llm-002"), false);
+  assert.equal(
+    JSON.parse(e.storage.get("ds60.classroom.conflict.llm-002"))[0].source,
+    "old retained source",
   );
-  const loading = e.run("openLesson('llm-002',false)");
-  e.resolve(e.next("module-lesson"), moduleData(row));
-  await loading;
+  e.context.confirm = () => true;
+  const choosing = clickPanel(e, "Use browser copy");
+  await settle();
+  e.resolve(e.next("module-save"), { session: {} });
+  await choosing;
+  await settle();
   assert.equal(e.element("source").value, "old retained source");
   assert.equal(e.element("explanation").value, "old explanation");
-  assert.match(e.element("save-state").textContent, /Recovered/);
+  const saved = e.next("module-save").body.fields;
+  assert.equal(saved.source, "old retained source");
+  assert.equal(saved.explanation, "old explanation");
+  const kept = JSON.parse(e.storage.get("ds60.classroom.conflict.llm-002"));
+  assert.equal(kept.length, 1);
+  assert.equal(kept[0].source, "llm-002");
+  assert.equal(kept[0].stash_meta.origin, "replaced-draft");
 });
 await test("partial legacy save failures preserve complete browser evidence for retry", async () => {
   const e = environment();
@@ -2751,7 +2794,10 @@ await test("marking exercises solved updates the index and offers the next unsol
   e.run(`showJob({ job_id: "s2", lesson_id: "sql-29", status: "succeeded",
     source: "SELECT 2;", output: "2", returncode: 0, elapsed_seconds: 0.1, checks: [] })`);
   assert.equal(e.element("results-title").textContent, "Result");
-  assert.equal(e.element("run-storage-status").textContent, "");
+  assert.equal(
+    e.element("run-storage-status").textContent,
+    "Saved run. It keeps the code that produced it, so opening it later never changes your editor.",
+  );
 });
 
 await test("the manual opens from any link and Back returns to the open lesson", async () => {
@@ -2823,6 +2869,386 @@ await test("Run settings appears only when it holds a time limit or runtime chec
   assert.equal(e.element("timeout").hidden, true);
   assert.equal(e.element("refresh").hidden, true);
   assert.equal(e.element("run-more").hidden, true);
+});
+
+// Authored walkthroughs ----------------------------------------------------------
+function authoredWalk(lessonId = "go-001") {
+  return {
+    lesson_id: lessonId,
+    kind: "authored",
+    label: "Authored steps, not a live trace",
+    evidence: "authored",
+    executed: false,
+    title: "Reading a first Go program",
+    source_path: "courses/go/solutions/go-001_solution.go",
+    source: 'package main\n\nimport "fmt"\n\nfunc main() {\n\tfmt.Println("hi")\n}\n',
+    solution_anchor: true,
+    expected_output: ["hi"],
+    verified_by: "Expected output is checked against the reference run in the CI reference corpus.",
+    steps: [
+      { lines: [1, 1], title: "Package", explanation: "Start <b>here</b>.", observe: "One name." },
+      { lines: [3, 3], title: "Import", explanation: "fmt formats text.", observe: "Used below." },
+      { lines: [5, 7], title: "Main", explanation: "main prints.", observe: "One line." },
+    ],
+  };
+}
+function authoredEnvironment({ available = true, mode = "practice" } = {}) {
+  const e = environment();
+  e.context.HTMLElement = class {};
+  vm.runInContext(guideScript, e.context, { filename: guideFilename });
+  e.current("go-001", "go");
+  e.run(
+    "current.walkthrough_available = " +
+      JSON.stringify(available) +
+      "; current.learning_mode = " +
+      JSON.stringify(mode) +
+      ";",
+  );
+  return e;
+}
+const codeRows = (e) => e.element("step-body").children[0].children[0].children[0].children;
+const countActions = (e, action) => e.requests.filter((r) => r.body.action === action).length;
+async function openAuthored(e) {
+  await e.documentEvent("ds60:lesson-opened");
+  const opening = e.event("walk-reference");
+  await settle();
+  const request = e.next("module-walkthrough");
+  return { opening, request };
+}
+const panelKey = (e, key) =>
+  e.element("step-panel").handlers.keydown[0]({
+    key,
+    target: e.element("step-panel"),
+    preventDefault() {},
+  });
+
+await test("module authored walkthrough opens without step-through or run", async () => {
+  const e = authoredEnvironment();
+  e.element("source").value = "learner draft";
+  const { opening, request } = await openAuthored(e);
+  assert.equal(e.element("walk-reference").hidden, false);
+  assert.equal(e.element("walk-reference").textContent, "Walk through the reference solution");
+  assert.equal(request.url, "/api/modules");
+  assert.deepEqual(request.body, {
+    action: "module-walkthrough",
+    lesson_id: "go-001",
+    reveal: true,
+  });
+  e.resolve(request, authoredWalk());
+  await opening;
+  await settle();
+  assert.equal(countActions(e, "module-walkthrough"), 1);
+  assert.equal(countActions(e, "step-through"), 0);
+  assert.equal(countActions(e, "module-run"), 0);
+  assert.equal(countActions(e, "module-save"), 0);
+  assert.equal(e.element("step-panel").hidden, false);
+  assert.equal(e.element("step-panel").dataset.kind, "authored");
+  assert.equal(e.element("step-badge").hidden, false);
+  assert.match(e.element("step-source").textContent, /not a live trace/);
+  assert.doesNotMatch(e.element("step-source").textContent, /run one line at a time/);
+  assert.equal(e.element("step-count").textContent, "Step 1 of 3");
+  const rows = codeRows(e);
+  assert.equal(rows.length, 7);
+  assert.equal(rows[0].className, "is-current");
+  assert.equal(rows[0]["aria-current"], "step");
+  assert.equal(rows[2].className, undefined);
+  const narration = e.element("step-narration").children;
+  assert.equal(narration[1].textContent, "Start <b>here</b>.");
+  assert.equal(narration[1].innerHTML, "");
+  assert.equal(e.element("source").value, "learner draft");
+});
+
+await test("authored walkthrough keyboard navigation and escape focus", async () => {
+  const e = authoredEnvironment();
+  const { opening, request } = await openAuthored(e);
+  e.resolve(request, authoredWalk());
+  await opening;
+  await settle();
+  panelKey(e, "ArrowRight");
+  assert.equal(e.element("step-count").textContent, "Step 2 of 3");
+  panelKey(e, "End");
+  assert.equal(e.element("step-count").textContent, "Step 3 of 3");
+  const rows = codeRows(e);
+  assert.deepEqual(
+    rows.map((row) => row.className === "is-current"),
+    [false, false, false, false, true, true, true],
+  );
+  assert.equal(rows[4]["aria-current"], "step");
+  assert.equal(rows[5]["aria-current"], undefined);
+  assert.match(e.element("step-status").textContent, /last authored step/);
+  assert.match(e.element("step-status").textContent, /hi/);
+  assert.doesNotMatch(e.element("step-status").textContent, /program finished/);
+  panelKey(e, "ArrowLeft");
+  assert.equal(e.element("step-count").textContent, "Step 2 of 3");
+  panelKey(e, "Home");
+  assert.equal(e.element("step-count").textContent, "Step 1 of 3");
+  panelKey(e, "ArrowLeft");
+  assert.equal(e.element("step-count").textContent, "Step 1 of 3");
+  e.element("walk-reference").focused = false;
+  panelKey(e, "Escape");
+  assert.equal(e.element("step-panel").hidden, true);
+  assert.equal(e.element("walk-reference").focused, true);
+  assert.equal(countActions(e, "step-through") + countActions(e, "module-run"), 0);
+});
+
+await test("authored walkthrough late response is dropped after lesson switch", async () => {
+  const e = authoredEnvironment();
+  const { opening, request } = await openAuthored(e);
+  e.current("go-002", "go");
+  e.run("intentVersion++;");
+  e.resolve(request, authoredWalk());
+  await opening;
+  await settle();
+  assert.equal(e.element("step-body").children.length, 0);
+  assert.equal(e.element("step-count").textContent, "");
+  assert.equal(e.element("step-narration").textContent, "");
+});
+
+await test("authored walkthrough error keeps draft", async () => {
+  const e = authoredEnvironment();
+  e.element("source").value = "my own attempt";
+  const { opening, request } = await openAuthored(e);
+  e.reject(request, "Walkthrough for go-001 is stale; rebind or re-author it.");
+  await opening;
+  await settle();
+  assert.match(e.element("step-status").textContent, /could not open/);
+  assert.match(e.element("step-status").textContent, /stale/);
+  assert.equal(e.element("step-status").dataset.state, "error");
+  assert.equal(e.element("step-body").children.length, 0);
+  assert.equal(e.element("source").value, "my own attempt");
+  assert.equal(countActions(e, "module-save") + countActions(e, "module-run"), 0);
+  assert.equal(e.element("walk-reference").disabled, false);
+});
+
+await test("core lessons keep live step-through and hide authored button", async () => {
+  const e = authoredEnvironment({ available: false, mode: "tutorial" });
+  await e.documentEvent("ds60:lesson-opened");
+  assert.equal(e.element("walk-reference").hidden, true);
+  assert.equal(e.element("step-through").hidden, true);
+  e.context.fixture = {
+    id: "python-01",
+    engine: "legacy",
+    runner: { id: "python" },
+    runtime_profile: "python-core",
+    walkthrough_available: true,
+  };
+  e.run("current=fixture;lessonId=fixture.id;");
+  e.element("source").value = "x = 1\n";
+  await e.documentEvent("ds60:lesson-opened");
+  assert.equal(e.element("walk-reference").hidden, true);
+  assert.equal(e.element("step-through").hidden, false);
+  const stepping = e.event("step-through");
+  await settle();
+  const request = e.next("step-through");
+  assert.equal(request.url, "/api/lab");
+  assert.equal(request.body.language, "python");
+  e.resolve(request, { kind: "python", steps: [], output: "" });
+  await stepping;
+  await settle();
+  assert.equal(countActions(e, "module-walkthrough"), 0);
+  assert.equal(e.element("step-panel").dataset.kind, "python");
+  assert.equal(e.element("step-badge").hidden, true);
+  assert.equal(
+    e.element("step-source").textContent,
+    "A snapshot of the code in your editor, run one line at a time.",
+  );
+});
+
+await test("reading lessons hide the Result panel and never prompt a run", async () => {
+  const e = environment();
+  e.current();
+  e.run(
+    'current.runtime_profile="reading";current.capability={profile:"reading",ready:true};showCapability(current.capability);resetResult();',
+  );
+  assert.equal(e.element("runtime-results").hidden, true);
+  assert.equal(e.element("job-status").textContent, "");
+  assert.equal(e.element("run").disabled, true);
+  assert.equal(e.element("workspace-mode").hidden, false);
+  assert.equal(e.element("workspace-mode").children[1].textContent, "Reading lesson");
+});
+
+await test("browser preview empty result names the preview button", async () => {
+  const e = environment();
+  e.current("web-001", "html");
+  e.run(
+    'current.runtime_profile="html-browser";current.capability={profile:"html-browser",ready:true,detail:""};showCapability(current.capability);resetResult();',
+  );
+  assert.equal(e.element("run").textContent, "Run browser preview");
+  assert.equal(
+    e.element("job-status").textContent,
+    "No preview yet. Press Run browser preview to try this lesson.",
+  );
+});
+
+await test("ready module worker says where code runs", async () => {
+  const e = environment();
+  e.current();
+  e.run(
+    'current.capability={profile:"python-core",ready:true,detail:"Fixture"};showCapability(current.capability);',
+  );
+  assert.equal(
+    e.element("capability").textContent,
+    "Ready to run in your local classroom. Fixture",
+  );
+  const rows = e.element("workspace-mode").children;
+  assert.equal(rows[2].textContent, "Code runs in");
+  assert.equal(rows[3].textContent, "The python-core worker container on this computer");
+});
+
+await test("legacy save-only runner says save only", async () => {
+  const e = environment();
+  e.current("cpp-01", "cpp");
+  e.run(
+    'current.engine="legacy";current.runtime_profile="cpp";current.runner={id:"cpp",title:"C++",executor:"cpp",implemented:false};current.effective={allowed_timeout_seconds:[15],timeout_seconds:15};current.setup_commands=[];current.runtime_guidance="Source can be saved here.";current.capability={profile:"cpp",ready:false,detail:"Source can be saved here."};showCapability(current.capability);',
+  );
+  assert.equal(e.element("capability").className, "notice");
+  assert.equal(
+    e.element("capability").textContent,
+    "Save only. Your C++ code is saved in your local learning workspace, but this classroom has no runner for it. Source can be saved here.",
+  );
+  assert.equal(e.element("run").textContent, "Save only");
+  assert.equal(e.element("run").disabled, true);
+  assert.equal(e.element("runtime-setup").hidden, true);
+});
+
+await test("an old module job is labeled as a saved run", async () => {
+  const e = environment();
+  e.current();
+  e.run(`showJob({ job_id: "old-1", lesson_id: "llm-009", status: "succeeded", source: "x = 1",
+    created_at: "2026-11-20T10:00:00Z", output: "1", returncode: 0, elapsed_seconds: 0.1, checks: [] })`);
+  const text = e.element("run-storage-status").textContent;
+  assert.ok(text.startsWith("Saved run from "), text);
+  assert.ok(text.endsWith("opening it later never changes your editor."), text);
+});
+
+await test("a stale fingerprinted backup never overwrites a newer server draft", async () => {
+  const e = environment();
+  const olderServer = { source: "older server", prediction: "", explanation: "" };
+  const base = e.run("draftFingerprint(" + JSON.stringify(olderServer) + ")");
+  const savedAt = "2026-11-20T10:00:00.000Z";
+  await openConflictFixture(e, {
+    "ds60.classroom.unsaved.llm-002": {
+      source: "stale browser source",
+      prediction: "stale",
+      explanation: "stale notes",
+      stash_meta: { base_sha256: base, saved_at: savedAt, origin: "browser-backup" },
+    },
+  });
+  assert.equal(e.element("source").value, "llm-002");
+  assert.equal(e.element("explanation").value, "");
+  assert.equal(e.storage.has("ds60.classroom.unsaved.llm-002"), false);
+  assert.equal(e.requests.filter((r) => r.body.action === "module-save").length, 0);
+  assert.equal(e.run("saveTimer"), null);
+  const stored = JSON.parse(e.storage.get("ds60.classroom.conflict.llm-002"));
+  assert.equal(stored.length, 1);
+  assert.equal(stored[0].source, "stale browser source");
+  assert.equal(stored[0].stash_meta.base_sha256, base);
+  const when = e.run("new Date(" + JSON.stringify(savedAt) + ").toLocaleString()");
+  assert.equal(
+    conflictPanel(e).children[0].textContent,
+    "A browser copy of this lesson from " +
+      when +
+      " differs from your saved draft. Your saved draft is in the editor and nothing was replaced.",
+  );
+  assert.deepEqual(
+    conflictPanel(e)
+      .children.slice(1)
+      .map((item) => item.textContent),
+    ["Use browser copy", "Keep saved draft", "Discard browser copy"],
+  );
+  e.context.confirm = () => false;
+  await clickPanel(e, "Discard browser copy");
+  assert.equal(e.storage.has("ds60.classroom.conflict.llm-002"), true);
+  e.context.confirm = () => true;
+  await clickPanel(e, "Discard browser copy");
+  assert.equal(e.storage.has("ds60.classroom.conflict.llm-002"), false);
+  assert.equal(conflictPanel(e), undefined);
+  assert.equal(e.element("source").value, "llm-002");
+});
+
+await test("a backup based on the loaded server draft restores as before", async () => {
+  const e = environment();
+  const base = e.run("draftFingerprint(" + JSON.stringify(serverDraft) + ")");
+  await openConflictFixture(e, {
+    "ds60.classroom.unsaved.llm-002": {
+      source: "newer browser source",
+      prediction: "newer",
+      explanation: "newer notes",
+      stash_meta: { base_sha256: base, saved_at: "2026-11-20T10:00:00.000Z" },
+    },
+  });
+  assert.equal(e.element("source").value, "newer browser source");
+  assert.equal(e.element("explanation").value, "newer notes");
+  assert.equal(
+    e.element("save-state").textContent,
+    "Recovered a browser draft. Save it to retain this version in your local learning workspace.",
+  );
+  assert.equal(conflictPanel(e), undefined);
+  assert.equal(e.storage.has("ds60.classroom.conflict.llm-002"), false);
+});
+
+await test("a backup equal to the server draft is discarded silently", async () => {
+  const e = environment();
+  await openConflictFixture(e, {
+    "ds60.classroom.unsaved.llm-002": {
+      ...serverDraft,
+      stash_meta: { base_sha256: "0", saved_at: "2026-11-20T10:00:00.000Z" },
+    },
+  });
+  assert.equal(e.element("source").value, "llm-002");
+  assert.equal(e.element("save-state").textContent, "Loaded from your local learning workspace.");
+  assert.equal(e.storage.has("ds60.classroom.unsaved.llm-002"), false);
+  assert.equal(e.storage.has("ds60.classroom.conflict.llm-002"), false);
+  assert.equal(conflictPanel(e), undefined);
+});
+
+await test("keeping the saved draft leaves the browser copy offered on the next open", async () => {
+  const e = environment();
+  await openConflictFixture(e, {
+    "ds60.classroom.unsaved.llm-002": {
+      source: "unfingerprinted copy",
+      prediction: "",
+      explanation: "kept notes",
+    },
+  });
+  const before = e.storage.get("ds60.classroom.conflict.llm-002");
+  await clickPanel(e, "Keep saved draft");
+  assert.equal(conflictPanel(e), undefined);
+  assert.equal(
+    e.element("save-state").textContent,
+    "Kept your saved draft. The browser copy is offered again the next time you open this lesson.",
+  );
+  assert.equal(e.storage.get("ds60.classroom.conflict.llm-002"), before);
+  const reopening = e.run("openLesson('llm-002',false)");
+  e.resolve(e.next("module-lesson"), moduleData(conflictRow));
+  await reopening;
+  assert.equal(e.element("source").value, "llm-002");
+  assert.equal(conflictPanel(e).dataset.key, "llm-002");
+  assert.equal(
+    conflictPanel(e).children[0].textContent,
+    "A browser copy of this lesson from an earlier visit differs from your saved draft. Your saved draft is in the editor and nothing was replaced.",
+  );
+  assert.equal(e.storage.get("ds60.classroom.conflict.llm-002"), before);
+});
+
+await test("opening a module Saved runs entry sends no run or step request", async () => {
+  const e = environment();
+  e.current();
+  e.element("source").value = "my current code";
+  e.run(`renderHistory([{ job_id: "old-2", lesson_id: "llm-009", status: "succeeded",
+    source: "print(1)", created_at: "2026-11-20T10:00:00Z", source_sha256: "abcdef0123456789",
+    output: "1", returncode: 0, elapsed_seconds: 0.1, checks: [] }])`);
+  const before = e.requests.length;
+  const entry = e.element("history").children[0];
+  await Promise.all(entry.handlers.click.map((fn) => fn({})));
+  await settle();
+  assert.equal(e.requests.slice(before).filter((r) => /run|step/.test(r.body.action)).length, 0);
+  // A run would first save the draft, so no request of any kind may start.
+  assert.deepEqual(
+    e.requests.slice(before).map((r) => r.body.action),
+    [],
+  );
+  assert.equal(e.element("source").value, "my current code");
 });
 
 console.log(JSON.stringify({ checks, passed: true, final: true }));

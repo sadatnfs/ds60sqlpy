@@ -37,6 +37,7 @@ spread; seed ccbdb85d.
   </head>
   <body data-mode="light">
     <a class="skip" href="#main">Skip to learning content</a>
+    <a id="skip-result" class="skip" href="#runtime-results">Skip to result</a>
     <header class="site-header">
       <button id="home-button" class="brand">
         <span class="brand-mark" aria-hidden="true">d.</span
@@ -177,7 +178,13 @@ spread; seed ccbdb85d.
                 ><span id="journey-position"></span
                 ><button id="next-lesson" disabled>Next →</button>
               </nav>
-              <p id="capability" class="notice"></p>
+              <p id="capability" class="notice" tabindex="-1"></p>
+              <dl
+                id="workspace-mode"
+                class="workspace-mode"
+                aria-label="How this lesson works"
+                hidden
+              ></dl>
               <details id="runtime-setup" class="notice" hidden>
                 <summary>Prepare this lesson's runtime</summary>
                 <p>
@@ -450,14 +457,14 @@ spread; seed ccbdb85d.
                               id="code-smaller"
                               class="quiet"
                               type="button"
-                              aria-label="Smaller code text"
-                              >A&minus;</button
+                              title="Smaller code text"
+                              >A&minus;<span class="sr-only"> smaller code text</span></button
                             ><button
                               id="code-larger"
                               class="quiet"
                               type="button"
-                              aria-label="Larger code text"
-                              >A+</button
+                              title="Larger code text"
+                              >A+<span class="sr-only"> larger code text</span></button
                             ></span
                           ><button
                             id="syntax-toggle"
@@ -549,7 +556,11 @@ spread; seed ccbdb85d.
                   <p id="save-state" class="save-state" role="status" aria-live="polite"></p>
                   <div class="toolbar run-tools">
                     <div class="run-main">
-                      <button id="run" class="primary" aria-keyshortcuts="Control+Enter Meta+Enter"
+                      <button
+                        id="run"
+                        class="primary"
+                        aria-keyshortcuts="Control+Enter Meta+Enter"
+                        aria-describedby="capability"
                         >Run code</button
                       ><kbd id="run-shortcut" class="run-shortcut" title="Keyboard shortcut for Run"
                         >Ctrl Enter</kbd
@@ -560,6 +571,13 @@ spread; seed ccbdb85d.
                         aria-controls="step-panel"
                         title="Run your code one step at a time and watch what changes"
                         >Step through</button
+                      ><button
+                        id="walk-reference"
+                        type="button"
+                        hidden
+                        aria-controls="step-panel"
+                        title="Read authored steps that explain the course reference. Nothing runs."
+                        >Walk through the reference</button
                       ><button id="cancel" disabled>Cancel job</button
                       ><span id="run-timer" class="run-timer" aria-hidden="true"></span>
                     </div>
@@ -595,6 +613,9 @@ spread; seed ccbdb85d.
                     <div class="step-head">
                       <div>
                         <h3 id="step-title" tabindex="-1">Step through</h3>
+                        <p id="step-badge" class="step-badge" hidden
+                          >Authored steps, not a live trace</p
+                        >
                         <p id="step-source" class="step-source"></p>
                       </div>
                       <button id="step-close" class="quiet" type="button"
@@ -634,7 +655,7 @@ spread; seed ccbdb85d.
                   </section>
                   <section id="runtime-results" class="results" aria-labelledby="results-title">
                     <div class="results-head">
-                      <h3 id="results-title">Result</h3>
+                      <h3 id="results-title" tabindex="-1">Result</h3>
                       <button id="copy-output" class="quiet" type="button">Copy output</button>
                     </div>
                     <p id="job-status" class="muted" aria-live="polite">
@@ -649,7 +670,7 @@ spread; seed ccbdb85d.
                       aria-label="Program output"
                       data-note="true"
                     >
-Press Run code. What your program prints, and any error messages, appear here.</pre
+What your program prints, and any error messages, appear here.</pre
                     >
                     <details id="raw-log" class="raw-log" hidden>
                       <summary>Show the full log, including the runner's own messages</summary>
@@ -982,8 +1003,8 @@ Press Run code. What your program prints, and any error messages, appear here.</
               <ol class="manual-steps">
                 <li>
                   <strong>Search.</strong> Press <kbd>Ctrl K</kbd> (<kbd>Cmd K</kbd> on a Mac) or
-                  <kbd>/</kbd> anywhere, type a topic, title or lesson ID such as
-                  <code>sql-07</code>, and press <kbd>Enter</kbd>.
+                  <kbd>/</kbd> anywhere outside the code editor, type a topic, title or lesson ID
+                  such as <code>sql-07</code>, and press <kbd>Enter</kbd>.
                 </li>
                 <li>
                   <strong>Browse.</strong> Choose <strong>All subjects</strong>, pick a course, then
@@ -1152,15 +1173,21 @@ Press Run code. What your program prints, and any error messages, appear here.</
 
             <section id="manual-keys" class="manual-section" aria-labelledby="manual-keys-title">
               <h2 id="manual-keys-title" tabindex="-1">Keyboard shortcuts</h2>
-              <p>On a Mac, use <kbd>Cmd</kbd> wherever this table says <kbd>Ctrl</kbd>.</p>
+              <p>
+                On a Mac, use <kbd>Cmd</kbd> wherever this table says <kbd>Ctrl</kbd>, unless the
+                row names its own Mac keys.
+              </p>
               <table class="manual-table">
                 <thead>
                   <tr><th scope="col">Keys</th><th scope="col">What happens</th></tr>
                 </thead>
                 <tbody>
                   <tr
-                    ><td><kbd>Ctrl K</kbd> or <kbd>/</kbd></td
-                    ><td>Search lessons and subjects</td></tr
+                    ><td><kbd>Ctrl K</kbd> (<kbd>Cmd K</kbd> on a Mac) or <kbd>/</kbd></td
+                    ><td
+                      >Open the command palette to search lessons and subjects, except inside the
+                      code editor, where the editor keeps these keys</td
+                    ></tr
                   >
                   <tr
                     ><td><kbd>Ctrl Enter</kbd></td
@@ -1177,6 +1204,20 @@ Press Run code. What your program prints, and any error messages, appear here.</
                   <tr
                     ><td><kbd>Esc</kbd> then <kbd>Tab</kbd></td
                     ><td>Leave the code editor with the keyboard</td></tr
+                  >
+                  <tr
+                    ><td><kbd>Ctrl M</kbd> (<kbd>Shift Alt M</kbd> on a Mac)</td
+                    ><td>
+                      Inside the code editor, switch whether <kbd>Tab</kbd> indents or moves focus
+                      out of the editor. Press again to switch back.
+                    </td></tr
+                  >
+                  <tr
+                    ><td><kbd>Tab</kbd> to <strong>Skip to result</strong></td
+                    ><td>
+                      The second skip link at the top of the page jumps straight to the Result area,
+                      or to the note that explains why a lesson has no Result.
+                    </td></tr
                   >
                   <tr
                     ><td><kbd>Esc</kbd></td
@@ -1267,7 +1308,8 @@ Press Run code. What your program prints, and any error messages, appear here.</
       <ul id="palette-results" class="palette-results" role="listbox" aria-label="Results"></ul>
       <div class="palette-footer" aria-hidden="true">
         <span><kbd>↑</kbd><kbd>↓</kbd> move</span><span><kbd>Enter</kbd> open</span
-        ><span><kbd>Esc</kbd> close</span><span><kbd>/</kbd> or <kbd>Ctrl K</kbd> search</span
+        ><span><kbd>Esc</kbd> close</span
+        ><span><kbd>/</kbd> or <kbd class="palette-key">Ctrl K</kbd> search</span
         ><span><kbd>Ctrl Enter</kbd> run</span><span><kbd>Ctrl S</kbd> save</span>
       </div>
     </dialog>

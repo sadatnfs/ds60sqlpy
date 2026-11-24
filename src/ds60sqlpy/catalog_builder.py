@@ -1264,6 +1264,22 @@ LESSON_OUTCOMES: dict[str, str] = {
     "python-58": "Refactor safely behind tests and review code changes.",
     "python-59": "Scope a capstone: decision, data contract, baseline, and stop rules.",
     "python-60": "Finish, reproduce, and present a capstone with clearly scoped claims.",
+    "sql-01": (
+        "Filter, sort, and limit rows with SELECT, WHERE, ORDER BY, and LIMIT, and explain the "
+        "order PostgreSQL evaluates each clause."
+    ),
+    "sql-58": (
+        "Stage messy raw input, validate and normalize it, and upsert it in a repeatable flow that"
+        " reports observable counts."
+    ),
+    "sql-59": (
+        "Deliver stakeholder metrics with an explicit grain, denominator, and reconciliation, "
+        "backed by measured performance evidence."
+    ),
+    "sql-60": (
+        "Apply explicit acceptance criteria to data quality, metrics, and performance, then write "
+        "a handoff that separates verified results from limitations."
+    ),
 }
 
 

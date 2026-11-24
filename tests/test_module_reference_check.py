@@ -409,3 +409,58 @@ def test_another_terminal_receipt_cannot_bypass_owned_job_cancellation(
     assert report["results"][0]["cleanup"] == {"confirmed": True, "outcome": "cancelled"}
     assert any(action == "module-cancel" for action, _ in client.calls)
     assert sum(action == "module-run" for action, _ in client.calls) == 1
+
+
+def walkthrough_case(*expected: str) -> probe.ReferenceCase:
+    base = reference()
+    return probe.ReferenceCase(
+        base.lesson_id,
+        base.subject,
+        base.profile,
+        base.language,
+        base.learning_mode,
+        base.verification_id,
+        base.source_path,
+        base.source,
+        None,
+        tuple(expected),
+    )
+
+
+def test_walkthrough_expected_output_must_appear_in_job_output() -> None:
+    case = walkthrough_case("42", "All lesson checks passed.")
+    client = FakeClient([case])
+    job = client.call("module-run", lesson_id=case.lesson_id, source=case.source, request_id="job")
+    with pytest.raises(
+        ValueError,
+        match="example-001 walkthrough expected output not observed: All lesson checks passed.",
+    ):
+        probe.verify_result(case, "job", job)
+
+
+def test_walkthrough_expected_output_present_passes(tmp_path: Path) -> None:
+    case = walkthrough_case("42")
+    client = FakeClient([case])
+    job = client.call("module-run", lesson_id=case.lesson_id, source=case.source, request_id="job")
+    probe.verify_result(case, "job", job)
+    report = report_for([case])
+    assert report["results"][0]["walkthrough_expected_output"] == ["42"]
+    assert probe.run_cases(client, [case], report, tmp_path / "report.json")
+
+
+def test_inventory_reports_walkthrough_outputs_without_execution(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    def forbidden(*_args: Any, **_kwargs: Any) -> None:
+        raise AssertionError("Inventory must not contact a classroom")
+
+    monkeypatch.setattr(probe, "ClassroomClient", forbidden)
+    path = tmp_path / "report.json"
+    assert probe.main(["--profiles", "go", "--report", str(path), "--list-only"]) == 0
+    report = json.loads(path.read_text())
+    assert report["walkthrough_outputs"] >= 3
+    by_id = {row["lesson_id"]: row for row in report["results"]}
+    assert by_id["go-001"]["walkthrough_expected_output"] == ["All lesson checks passed."]
+    assert by_id["go-001"]["source_path"] == "courses/go/solutions/go-001_solution.go"
+    assert all(result["status"] == "pending" for result in report["results"])
+    assert "carry walkthrough expected output; nothing executed" in capsys.readouterr().out

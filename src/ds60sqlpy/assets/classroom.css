@@ -612,7 +612,7 @@ p:last-child {
   border-color: var(--area-ink, var(--accent));
 }
 .thumb-tab[aria-pressed="true"] {
-  color: var(--area-on-ink, #ffffff);
+  color: var(--area-on-ink, var(--on-accent));
   background: var(--area-ink, var(--accent));
   border-color: var(--area-ink, var(--accent));
 }
@@ -1039,6 +1039,24 @@ details.notice::before {
   margin-bottom: 12px;
 }
 #capability:empty {
+  display: none;
+}
+.workspace-mode {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: 12px;
+  row-gap: 2px;
+  font-size: var(--fs-sm);
+  margin: 8px 0 0;
+}
+.workspace-mode dt {
+  color: var(--muted);
+  font-weight: 600;
+}
+.workspace-mode dd {
+  margin: 0;
+}
+.workspace-mode[hidden] {
   display: none;
 }
 /* The spread: chapter page, binding gutter, practice page. */
@@ -2898,6 +2916,9 @@ details.notice::before {
   font-size: 1.0625rem;
   color: var(--text);
 }
+.palette-search:focus-within {
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
 .palette-results {
   flex: 1;
   overflow: auto;
@@ -3610,6 +3631,7 @@ details.notice::before {
 .manual-parts li:focus {
   outline: none;
   background: var(--tint);
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 .manual-parts h3 {
   margin-bottom: 4px;
@@ -3727,6 +3749,28 @@ details.notice::before {
   font-size: var(--fs-sm);
   color: var(--muted);
   max-width: 70ch;
+}
+/* Authored walkthroughs: always labelled, never presented as a live run. */
+.step-badge {
+  display: inline-block;
+  margin: 6px 0 0;
+  padding: 2px 8px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--tint);
+  color: var(--accent);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  line-height: 1.5;
+}
+.step-badge[hidden] {
+  display: none;
+}
+#step-panel[data-kind="authored"] .step-code li.is-current {
+  box-shadow: inset 3px 0 0 currentColor;
+}
+#step-panel[data-kind="authored"] .step-narration strong {
+  font-weight: 700;
 }
 #step-close {
   flex: none;
