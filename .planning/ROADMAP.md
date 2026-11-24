@@ -17,6 +17,7 @@ Qualify the unfinished release 1.4.4 classroom-guide and Python/SQL walkthrough 
 - [x] **Phase 08.1: Unslop Classroom UI Chrome (INSERTED)** - Remove visual slop from the classroom chrome without touching lesson content.
 - [x] **Phase 9: Code & Desktop Acceptance Gates** - Pass repository quality checks and bounded desktop browser acceptance for the overhaul.
 - [x] **Phase 10: Verified Publication & Safe Closeout** - Publish only qualified artifacts, smoke-test the pull, and separately verify safe cleanup.
+- [ ] **Phase 11: Post-release Hardening & Content Completion** - Close the remaining security, content, runtime, publication, test and typography debt left after release 2.0.0.
 
 ## Phase Details
 
@@ -230,6 +231,31 @@ Plans:
 - [x] 10-01-PLAN.md: Publish and verify release 2.0.0
 - [x] 10-02-PLAN.md: Safe closeout and local DS60 Docker cleanup
 
+### Phase 11: Post-release Hardening & Content Completion
+**Goal:** As a learner and maintainer, I want every lesson to teach lesson-specific material with code that has actually run, on images that are secure, buildable and published from CI, so that the classroom is production-ready beyond release 2.0.0.
+**Mode:** mvp
+**Depends on**: Phase 10
+**Requirements**: HARD-01, HARD-02, HARD-03, HARD-04, HARD-05, HARD-06, HARD-07
+**Success Criteria** (what must be TRUE):
+  1. Image and repository security findings that have a fix are fixed: shipped Dockerfile misconfigurations are gone from the app image, kernel-header and base-image findings are reduced, CodeQL runs on every push, and the remaining exceptions carry current justifications.
+  2. Lessons no longer read as generic template text: the catalog templated-prose total drops by at least half, no lesson stays above 50% templated words, and shared operating instructions live in one linked guide.
+  3. Every runnable code sample in the companion guides is executed by an automated harness in its own runtime, and failing samples are fixed or explicitly marked as fragments.
+  4. The R worker image keeps a working C, C++ and Fortran toolchain, and a test builds and loads a source package with compiled code.
+  5. Qualified scientific-project images are pushed to the registry from GitHub Actions only, with scan gates and multi-architecture manifests.
+  6. The full test suite passes repeatedly under parallel execution with no known flaky tests.
+  7. No tracked first-party file contains an em dash or en dash, and a repository-wide gate keeps it that way.
+**Plans**: 8 plans
+
+Plans:
+- [ ] 11-01-PLAN.md: Repository-wide dash removal and gate
+- [ ] 11-02-PLAN.md: Flaky and failing test fixes
+- [ ] 11-03-PLAN.md: R worker compiler toolchain and package-build test
+- [ ] 11-04-PLAN.md: Security hardening (image misconfigurations, kernel headers, Swift base, CodeQL, Dependabot)
+- [ ] 11-05-PLAN.md: Scientific image publication from GitHub Actions
+- [ ] 11-06-PLAN.md: Companion-guide code execution harness and sample fixes
+- [ ] 11-07-PLAN.md: Lesson-specific rewrites of templated prose
+- [ ] 11-08-PLAN.md: CI qualification, policy refresh and Phase 11 closeout
+
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |
@@ -245,3 +271,4 @@ Plans:
 | 08.1. Unslop Classroom UI Chrome (INSERTED) | 1/1 | Complete | 2026-11-24 |
 | 9. Code & Desktop Acceptance Gates | 2/2 | Complete | 2026-11-24 |
 | 10. Verified Publication & Safe Closeout | 2/2 | Complete | 2026-11-24 |
+| 11. Post-release Hardening & Content Completion | 0/8 | Not started | - |
