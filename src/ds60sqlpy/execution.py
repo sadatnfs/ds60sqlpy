@@ -708,10 +708,9 @@ class PadRunner:
             raise ValueError("Install Python 3.12, then set DS60_PYTHON to its executable path.")
         path = self._path(lesson_id, language)
         path.parent.mkdir(parents=True, exist_ok=True)
-        limit = self.timeout if timeout_seconds is None else timeout_seconds
         if definition.executor == "python":
-            return self._step_through_python(path.parent, code, limit)
-        return self._step_through_sql(path.parent, lesson_id, code, cursor_offset, limit)
+            return self._step_through_python(path.parent, code, timeout_seconds)
+        return self._step_through_sql(path.parent, lesson_id, code, cursor_offset, timeout_seconds)
 
     def _step_environment(self) -> dict[str, str]:
         environment = dict(os.environ)
@@ -719,7 +718,7 @@ class PadRunner:
         environment["PYTHONUTF8"] = "1"
         return environment
 
-    def _step_through_python(self, folder: Path, code: str, timeout: int) -> dict[str, Any]:
+    def _step_through_python(self, folder: Path, code: str, timeout: int | None) -> dict[str, Any]:
         assert self.python is not None
         environment = self._step_environment()
         environment["PYTHONPATH"] = os.pathsep.join(
@@ -756,7 +755,7 @@ class PadRunner:
         lesson_id: str,
         code: str,
         cursor_offset: int | None,
-        timeout: int,
+        timeout: int | None,
     ) -> dict[str, Any]:
         assert self.python is not None
         plan = stepping.plan_sql(code, cursor_offset)

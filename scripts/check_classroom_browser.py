@@ -231,7 +231,7 @@ def save(page: Any, expect: Any) -> None:
 
 def learner_snapshot(page: Any, lesson_id: str) -> dict[str, Any]:
     """Capture persisted and visible learning state around a read-only walkthrough."""
-    return page.evaluate(
+    snapshot: dict[str, Any] = page.evaluate(
         """async lessonId => {
           const language = document.getElementById("runner").value;
           const mode = document.getElementById("pad-mode").value || "snippet";
@@ -258,6 +258,7 @@ def learner_snapshot(page: Any, lesson_id: str) -> dict[str, Any]:
         }""",
         lesson_id,
     )
+    return snapshot
 
 
 def assert_learning_state_unchanged(
