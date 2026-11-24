@@ -707,10 +707,15 @@ class PadRunner:
         if self.python is None:
             raise ValueError("Install Python 3.12, then set DS60_PYTHON to its executable path.")
         path = self._path(lesson_id, language)
-        path.parent.mkdir(parents=True, exist_ok=True)
         if definition.executor == "python":
+            path.parent.mkdir(parents=True, exist_ok=True)
             return self._step_through_python(path.parent, code, timeout_seconds)
-        return self._step_through_sql(path.parent, lesson_id, code, cursor_offset, timeout_seconds)
+        plan = stepping.plan_sql(code, cursor_offset)
+        rejected = stepping.sql_unsupported_response(plan)
+        if rejected is not None:
+            return rejected
+        path.parent.mkdir(parents=True, exist_ok=True)
+        return self._step_through_sql(path.parent, lesson_id, plan, timeout_seconds)
 
     def _step_environment(self) -> dict[str, str]:
         environment = dict(os.environ)
@@ -753,22 +758,10 @@ class PadRunner:
         self,
         folder: Path,
         lesson_id: str,
-        code: str,
-        cursor_offset: int | None,
+        plan: stepping.SqlPlan,
         timeout: int | None,
     ) -> dict[str, Any]:
         assert self.python is not None
-        plan = stepping.plan_sql(code, cursor_offset)
-        if plan.unsupported is not None or not plan.steps:
-            return {
-                "kind": "sql",
-                "statement": plan.statement,
-                "statement_offset": plan.statement_offset,
-                "steps": [],
-                "unsupported": plan.unsupported or stepping.NO_QUERY,
-                "elapsed_seconds": 0.0,
-                "error": None,
-            }
         environment = self._step_environment()
         self._course_database_environment(environment, lesson_search_path(self.catalog, lesson_id))
         with tempfile.TemporaryDirectory(prefix=".step-", dir=folder) as scratch:

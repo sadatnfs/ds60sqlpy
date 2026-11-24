@@ -1918,6 +1918,22 @@ def _explain_limit(detail: dict[str, Any], count: int | None, previous: int | No
     return text
 
 
+def sql_unsupported_response(plan: SqlPlan) -> dict[str, Any] | None:
+    """Return the shared no-database reply when a plan cannot be walked through."""
+
+    if plan.unsupported is None and plan.steps:
+        return None
+    return {
+        "kind": "sql",
+        "statement": plan.statement,
+        "statement_offset": plan.statement_offset,
+        "steps": [],
+        "unsupported": plan.unsupported or NO_QUERY,
+        "elapsed_seconds": 0.0,
+        "error": None,
+    }
+
+
 def sql_response(
     plan: SqlPlan,
     records: list[dict[str, Any]],

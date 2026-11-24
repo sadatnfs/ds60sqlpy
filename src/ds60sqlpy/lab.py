@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any, cast
 from urllib.parse import urlsplit
 
+from ds60sqlpy import step_through as stepping
 from ds60sqlpy.capabilities import CapabilityService
 from ds60sqlpy.catalog import Catalog, Lesson
 from ds60sqlpy.classroom import ClassroomService
@@ -387,6 +388,12 @@ class LabServer(CourseHTTPServer):
         cursor = payload.get("cursor_offset")
         if cursor is not None and (type(cursor) is not int or cursor < 0):
             raise ValueError("Choose a cursor position inside the code.")
+        if language == "sql":
+            # Parse first: a statement the walkthrough cannot trace never reaches
+            # course preparation, the SQL worker or a saved-pad path.
+            rejected = stepping.sql_unsupported_response(stepping.plan_sql(code, cursor))
+            if rejected is not None:
+                return rejected
         if not self.execution_lock.acquire(blocking=False):
             raise ValueError("A pad is already running. Wait for its result before running again.")
         try:

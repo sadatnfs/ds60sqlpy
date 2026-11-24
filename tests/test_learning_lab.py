@@ -5,11 +5,13 @@ import sys
 import threading
 from dataclasses import replace
 from pathlib import Path
+from typing import Any
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 import pytest
 
+from ds60sqlpy import step_through as stepping
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.coaching import CoachingService
 from ds60sqlpy.container_runtime import prepare_workspace
@@ -19,9 +21,9 @@ from ds60sqlpy.progress import ProgressStore
 from ds60sqlpy.study_plan import build_study_plan
 
 
-def local_catalog(tmp_path: Path) -> Catalog:
+def local_catalog(tmp_path: Path, lesson_id: str = "python-01") -> Catalog:
     root = Catalog.load()
-    lesson = root.get("python-01")
+    lesson = root.get(lesson_id)
     for relative in (lesson.guide_path, lesson.lesson_path, *lesson.solution_paths):
         target = tmp_path / relative
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -468,5 +470,102 @@ def test_failed_pad_responses_explain_the_error_without_changing_receipts(
         )["receipt"]
         assert "explanation" not in receipt["result"]
         assert "explanation" not in server.action({**run, "code": "print(42)\n"})
+    finally:
+        server.server_close()
+
+
+def sql_walkthrough_server(tmp_path: Path) -> LabServer:
+    server = LabServer(
+        Catalog.load(), progress_path=tmp_path / "progress.json", python=sys.executable
+    )
+    server.pads = PadRunner(local_catalog(tmp_path / "pads", "sql-start-01"), python=sys.executable)
+    return server
+
+
+def forbid(message: str) -> Any:
+    def forbidden(*args: object, **kwargs: object) -> None:
+        raise AssertionError(message)
+
+    return forbidden
+
+
+def test_rejected_sql_step_through_skips_database_preparation_and_pad_path(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    server = sql_walkthrough_server(tmp_path)
+    monkeypatch.setattr(
+        "ds60sqlpy.lab.ensure_before_run", forbid("Rejected SQL prepared the course database.")
+    )
+    monkeypatch.setattr(server.pads, "_execute", forbid("Rejected SQL reached the SQL worker."))
+    monkeypatch.setattr(server._classroom.runs, "record", forbid("A walkthrough saved a receipt."))
+    source = "-- Clauses out of order\nSELECT 1 ORDER BY 1 WHERE true"
+    request = {
+        "action": "step-through",
+        "lesson_id": "sql-start-01",
+        "language": "sql",
+        "code": source,
+        "cursor_offset": len(source),
+    }
+    try:
+        result = server.action(request)
+        assert result["steps"] == [] and result["unsupported"] == stepping.UNSUPPORTED_SQL
+        assert "database_preparation" not in result
+        assert source[result["statement_offset"] :] == result["statement"]
+        assert not (server.pads.catalog.repo_root / ".learning").exists()
+        direct = server.pads.step_through("sql-start-01", "sql", source, cursor_offset=len(source))
+        assert direct == result
+        assert not (server.pads.catalog.repo_root / ".learning").exists()
+        empty = server.action({**request, "code": "-- nothing to run\n", "cursor_offset": 0})
+        assert (empty["steps"], empty["unsupported"]) == ([], stepping.NO_QUERY)
+        assert not (server.pads.catalog.repo_root / ".learning").exists()
+    finally:
+        server.server_close()
+
+
+def test_supported_sql_step_through_prepares_before_trace(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    server = sql_walkthrough_server(tmp_path)
+    calls: list[tuple[object, ...]] = []
+    prepared = {"prepared": ["training"]}
+
+    def prepare(catalog: Catalog, lesson_id: str) -> dict[str, Any]:
+        calls.append(("prepare", lesson_id))
+        return prepared
+
+    def trace(
+        lesson_id: str,
+        language: str,
+        code: str,
+        *,
+        cursor_offset: int | None = None,
+        timeout_seconds: int | None = None,
+    ) -> dict[str, Any]:
+        calls.append(("trace", lesson_id, language, code, cursor_offset, timeout_seconds))
+        return {"kind": "sql", "steps": [{"clause": "from"}], "error": None}
+
+    monkeypatch.setattr("ds60sqlpy.lab.ensure_before_run", prepare)
+    monkeypatch.setattr(server.pads, "step_through", trace)
+    for name in ("run", "save"):
+        monkeypatch.setattr(server.pads, name, forbid(f"A walkthrough called PadRunner.{name}."))
+    monkeypatch.setattr(server._classroom.runs, "record", forbid("A walkthrough saved a receipt."))
+    source = "SELECT n FROM generate_series(1, 3) AS g(n) WHERE n > 1"
+    try:
+        result = server.action(
+            {
+                "action": "step-through",
+                "lesson_id": "sql-start-01",
+                "language": "sql",
+                "code": source,
+                "cursor_offset": 7,
+                "timeout_seconds": 60,
+            }
+        )
+        assert calls == [
+            ("prepare", "sql-start-01"),
+            ("trace", "sql-start-01", "sql", source, 7, 60),
+        ]
+        assert result["database_preparation"] == prepared
+        assert "receipt_saved" not in result and "purpose" not in result
     finally:
         server.server_close()
