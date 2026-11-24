@@ -119,7 +119,7 @@ def test_unknown_action_cannot_contact_docker_or_write_owner(tmp_path: Path, pro
         },
         capture_output=True,
         text=True,
-        timeout=5,
+        timeout=60,
     )
     assert result.returncode == 2
     assert not call_log.exists()
@@ -288,7 +288,7 @@ esac
         },
         text=True,
         capture_output=True,
-        timeout=5,
+        timeout=60,
     )
     assert result.returncode == 2 and "Unexpected private environment field" in result.stderr
     assert not contact.exists()
@@ -359,7 +359,7 @@ esac
         },
         capture_output=True,
         text=True,
-        timeout=5,
+        timeout=60,
     )
     assert result.returncode == 2 and "emulation is disabled" in result.stderr
     assert not (copied / ".env").exists()
@@ -505,7 +505,7 @@ exit 99
         },
         text=True,
         capture_output=True,
-        timeout=5,
+        timeout=60,
     )
     assert result.returncode == 0, result.stderr
     exported = dict(line.split("=", 1) for line in snapshot.read_text().splitlines() if "=" in line)

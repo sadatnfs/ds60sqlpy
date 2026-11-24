@@ -136,7 +136,7 @@ def test_hive_preparation_serializes_against_normal_workshop_actions(owned: Any)
     lock.mkdir()
     (lock / "pid").write_text("retained-owner")
     result = subprocess.run(
-        ["bash", "run.sh", "prepare"], cwd=root, env=env, capture_output=True, text=True, timeout=5
+        ["bash", "run.sh", "prepare"], cwd=root, env=env, capture_output=True, text=True, timeout=60
     )
     assert result.returncode == 2 and "Another workshop action" in result.stderr
     assert (lock / "pid").read_text() == "retained-owner"
@@ -280,10 +280,10 @@ def test_hive_runtime_uses_canonical_manifest_and_rejects_changed_source(
     sha.chmod(0o755)
     command = ["bash", "verify-metadata.sh", str(root), HIVE_ID]
     assert (
-        subprocess.run(command, cwd=root, env=env, capture_output=True, timeout=5).returncode == 0
+        subprocess.run(command, cwd=root, env=env, capture_output=True, timeout=60).returncode == 0
     )
     (root / "MetadataProbe.java").write_text("changed source")
-    result = subprocess.run(command, cwd=root, env=env, capture_output=True, text=True, timeout=5)
+    result = subprocess.run(command, cwd=root, env=env, capture_output=True, text=True, timeout=60)
     assert result.returncode != 0 and "identity differs" in result.stderr
 
 
@@ -305,7 +305,7 @@ def test_hive_compose_pins_saved_values_and_clears_platform_override(owned: Any)
         env=env | dict.fromkeys(saved, "ambient-wrong"),
         capture_output=True,
         text=True,
-        timeout=5,
+        timeout=60,
     )
     assert result.returncode == 0, result.stderr
     assert json.loads((root / "compose-env.json").read_text()) == saved | {

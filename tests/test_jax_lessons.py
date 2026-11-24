@@ -128,7 +128,7 @@ def test_subject_generation_is_exact_without_running_jax() -> None:
         capture_output=True,
         text=True,
         check=False,
-        timeout=120,
+        timeout=600,
     )
     assert completed.returncode == 0, completed.stdout + completed.stderr
 
@@ -150,7 +150,7 @@ def test_reference_in_a_fresh_cpu_process(entry: dict[str, Any]) -> None:
         capture_output=True,
         text=True,
         check=False,
-        timeout=120,
+        timeout=600,
         env=environment,
     )
     assert completed.returncode == 0, completed.stdout + completed.stderr

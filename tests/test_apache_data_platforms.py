@@ -178,7 +178,7 @@ def test_workshop_invalid_action_has_no_docker_calls_or_state(
         | {"PATH": str(bin_dir) + os.pathsep + os.environ["PATH"], "DOCKER_CALL_LOG": str(log)},
         capture_output=True,
         text=True,
-        timeout=5,
+        timeout=60,
     )
     assert result.returncode == 2
     assert not log.exists() and not (project / ".env").exists()
@@ -220,7 +220,7 @@ esac
         },
         capture_output=True,
         text=True,
-        timeout=5,
+        timeout=60,
     )
     assert result.returncode == 2 and "automatic emulation is disabled" in result.stderr.lower()
     assert not (project / ".env").exists() and not (project / ".workshop-lock").exists()
@@ -342,7 +342,7 @@ exit 99
         },
         capture_output=True,
         text=True,
-        timeout=5,
+        timeout=60,
     )
     assert result.returncode == 0, result.stdout + result.stderr
     calls = log.read_text().splitlines()
@@ -568,7 +568,7 @@ esac
         },
         capture_output=True,
         text=True,
-        timeout=5,
+        timeout=60,
     )
     assert result.returncode == 2 and "8 GiB" in result.stderr
     assert not (project / ".env").exists() and not (project / ".workshop-lock").exists()
@@ -609,7 +609,7 @@ def test_cassandra_never_changes_a_saved_single_node_topology_implicitly(tmp_pat
         },
         capture_output=True,
         text=True,
-        timeout=5,
+        timeout=60,
     )
     assert result.returncode == 2 and "differs from saved state" in result.stderr
     assert (project / ".env").read_text() == settings

@@ -304,9 +304,12 @@ def test_bounded_slow_subscriber_and_explicit_disconnect(tmp_path: Path) -> None
         iterator = await scheduler.subscribe(one["id"])
         first = await anext(iterator)
         assert first["event"] == "queued"
-        deadline = time.monotonic() + 2
+        # Draining the iterator early would relieve the backpressure under test, so wait for
+        # the producer to give up first. The bound only guards against a hang on a loaded host.
+        deadline = time.monotonic() + 60
         while one["id"] in scheduler.work and time.monotonic() < deadline:
             await asyncio.sleep(0.005)
+        assert one["id"] not in scheduler.work
         events = [item async for item in iterator]
         assert events[-1]["data"]["reason"] == "subscriber_backpressure_timeout"
         assert len([item for item in events if item["event"] == "token"]) <= 5

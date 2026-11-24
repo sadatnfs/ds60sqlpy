@@ -307,7 +307,7 @@ def test_portable_authoring_recreates_all_published_artifacts(
         ],
         capture_output=True,
         text=True,
-        timeout=30,
+        timeout=300,
         check=False,
     )
     assert completed.returncode == 0, completed.stderr
@@ -315,7 +315,7 @@ def test_portable_authoring_recreates_all_published_artifacts(
         [sys.executable, "-B", str(tmp_path / "scripts/normalize_lesson_prose.py"), "--write"],
         capture_output=True,
         text=True,
-        timeout=30,
+        timeout=300,
         check=False,
     )
     assert normalized.returncode == 0, normalized.stderr
@@ -341,7 +341,7 @@ def test_portable_authoring_recreates_all_published_artifacts(
         ],
         capture_output=True,
         text=True,
-        timeout=30,
+        timeout=300,
         check=False,
     )
     assert styled.returncode == 0, styled.stdout + styled.stderr

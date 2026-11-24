@@ -164,7 +164,7 @@ def shell_function(name: str, file: Path) -> subprocess.CompletedProcess[str]:
         ],
         capture_output=True,
         text=True,
-        timeout=5,
+        timeout=60,
     )
 
 

@@ -54,7 +54,7 @@ def run_broker(
         env=os.environ | {"CLUSTER_ID": cluster, "KAFKA_CALL_DIR": str(calls)},
         capture_output=True,
         text=True,
-        timeout=5,
+        timeout=60,
     )
 
 

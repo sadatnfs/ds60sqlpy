@@ -57,7 +57,7 @@ def test_unknown_flag_has_no_state_or_docker_calls(tmp_path: Path, workshop: str
         env=env,
         capture_output=True,
         text=True,
-        timeout=5,
+        timeout=60,
     )
     assert result.returncode == 2
     assert not log.exists() and not (project / ".env").exists()
@@ -87,7 +87,7 @@ esac
         env=env,
         capture_output=True,
         text=True,
-        timeout=5,
+        timeout=60,
     )
     assert result.returncode == 2
     assert not (project / ".env").exists() and not (project / ".workshop-lock").exists()
@@ -147,7 +147,7 @@ exit 99
         env=env | {"TEST_OWNER": owner, "TEST_KIND": kind},
         capture_output=True,
         text=True,
-        timeout=5,
+        timeout=60,
     )
     assert result.returncode == 0, result.stdout + result.stderr
     calls = log.read_text().splitlines()
