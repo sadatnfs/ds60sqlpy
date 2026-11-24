@@ -11,7 +11,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from locks import read_lock, selected_lock
+from locks import index_arguments, read_lock, selected_lock
 
 
 def main() -> None:
@@ -27,9 +27,6 @@ def main() -> None:
     for group in ("cpu", "scientific", "build"):
         lock = selected_lock(group, architecture)
         read_lock(lock)
-        index = (
-            "https://download.pytorch.org/whl/cpu" if group == "cpu" else "https://pypi.org/simple"
-        )
         subprocess.run(
             [
                 sys.executable,
@@ -40,8 +37,7 @@ def main() -> None:
                 "--require-hashes",
                 "--only-binary=:all:",
                 "--no-deps",
-                "--index-url",
-                index,
+                *index_arguments(group),
                 "--dest",
                 str(args.output),
                 "-r",

@@ -10,7 +10,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from locks import check_versions, selected_lock
+from locks import check_versions, index_arguments, selected_lock
 
 
 def main() -> None:
@@ -45,12 +45,7 @@ def main() -> None:
                 parser.error("Offline preparation needs an explicit wheelhouse")
             command += ["--no-index", "--find-links", str(args.wheelhouse)]
         else:
-            index = (
-                "https://download.pytorch.org/whl/cpu"
-                if args.group == "cpu"
-                else "https://pypi.org/simple"
-            )
-            command += ["--index-url", index]
+            command += index_arguments(args.group)
         subprocess.run([*command, "-r", str(lock)], check=True)
     versions = check_versions(lock)
     print(

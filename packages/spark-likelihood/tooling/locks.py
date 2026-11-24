@@ -52,6 +52,22 @@ def selected_lock(group: str, architecture: str) -> Path:
     return BASE / "locks" / names[group]
 
 
+PYPI_INDEX = "https://pypi.org/simple"
+TORCH_CPU_PAGE = "https://download.pytorch.org/whl/cpu/torch/"
+
+
+def index_arguments(group: str) -> list[str]:
+    """Return pip source flags. The PyTorch page serves only the +cpu torch wheels.
+
+    The PyTorch index lags PyPI for the other locked packages, so every group resolves
+    from PyPI and the cpu group adds the PyTorch torch page; hashes still pin each file.
+    """
+    arguments = ["--index-url", PYPI_INDEX]
+    if group == "cpu":
+        arguments += ["--find-links", TORCH_CPU_PAGE]
+    return arguments
+
+
 def check_versions(path: Path) -> dict[str, str]:
     expected = read_lock(path)
     for name, version in expected.items():

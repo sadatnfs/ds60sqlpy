@@ -12,7 +12,8 @@ built from the current source on the Debian 13 Spark Python layer and the R
 4.6.1 worker. It used no network, no source mount, temporary scratch, two CPUs
 and 3 GiB RAM, and no learner volume. Every Scala, runner, CLI, registry, R and
 C++ hash in the receipt equals the repository tree. The earlier Spark 4.0.1
-receipts are kept in [qualification-history](qualification-history/).
+receipts are kept in `qualification-history/`; the last of them is
+[2026-10-29-spark-4.0.1-arm64.json](qualification-history/2026-10-29-spark-4.0.1-arm64.json).
 
 ## Observed results
 

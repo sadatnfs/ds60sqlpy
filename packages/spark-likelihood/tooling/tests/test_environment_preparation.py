@@ -51,6 +51,21 @@ class PreparationChecks(unittest.TestCase):
                     with self.assertRaises(ValueError):
                         locks.read_lock(path)
 
+    def test_only_the_cpu_group_adds_the_pytorch_torch_page_to_pypi(self):
+        self.assertEqual(
+            locks.index_arguments("cpu"),
+            [
+                "--index-url",
+                "https://pypi.org/simple",
+                "--find-links",
+                "https://download.pytorch.org/whl/cpu/torch/",
+            ],
+        )
+        for group in ("scientific", "build"):
+            self.assertEqual(
+                locks.index_arguments(group), ["--index-url", "https://pypi.org/simple"]
+            )
+
     def test_prepared_override_checks_every_locked_version(self):
         expected = locks.read_lock(locks.selected_lock("cpu", "arm64"))
         with patch.object(locks.importlib.metadata, "version", side_effect=expected.__getitem__):

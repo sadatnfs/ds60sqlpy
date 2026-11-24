@@ -22,8 +22,9 @@ Linux Python 3.12 environment, populate that directory explicitly with:
 python3 tooling/download_wheels.py --output tooling/wheelhouse
 ```
 
-This command contacts the public CPU Torch index and PyPI with exact hashes;
-it is preparation, not model execution. It does not obtain Docker base images.
+This command contacts PyPI and, for the CPU Torch wheel only, the PyTorch torch
+page, with exact hashes. The PyTorch index lags PyPI for the other locked
+packages, so they always come from PyPI. It is preparation, not model execution. It does not obtain Docker base images.
 Download receipts are not installation or runtime qualification. Do not use this
 command implicitly from a fit or notebook cell that is supposed to be offline.
 
