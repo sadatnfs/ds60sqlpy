@@ -8,6 +8,7 @@ from typing import Any
 
 import pytest
 
+from scripts import check_module_references as references
 from scripts import check_track_qualification as qualification
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -73,9 +74,9 @@ def test_routes_and_reasons_are_derived() -> None:
             assert entry["route"] == qualification.expected_route(family, profile), track
             assert entry["label"] in qualification.RESULT_LABELS
             assert entry["label"] == qualification.ROUTE_LABELS[entry["route"]]
-            if family != "core" and profile not in qualification.ORDINARY_PROFILES:
+            if family != "core" and profile not in references.ORDINARY_PROFILES:
                 expected_unavailable.append(
-                    {"profile": profile, "reason": qualification.EXTERNAL_REASONS[profile]}
+                    {"profile": profile, "reason": references.EXTERNAL_REASONS[profile]}
                 )
         assert runtime["unavailable"] == expected_unavailable, track
         assert all(item["reason"].strip() for item in runtime["unavailable"])

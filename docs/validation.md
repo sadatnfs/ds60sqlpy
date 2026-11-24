@@ -502,10 +502,11 @@ Not covered, by design:
 
 ### Exercise lifecycle transitions locally
 
-Run the same harness on a workstation with a fresh, disposable project name:
+Run the same harness on a workstation with a fresh, disposable project name
+(replace `try1` with a new lowercase suffix each time):
 
 ```bash
-python scripts/check_classroom_lifecycle.py --project ds60-p7-local-<suffix> --base HEAD~1 --target HEAD
+python scripts/check_classroom_lifecycle.py --project ds60-p7-local-try1 --base HEAD~1 --target HEAD
 ```
 
 It walks eight transitions in order: fresh, stop, resume, rerun, restart,

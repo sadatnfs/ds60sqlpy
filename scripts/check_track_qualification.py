@@ -24,14 +24,11 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT))
 
+from ds60sqlpy.browser_runs import BROWSER_PROFILES  # noqa: E402
+from ds60sqlpy.gpu_runtime import GPU_PROFILES  # noqa: E402
 from ds60sqlpy.modules import ModuleCatalog  # noqa: E402
 from ds60sqlpy.walkthroughs import load_walkthroughs  # noqa: E402
-from scripts.check_module_references import (  # noqa: E402
-    BROWSER_PROFILES,
-    EXTERNAL_REASONS,
-    GPU_PROFILES,
-    ORDINARY_PROFILES,
-)
+from scripts.check_module_references import EXTERNAL_REASONS, ORDINARY_PROFILES  # noqa: E402
 from scripts.ci_profiles import groups  # noqa: E402
 
 LEDGER = "curriculum/track-qualification.json"

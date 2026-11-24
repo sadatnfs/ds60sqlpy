@@ -174,7 +174,7 @@ def css_rule(selector: str) -> str:
     text = CSS.read_text(encoding="utf-8")
     matches = re.findall(re.escape(selector) + r"\s*\{([^}]*)\}", text)
     assert len(matches) == 1, selector
-    return matches[0]
+    return str(matches[0])
 
 
 def test_palette_and_manual_focus_cues_use_the_accent() -> None:

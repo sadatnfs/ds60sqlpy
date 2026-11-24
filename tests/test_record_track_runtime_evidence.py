@@ -11,10 +11,11 @@ import pytest
 
 from scripts import check_track_qualification as qualification
 from scripts import record_track_runtime_evidence as evidence
+from scripts.ci_profiles import groups
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests/fixtures/gh_run_view/app_build_run.json"
-KNOWN = {row["id"] for row in qualification.groups(ROOT)}
+KNOWN = {row["id"] for row in groups(ROOT)}
 COMMIT = "0123456789abcdef0123456789abcdef01234567"
 
 

@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-import yaml
+import yaml  # type: ignore[import-untyped]
 
 from scripts.ci_profiles import RUNNERS, matrix
 
@@ -35,7 +35,8 @@ def workflow() -> dict[str, Any]:
 
 def triggers(data: dict[str, Any]) -> dict[str, Any]:
     # PyYAML 1.1 reads the bare key "on" as boolean True.
-    value = data.get("on", data.get(True))
+    raw: dict[Any, Any] = data
+    value = raw.get("on", raw.get(True))
     assert isinstance(value, dict)
     return value
 
@@ -43,7 +44,9 @@ def triggers(data: dict[str, Any]) -> dict[str, Any]:
 def job(name: str) -> dict[str, Any]:
     jobs = workflow()["jobs"]
     assert name in jobs, sorted(jobs)
-    return jobs[name]
+    found = jobs[name]
+    assert isinstance(found, dict)
+    return found
 
 
 def steps(name: str) -> list[dict[str, Any]]:

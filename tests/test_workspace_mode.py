@@ -79,7 +79,9 @@ def test_legacy_reading_wins_over_save_only() -> None:
     assert mode["showResults"] is False
 
 
-def legacy(runner_id: str, title: str, executor: str, *, implemented: bool = True) -> dict:
+def legacy(
+    runner_id: str, title: str, executor: str, *, implemented: bool = True
+) -> dict[str, Any]:
     return {
         "engine": "legacy",
         "runtime_profile": runner_id,
@@ -92,14 +94,14 @@ def legacy(runner_id: str, title: str, executor: str, *, implemented: bool = Tru
     }
 
 
-def module(profile: str, **extra: str) -> dict:
+def module(profile: str, **extra: str) -> dict[str, Any]:
     return {"engine": "module", "runtime_profile": profile, **extra}
 
 
 RUN_RESULTS = "The Result panel under your code"
 READY = "Ready to run in your local classroom."
 SAVE_ONLY_DETAIL = "Source can be saved here; this execution adapter is not implemented."
-CASES: list[tuple[str, dict, dict, dict]] = [
+CASES: list[tuple[str, dict[str, Any], dict[str, Any], dict[str, Any]]] = [
     (
         "legacy-python-ready",
         legacy("python", "Python", "python"),
@@ -279,7 +281,9 @@ CASES: list[tuple[str, dict, dict, dict]] = [
 @pytest.mark.parametrize(
     ("lesson", "cap", "expected"), [c[1:] for c in CASES], ids=[c[0] for c in CASES]
 )
-def test_every_mode_has_exact_copy(lesson: dict, cap: dict, expected: dict) -> None:
+def test_every_mode_has_exact_copy(
+    lesson: dict[str, Any], cap: dict[str, Any], expected: dict[str, Any]
+) -> None:
     mode = evaluate_mode(lesson, cap)
     assert {key: mode[key] for key in expected} == expected
 

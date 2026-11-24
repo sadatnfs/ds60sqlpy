@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from functools import cache
 from pathlib import Path
+from typing import Any
 
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.modules import ModuleCatalog
@@ -186,7 +187,7 @@ def test_templated_word_counts_need_three_lessons() -> None:
 
 
 def test_track_gap_lines_filter_by_track_and_code() -> None:
-    rows = [
+    rows: list[dict[str, Any]] = [
         {
             "id": "t-1",
             "track": "t",
