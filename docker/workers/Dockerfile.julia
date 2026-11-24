@@ -3,7 +3,7 @@ FROM ${DS60_PYTHON_IMAGE} AS toolchain
 # Apply Debian security updates newer than the pinned base image.
 # This image installs no Python packages, so pip is removed rather than upgraded.
 # hadolint ignore=DL3005
-RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends ca-certificates git libgomp1 libstdc++6 \
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends ca-certificates libgomp1 libstdc++6 \
     && rm -rf /var/lib/apt/lists/* \
     && python -m pip uninstall --yes pip
 ARG TARGETARCH
@@ -12,7 +12,10 @@ COPY docker/workers/native/install_native.py /tmp/install_native.py
 RUN TARGETARCH=${TARGETARCH} python /tmp/install_native.py julia && ln -s /opt/julia/bin/julia /usr/local/bin/julia
 ENV JULIA_DEPOT_PATH=/opt/julia-depot JULIA_CPU_TARGET=generic JULIA_NUM_PRECOMPILE_TASKS=2 JULIA_NUM_THREADS=2
 COPY docker/workers/julia/ /opt/julia-env/
+# Package docs and test manifests pin old JLL builds that are never loaded; drop them with Julia's own test tree.
 RUN julia --startup-file=no --project=/opt/julia-env -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()' \
+    && rm -rf /opt/julia/share/julia/test \
+    && find /opt/julia /opt/julia-depot -type f -name 'Manifest*.toml' \( -path '*/docs/*' -o -path '*/test/*' \) -delete \
     && chmod -R a+rX /opt/julia-env /opt/julia-depot /opt/julia
 FROM toolchain
 WORKDIR /opt/worker

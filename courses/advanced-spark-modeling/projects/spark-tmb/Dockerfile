@@ -19,7 +19,10 @@ RUN python -c 'import ctypes,ssl,sys; assert sys.version_info[:2] == (3,12); cty
     && java -version && Rscript --vanilla -e 'stopifnot(as.character(getRversion()) == "4.6.1", as.character(packageVersion("TMB")) == "1.9.25")'
 COPY courses/advanced-spark-modeling/projects/spark-tmb/bootstrap.lock /tmp/bootstrap.lock
 COPY courses/advanced-spark-modeling/projects/spark-tmb/requirements.lock /tmp/requirements.lock
-RUN python -m pip install --no-cache-dir --require-hashes --only-binary=:all: -r /tmp/bootstrap.lock \
+# The Spark Python layer ships without pip. A temporary bundled pip installs the
+# hashed locks and the local wheel below, then is removed.
+RUN python -m ensurepip --default-pip \
+    && python -m pip install --no-cache-dir --require-hashes --only-binary=:all: -r /tmp/bootstrap.lock \
     && RPY2_CFFI_MODE=ABI python -m pip install --no-cache-dir --require-hashes --no-build-isolation -r /tmp/requirements.lock \
     && python -m pip check
 # Install only the reusable pure core wheel; this R reference does not need Torch.
@@ -29,6 +32,7 @@ RUN cp -a /opt/ds60-package-source /tmp/likelihood-build \
        --wheel-dir /opt/ds60-wheels /tmp/likelihood-build \
     && python -m pip install --no-index --no-deps --force-reinstall /opt/ds60-wheels/*.whl \
     && python -I -c 'import pathlib,sys,ds60_spark_likelihood as package; assert "site-packages" in pathlib.Path(package.__file__).parts; assert not any(name == "ds60sqlpy" or name.startswith("ds60sqlpy.") for name in sys.modules); assert "torch" not in sys.modules' \
+    && python -m pip uninstall --yes pip \
     && rm -rf /tmp/likelihood-build
 COPY courses/tmb-modeling/projects/tmb-local/ /opt/tmb-project/
 WORKDIR /opt/tmb-project

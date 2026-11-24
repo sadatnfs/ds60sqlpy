@@ -25,7 +25,8 @@ public class Main {
     // Expected: checksum 10010000; elapsed nanoseconds nonnegative.
 
     // Exercise 4: Record and read an actual JFR event
-    // Create a bounded recording with one Calculation event containing input 100 and output 5050.
+    // Create a bounded recording with one Calculation event containing input 100 and output
+    // 5050.
     // Expected: one matching event with the declared fields.
 
     // Exercise 5: Collect a small timing distribution

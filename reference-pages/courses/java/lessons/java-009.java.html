@@ -204,7 +204,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">    <span class="syntax-comment">// sees; then run it and restore the original line.</span></span>
 <span class="source-line">    <span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` from the assertion on</span></span>
 <span class="source-line">    <span class="syntax-comment">// `events.equals(List.of(&quot;body&quot;, &quot;closeA&quot;))`. Restoring the original line brings back the</span></span>
-<span class="source-line">    <span class="syntax-comment">// worked observation: events body, close A.</span></span>
+<span class="source-line">    <span class="syntax-comment">// worked observation: events `body` then `closeA`.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 2: Close in reverse order: debug a regression</span></span>
 <span class="source-line">    <span class="syntax-comment">// A regression changed one token in the code that Example B adds after Example A, so one</span></span>
@@ -214,19 +214,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">    <span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` from the assertion on</span></span>
 <span class="source-line">    <span class="syntax-comment">// `events.equals(List.of(&quot;body&quot;, &quot;closeB&quot;, &quot;closeA&quot;))`; after it the line reads `try (Probe</span></span>
 <span class="source-line">    <span class="syntax-comment">// a = new Probe(&quot;A&quot;, events, false); Probe b = new Probe(&quot;B&quot;, events, false)) {` again and</span></span>
-<span class="source-line">    <span class="syntax-comment">// closeB before closeA.</span></span>
+<span class="source-line">    <span class="syntax-comment">// `closeB` is recorded before `closeA`.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 3: Close after body failure</span></span>
 <span class="source-line">    <span class="syntax-comment">// Throw IllegalStateException in the body and inspect events after catching it.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: close A still recorded.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: `closeA` is still recorded.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 4: Preserve suppressed close failure</span></span>
 <span class="source-line">    <span class="syntax-comment">// Make the body throw and the resource close throw too.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: primary message body; one suppressed exception closeA.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: primary message `body`; one suppressed exception `closeA`.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 5: Observe close-only failure</span></span>
 <span class="source-line">    <span class="syntax-comment">// Let the body succeed but close throw IOException.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: IOException closeA is primary.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: IOException `closeA` is primary.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 6: Retain a translated cause</span></span>
 <span class="source-line">    <span class="syntax-comment">// Wrap an IOException in IllegalStateException with a domain message and inspect cause.</span></span>

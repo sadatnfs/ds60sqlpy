@@ -26,7 +26,7 @@ DS60 Classroom is a local, desktop-first browser classroom for learning programm
 
 ## Languages
 
-- Python 3.11–3.12 - classroom application, CLI, content tooling, and tests; package compatibility is `>=3.11,<3.13` in `pyproject.toml`.
+- Python 3.11 to 3.12 - classroom application, CLI, content tooling, and tests; package compatibility is `>=3.11,<3.13` in `pyproject.toml`.
 - HTML, CSS, and JavaScript - static browser classroom in `src/ds60sqlpy/assets/`.
 - Multiple isolated teaching runtimes - Python, C/C++, C#, Go, Java/Scala, JavaScript/TypeScript, PHP, R, Rust, Swift, Julia, SQL, and specialist data/ML workers; each is separately cataloged in `docker/classroom-images.tsv` and built from `docker/workers/`.
 

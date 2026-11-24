@@ -4,9 +4,12 @@ ARG TARGETARCH
 USER root
 COPY install.py /tmp/install-cassandra.py
 COPY requirements.amd64.lock requirements.arm64.lock /tmp/cassandra-locks/
+# The scala-jvm base ships without pip; a temporary bundled pip is removed after use.
 RUN python3 /tmp/install-cassandra.py \
+    && python3 -m ensurepip --default-pip \
     && python3 -m pip install --no-cache-dir --only-binary=:all: --require-hashes \
         -r /tmp/cassandra-locks/requirements.${TARGETARCH}.lock \
+    && python3 -m pip uninstall --yes pip \
     && rm -rf /tmp/install-cassandra.py /tmp/cassandra-locks
 RUN apt-get update && apt-get install -y --no-install-recommends procps \
     && rm -rf /var/lib/apt/lists/*

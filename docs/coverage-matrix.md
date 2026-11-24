@@ -18,7 +18,7 @@ file drifts from the catalogs or a cataloged lesson is missing.
 - Execution: 1478 runnable, 348 reading, 12 operations
 - Module variants folded into canonical rows: 236 across 173 lessons
 - Lessons with no recorded gap: 1838
-- Templated prose words: 835278
+- Templated prose words: 835161
 
 ## Gap codes
 
@@ -62,7 +62,7 @@ lessons are complete worked chapters and carry no exercise contract.
 | module | Deep learning with TensorFlow and Keras (`deep-learning-tensorflow`) | 36 | 36 | 0 | 35 | 1 | 0 | 3 | 1912 | 17628 | 36 |
 | module | Docker: images, applications and operating containers (`docker`) | 42 | 42 | 0 | 0 | 42 | 0 | 0 | 1246 | 15734 | 42 |
 | module | Go: practical programs, concurrency and Kubernetes controllers (`go`) | 48 | 48 | 0 | 48 | 0 | 0 | 0 | 2209 | 61712 | 48 |
-| module | Java: from the first compile to reliable applications (`java`) | 36 | 36 | 0 | 36 | 0 | 0 | 0 | 2270 | 54232 | 36 |
+| module | Java: from the first compile to reliable applications (`java`) | 36 | 36 | 0 | 36 | 0 | 0 | 0 | 2271 | 54115 | 36 |
 | module | JavaScript and TypeScript: language, browser and Node applications (`javascript-typescript`) | 66 | 66 | 0 | 63 | 3 | 0 | 0 | 2122 | 69429 | 66 |
 | module | JAX: numerical functions to independent scientific work (`jax`) | 34 | 34 | 0 | 31 | 3 | 0 | 0 | 1552 | 5332 | 34 |
 | module | Julia language and scientific computing (`julia`) | 32 | 32 | 0 | 32 | 0 | 0 | 0 | 1121 | 4663 | 32 |

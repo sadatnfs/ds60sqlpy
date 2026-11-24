@@ -2,7 +2,12 @@ ARG BASE_IMAGE=ds60sqlpy-worker-llm-torch-cpu:1.4.3
 FROM ${BASE_IMAGE}
 USER root
 COPY requirements.lock /tmp/inference-requirements.lock
-RUN python -m pip install --no-cache-dir --require-hashes --only-binary=:all: -r /tmp/inference-requirements.lock
+# The classroom base ships without pip. A temporary bundled pip installs the
+# hashed lock and is removed, so the service image carries no installer.
+RUN python -m ensurepip --default-pip \
+    && python -m pip install --no-cache-dir --require-hashes --only-binary=:all: -r /tmp/inference-requirements.lock \
+    && python -m pip uninstall --yes pip \
+    && rm /tmp/inference-requirements.lock
 WORKDIR /opt/inference
 COPY serving_*.py server.py prepare.py check_model.py corpus.txt index.html app.js style.css ./
 ENV PYTHONDONTWRITEBYTECODE=1 HOME=/tmp CUDA_VISIBLE_DEVICES=""

@@ -168,7 +168,7 @@
       ],
       "outcome": "Manage resources with try-with-resources and read close order, suppressed exceptions and translated causes.",
       "lab": "Throw IllegalStateException in the body and inspect events after catching it.",
-      "verification": "close A still recorded."
+      "verification": "`closeA` is still recorded."
     },
     {
       "id": "java-010",

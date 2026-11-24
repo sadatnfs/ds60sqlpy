@@ -577,7 +577,7 @@ add(
         ex(
             "Close on normal completion",
             "Open a Probe resource, record body, then inspect closure order.",
-            "events body, close A.",
+            "events `body` then `closeA`.",
             """List<String> events = new ArrayList<>();
 try (Probe resource = new Probe("A", events, false)) { events.add("body"); }
 assert events.equals(List.of("body", "closeA"));""",
@@ -585,8 +585,8 @@ assert events.equals(List.of("body", "closeA"));""",
         ),
         ex(
             "Close in reverse order",
-            "Declare resourcesA then B and leave the block.",
-            "closeB before closeA.",
+            "Declare resources A then B and leave the block.",
+            "`closeB` is recorded before `closeA`.",
             """events.clear();
 try (Probe a = new Probe("A", events, false); Probe b = new Probe("B", events, false)) { events.add("body"); }
 assert events.equals(List.of("body", "closeB", "closeA"));""",
@@ -595,7 +595,7 @@ assert events.equals(List.of("body", "closeB", "closeA"));""",
         ex(
             "Close after body failure",
             "Throw IllegalStateException in the body and inspect events after catching it.",
-            "close A still recorded.",
+            "`closeA` is still recorded.",
             """events.clear(); boolean bodyFailed = false;
 try (Probe a = new Probe("A", events, false)) { throw new IllegalStateException("body"); }
 catch (IllegalStateException expected) { bodyFailed = true; }
@@ -605,7 +605,7 @@ assert bodyFailed && events.equals(List.of("closeA"));""",
         ex(
             "Preserve suppressed close failure",
             "Make the body throw and the resource close throw too.",
-            "primary message body; one suppressed exception close A.",
+            "primary message `body`; one suppressed exception `closeA`.",
             """events.clear();
 try (Probe a = new Probe("A", events, true)) { throw new IllegalStateException("body"); }
 catch (IllegalStateException expected) {
@@ -618,7 +618,7 @@ catch (IllegalStateException expected) {
         ex(
             "Observe close-only failure",
             "Let the body succeed but close throw IOException.",
-            "IOException close A is primary.",
+            "IOException `closeA` is primary.",
             """boolean closeFailed = false;
 try (Probe a = new Probe("A", events, true)) { }
 catch (java.io.IOException expected) { closeFailed = expected.getMessage().equals("closeA"); }

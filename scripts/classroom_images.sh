@@ -224,6 +224,8 @@ database_published_for() {
   ((10#$major != since_major ? 10#$major > since_major : (10#$minor != since_minor ? 10#$minor > since_minor : 10#$patch >= since_patch)))
 }
 
+# database_from_hub is read by classroom.sh after it sources this file.
+# shellcheck disable=SC2034
 export_image_selection() {
   local profile _service local_name suffix variable _kind profile_tag app_tag
   local source_root="${repo_dir:?The launcher must resolve its source directory}"

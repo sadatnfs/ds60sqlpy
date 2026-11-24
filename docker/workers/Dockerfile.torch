@@ -16,9 +16,9 @@ RUN python -m pip install ${DS60_PYTHON_INDEX_URL:+--index-url "$DS60_PYTHON_IND
 # package comes from PyPI, or from an optional anonymous mirror, because the
 # PyTorch index does not carry the patched versions; hashes are still required.
 RUN python -m pip install --no-cache-dir --require-hashes --only-binary=:all: \
-      --index-url "${DS60_PYTHON_INDEX_URL:-https://pypi.org/simple}" \
-      --find-links https://download.pytorch.org/whl/cpu/torch/ \
-      -r /tmp/requirements.txt \
+    --index-url "${DS60_PYTHON_INDEX_URL:-https://pypi.org/simple}" \
+    --find-links https://download.pytorch.org/whl/cpu/torch/ \
+    -r /tmp/requirements.txt \
     && python -m pip uninstall --yes pip
 COPY src/ds60sqlpy/__init__.py src/ds60sqlpy/http_server.py src/ds60sqlpy/module_worker.py src/ds60sqlpy/worker_operations.py src/ds60sqlpy/plot_artifacts.py src/ds60sqlpy/plot_capture.py src/ds60sqlpy/worker_figures.py /opt/worker/src/ds60sqlpy/
 COPY courses/llm-theory/fixtures/ /opt/worker/courses/llm-theory/fixtures/

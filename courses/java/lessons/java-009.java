@@ -9,7 +9,7 @@ public class Main {
     // sees; then run it and restore the original line.
     // Expected: The changed run fails with an `AssertionError` from the assertion on
     // `events.equals(List.of("body", "closeA"))`. Restoring the original line brings back the
-    // worked observation: events body, close A.
+    // worked observation: events `body` then `closeA`.
 
     // Exercise 2: Close in reverse order: debug a regression
     // A regression changed one token in the code that Example B adds after Example A, so one
@@ -19,19 +19,19 @@ public class Main {
     // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
     // `events.equals(List.of("body", "closeB", "closeA"))`; after it the line reads `try (Probe
     // a = new Probe("A", events, false); Probe b = new Probe("B", events, false)) {` again and
-    // closeB before closeA.
+    // `closeB` is recorded before `closeA`.
 
     // Exercise 3: Close after body failure
     // Throw IllegalStateException in the body and inspect events after catching it.
-    // Expected: close A still recorded.
+    // Expected: `closeA` is still recorded.
 
     // Exercise 4: Preserve suppressed close failure
     // Make the body throw and the resource close throw too.
-    // Expected: primary message body; one suppressed exception closeA.
+    // Expected: primary message `body`; one suppressed exception `closeA`.
 
     // Exercise 5: Observe close-only failure
     // Let the body succeed but close throw IOException.
-    // Expected: IOException closeA is primary.
+    // Expected: IOException `closeA` is primary.
 
     // Exercise 6: Retain a translated cause
     // Wrap an IOException in IllegalStateException with a domain message and inspect cause.

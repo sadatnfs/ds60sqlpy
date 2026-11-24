@@ -32,7 +32,7 @@ try (Probe resource = new Probe("A", events, false)) {
 assert events.equals(List.of("body", "closeA"));
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `events.equals(List.of("body", "closeA"))`. Restoring the original line brings back the worked observation: events body, close A.
+**Expected:** The changed run fails with an `AssertionError` from the assertion on `events.equals(List.of("body", "closeA"))`. Restoring the original line brings back the worked observation: events `body` then `closeA`.
 
 **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `events.equals(List.of("body", "closeA"))` false. After restoring the line, the program completes without an `AssertionError` again.
 
@@ -52,7 +52,7 @@ try (Probe a = new Probe("A", events, false); Probe b = new Probe("B", events, f
 assert events.equals(List.of("body", "closeB", "closeA"));
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `events.equals(List.of("body", "closeB", "closeA"))`; after it the line reads `try (Probe a = new Probe("A", events, false); Probe b = new Probe("B", events, false)) {` again and closeB before closeA.
+**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `events.equals(List.of("body", "closeB", "closeA"))`; after it the line reads `try (Probe a = new Probe("A", events, false); Probe b = new Probe("B", events, false)) {` again and `closeB` is recorded before `closeA`.
 
 **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `events.equals(List.of("body", "closeB", "closeA"))` for this input.
 
@@ -73,7 +73,7 @@ try (Probe a = new Probe("A", events, false)) {
 assert bodyFailed && events.equals(List.of("closeA"));
 ```
 
-**Expected:** close A still recorded.
+**Expected:** `closeA` is still recorded.
 
 **Verify:** Keep an assertion equivalent to `bodyFailed && events.equals(List.of("closeA"))`. As a control, change `bodyFailed = true;` to `bodyFailed = false;`: the run must fail with an `AssertionError` from the assertion on `bodyFailed && events.equals(List.of("closeA"))`. Restore the line before continuing.
 
@@ -94,7 +94,7 @@ try (Probe a = new Probe("A", events, true)) {
 }
 ```
 
-**Expected:** primary message body; one suppressed exception close A.
+**Expected:** primary message `body`; one suppressed exception `closeA`.
 
 **Verify:** Keep an assertion equivalent to `expected.getSuppressed()[0].getMessage().equals("closeA")`. As a control, change `try (Probe a = new Probe("A", events, true)) {` to `try (Probe a = new Probe("A!", events, true)) {`: the run must fail with an `AssertionError` from the assertion on `expected.getSuppressed()[0].getMessage().equals("closeA")`. Restore the line before continuing.
 
@@ -112,7 +112,7 @@ try (Probe a = new Probe("A", events, true)) {} catch (java.io.IOException expec
 assert closeFailed;
 ```
 
-**Expected:** IOException close A is primary.
+**Expected:** IOException `closeA` is primary.
 
 **Verify:** Keep an assertion equivalent to `closeFailed`. As a control, change `try (Probe a = new Probe("A", events, true)) {} catch (java.io.IOException expected) {` to `try (Probe a = new Probe("A", events, false)) {} catch (java.io.IOException expected) {`: the run must fail with an `AssertionError` from the assertion on `closeFailed`. Restore the line before continuing.
 
