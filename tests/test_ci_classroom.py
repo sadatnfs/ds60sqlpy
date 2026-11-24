@@ -305,6 +305,7 @@ def test_python_web_requires_real_services_browser_and_retained_state(
     assert len(checks) == 1
     command = checks[0]
     assert command[command.index("--image") + 1] == "ds60sqlpy-worker-python-web:1.0.0"
+    assert command[command.index("--postgres-image") + 1] == "ds60sqlpy-postgres:1.0.0"
     assert command[command.index("--browser-python") + 1] == str(
         tmp_path / "work/browser-env/bin/python"
     )

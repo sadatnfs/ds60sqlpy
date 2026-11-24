@@ -404,6 +404,9 @@ class ClassroomCI:
                         "work/python-web-ci-workspace",
                         "--image",
                         "ds60sqlpy-worker-python-web:" + self.version,
+                        # The classroom start already built this hardened PostgreSQL 17 image.
+                        "--postgres-image",
+                        "ds60sqlpy-postgres:" + self.version,
                         "--browser-python",
                         browser,
                         "--report",
