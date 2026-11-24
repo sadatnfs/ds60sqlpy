@@ -18,7 +18,7 @@ PyTorch inference_mode disables more autograd bookkeeping than no_grad and creat
 
 ## Reading the implementation
 
-The predict helper requires a CPU float32 tensor shaped(batch, 2), with batch size 1..4 and finite entries. It calls model.eval and uses inference_mode, then returns an owned clone suitable for caller inspection. The coefficient vector [2, -1] supplies an independent output oracle. Treat shape, dtype, device and value validation as different diagnostics rather than silently coercing every input.
+The predict helper requires a CPU float32 tensor shaped (batch, 2), with batch size 1..4 and finite entries. It calls model.eval and uses inference_mode, then returns an owned clone suitable for caller inspection. The coefficient vector [2, -1] supplies an independent output oracle. Treat shape, dtype, device and value validation as different diagnostics rather than silently coercing every input.
 
 ## Trace validation, mode, storage and batching as separate boundaries
 

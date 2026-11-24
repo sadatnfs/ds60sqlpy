@@ -94,7 +94,7 @@ def final_rows(spark, root):
     ]
 ```
 
-The three-count,35-total output is direct evidence that the out-of-order event was accepted while its window state was retained. The actual watermark then explains append finalization. A two-count,30-total result would reveal a wrong sequencing orlate-data interpretation even if both runs completed successfully.
+The three-count, 35-total output is direct evidence that the out-of-order event was accepted while its window state was retained. The actual watermark then explains append finalization. A two-count, 30-total result would reveal a wrong sequencing or late-data interpretation even if both runs completed successfully.
 
 **Verification evidence:** Assert the exact first-window tuple and the observed progress boundary.
 
@@ -147,7 +147,7 @@ def event_ledger(phases, output):
     )
 ```
 
-The reconciliation separates consumed input, discarded late state updates and finalized business output. The administrative event is neither lost norpart of the five business records; its own window has not crossed the finalization threshold. This prevents a finite test from mislabeling pending state as missing output or claiming every source record must immediately appear in append mode.
+The reconciliation separates consumed input, discarded late state updates and finalized business output. The administrative event is neither lost nor part of the five business records; its own window has not crossed the finalization threshold. This prevents a finite test from mislabeling pending state as missing output or claiming every source record must immediately appear in append mode.
 
 **Verification evidence:** Assert all final tuples, input/drop reconciliation and actual watermark at least 00:25.
 

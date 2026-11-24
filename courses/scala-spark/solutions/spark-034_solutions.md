@@ -49,13 +49,13 @@ def inputs(spark, root):
 
 The schemas and watermarks define the stateful interpretation before any query starts. The minimum policy preserves the slower side progress as a constraint on combined eviction. A single fast source therefore cannot be assumed to finalize every unmatched record, and construction alone supplies no processed-row evidence.
 
-**Verification evidence:** Assert both streaming flags, the declared timestamp fields and policymin before execution.
+**Verification evidence:** Assert both streaming flags, the declared timestamp fields and policy min before execution.
 
 ### Exercise 2: Express key equality and the exact time range
 
-Build either an inner orleft_outer join using key equality, click_time>=impression_time and click_time<impression_time+10 minutes. Project impression_id, click_id and both timestamps.
+Build either an inner or left_outer join using key equality, click_time>=impression_time and click_time<impression_time+10 minutes. Project impression_id, click_id and both timestamps.
 
-**Expected:** A streaming relation with the four declared columns. The condition can matchi 1/c1 and i3/c2 but not boundaryclickc 3.
+**Expected:** A streaming relation with the four declared columns. The condition can match i1/c1 and i3/c2 but not boundary click c3.
 
 ```scala
 def boundedJoin(impressions: DataFrame, clicks: DataFrame, kind: String): DataFrame = {
@@ -172,9 +172,9 @@ def pairs(spark, root, kind):
     ]
 ```
 
-The exact identities expose both the key condition and the half-open temporal edge. The outer sink does not yet includei 2 because future eligible B clicks are still possible under the policy. Returning from AvailableNow means the currently available files were processed, not that the business interval has become final by wall-clock passage.
+The exact identities expose both the key condition and the half-open temporal edge. The outer sink does not yet include i2 because future eligible B clicks are still possible under the policy. Returning from AvailableNow means the currently available files were processed, not that the business interval has become final by wall-clock passage.
 
-**Verification evidence:** Assert exact pair lists and absence of prematurei 2/NULL; do not rely only on output count 2.
+**Verification evidence:** Assert exact pair lists and absence of premature i2/NULL; do not rely only on output count 2.
 
 ### Exercise 5: Advance both sides and observe delayed outer finalization
 
@@ -210,7 +210,7 @@ def progress_evidence(progress):
     )
 ```
 
-The two-sided advancers move the conservative progress boundary far enough to close old eligibility intervals. The output and state-removal receipt together establish why the unmatched NULL row appears now. The administrative impression isnewer and remains pending, so the test does not equate finite source exhaustion with finalization of every left record.
+The two-sided advancers move the conservative progress boundary far enough to close old eligibility intervals. The output and state-removal receipt together establish why the unmatched NULL row appears now. The administrative impression is newer and remains pending, so the test does not equate finite source exhaustion with finalization of every left record.
 
 **Verification evidence:** Assert the complete outer ledger, input 2 for each new run, observed progress boundary and removed-state count.
 

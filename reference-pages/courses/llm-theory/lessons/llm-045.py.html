@@ -209,14 +209,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Calculate a SwiGLU gate derivative</span></span>
 <span class="source-line"><span class="syntax-comment"># Use scalar g=0, u=2 and output SiLU(g)*u.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: output0; gradient with respect to g is 1; with respect to u is 0.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: output 0; gradient with respect to g is 1; with respect to u is 0.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Check the RMSNorm Jacobian formula</span></span>
 <span class="source-line"><span class="syntax-comment"># Compare autograd with J=I/r-xxT/(d*r³) at x = [1, 2, 3].</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: matrices agree within 1e-10.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Match feed-forward parameter budgets</span></span>
-<span class="source-line"><span class="syntax-comment"># Compare plain FFN model width d=4, hidden6 with SwiGLU hidden width 4, excluding biases;</span></span>
+<span class="source-line"><span class="syntax-comment"># Compare plain FFN model width d=4, hidden 6 with SwiGLU hidden width 4, excluding biases;</span></span>
 <span class="source-line"><span class="syntax-comment"># execute a gated block with input and output width 4.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: both 48 weight entries; output shape(2, 4).</span></span>
 <span class="source-line"></span>

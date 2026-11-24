@@ -2,8 +2,8 @@
 // D3 7.9.0 is supplied as global d3. Render only inside #chart.
 // Answer-free learner artifact. Save your own copy before editing.
 
-// Exercise 1: Predict selected IDs for groupA.
-// Expected: Only records whose group isA remain.
+// Exercise 1: Predict selected IDs for group A.
+// Expected: Only records whose group is A remain.
 
 // Exercise 2: Reset the dashboard to all groups.
 // Expected: Every view returns to the same initial analytical universe.

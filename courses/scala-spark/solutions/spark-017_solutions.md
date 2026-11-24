@@ -225,7 +225,7 @@ def array_relationships(spark):
 
 The six-row relation models every independent pairing, while the three-row relation models aligned positions. Padding preserves the third channel without inventing a SKU. Zipping is not a generic cure for explosion and multiplying arrays is not automatically a bug. The data contract must state whether positions correspond before either implementation can be called correct.
 
-**Verification evidence:** Assert the complete Cartesian pair set and all three ordered zipped rows including the paddedNULL.
+**Verification evidence:** Assert the complete Cartesian pair set and all three ordered zipped rows including the padded NULL.
 
 ## Execution and interpretation
 

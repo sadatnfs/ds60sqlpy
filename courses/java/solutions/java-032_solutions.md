@@ -73,7 +73,7 @@ assert checksum == 10_010_000L && elapsed >= 0;
 
 ## Exercise 4: Record and read an actual JFR event
 
-Task: Create a bounded recording withoneCalculation event containing input 100 and output 5050.
+Task: Create a bounded recording with one Calculation event containing input 100 and output 5050.
 
 This verifies real recording and readback of an owned event. It does not infer CPU hotspots or allocation rates from a custom marker alone.
 

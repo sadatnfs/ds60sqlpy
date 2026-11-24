@@ -290,7 +290,7 @@ Configured lowerBound=0, upperBound=10, numPartitions=2</code></pre>
 <p><strong>Progressive hint:</strong> Do not depend on one regex matching every possible secret-bearing string.</p>
 <h4 id="exercise-6-write-a-future-acceptance-and-failure-contract">Exercise 6: Write a future acceptance and failure contract<a class="heading-anchor" href="#exercise-6-write-a-future-acceptance-and-failure-contract" aria-label="Link to this section">#</a></h4>
 <p>Specify the evidence required before enabling a JDBC profile, including missing-driver, mapping, timeout, cancellation and least-privilege checks.</p>
-<p><strong>Inputs/evidence:</strong> Current profile bundles no qualified JDBC driver/remote database; synthetic export and schema mapping only. Optional enrichment IDssql-quality-01 and sql-test-01.</p>
+<p><strong>Inputs/evidence:</strong> Current profile bundles no qualified JDBC driver/remote database; synthetic export and schema mapping only. Optional enrichment IDs sql-quality-01 and sql-test-01.</p>
 <p><strong>Expected result/shape:</strong> A reviewable acceptance matrix with unavailable runtime rows, not a fabricated successful connection.</p>
 <p><strong>Verify:</strong> List positive and negative cases, exact version tuple, source identity, output oracle, connection closure and no-write privileges.</p>
 <p><strong>Progressive hint:</strong> A proposed option map is not a connector implementation.</p>

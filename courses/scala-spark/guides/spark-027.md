@@ -32,7 +32,7 @@ The [Scala learner](../lessons/spark-027.scala) and [PySpark learner](../lessons
 
 - **Bag-aware oracle:** A comparison preserving duplicate occurrence counts and NULL values rather than reducing a relation to a set.
 
-The input deliberately contains repeated records. Entity 1/segmenta/amount 10 appears twice, and entity 4/segmentb/amount 20 appears twice. They are separate occurrences in this lesson, not accidental duplicates to remove. One amount is unknown, one is zero, one segment is unknown, and one amount is negative. The transformation keeps nonnegative or unknown amounts and doubles known amounts. Its golden result has seven rows and known doubled total 130.
+The input deliberately contains repeated records. Entity 1/segment a/amount 10 appears twice, and entity 4/segment b/amount 20 appears twice. They are separate occurrences in this lesson, not accidental duplicates to remove. One amount is unknown, one is zero, one segment is unknown, and one amount is negative. The transformation keeps nonnegative or unknown amounts and doubles known amounts. Its golden result has seven rows and known doubled total 130.
 
 Persistence is useful when several actions reuse expensive work and recomputation costs outweigh storage and management overhead. It is not automatically beneficial for every relation. The eight-row source makes no meaningful speed benchmark, but it supports exact observations of cache registration, materialization, reuse and cleanup. The reference runs two consumers and records a cache scan while keeping the logical result fixed.
 

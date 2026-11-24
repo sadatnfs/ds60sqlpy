@@ -20,11 +20,11 @@ end
 
 worked_a()
 
-# Task 1: Compare rates0/5 and0/0 under the helper policy.
+# Task 1: Compare rates 0/5 and 0/0 under the helper policy.
 # Task 2: Use an integer directly as an if condition.
 # Task 3: Guard the first element of a possibly empty array.
 # Task 4: Use isequal for two NaN values.
-# Task 5: Compare0.0 and-0.0 using both equality functions.
+# Task 5: Compare 0.0 and -0.0 using both equality functions.
 # Task 6: Evaluate a comparison involving missing.
 
 # Write your independent changes below.

@@ -21,7 +21,7 @@ public class Main {
     // new ArrayList<>(List.of("x"));` again and record retains its original single item.
 
     // Exercise 3: Use value equality
-    // Construct another Order with normalizedA and item x.
+    // Construct another Order with normalized A and item x.
     // Expected: equals true and equal hashCode.
 
     // Exercise 4: Reject blank identity

@@ -5,28 +5,28 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Align paired errors
-# Use systemA errors q1=0, q2=0, q3=1 andB q1=1, q2=1, q3=0.
-# Expected: differences[-1, -1, 1] by sortedID.
+# Use system A errors q1=0, q2=0, q3=1 and B q1=1, q2=1, q3=0.
+# Expected: differences [-1, -1, 1] by sorted ID.
 
 # Exercise 2: Aggregate by family
-# Assignq1, q2 tofamilyF andq3 toG; compare row mean with family mean.
-# Expected: row mean-1/3; family mean0.
+# Assign q1, q2 to family F and q3 to G; compare row mean with family mean.
+# Expected: row mean -1/3; family mean 0.
 
 # Exercise 3: Resample paired families
-# Draw2000 bootstrap samples of the two family differences withseed17.
-# Expected: all estimates are-1, 0 or1; repeatable with same seed.
+# Draw 2000 bootstrap samples of the two family differences with seed 17.
+# Expected: all estimates are -1, 0 or 1; repeatable with same seed.
 
 # Exercise 4: Report coverage and answered accuracy
-# For10 questions, answer6 with 5 correct and abstain on4.
-# Expected: coverage.6; answered accuracy5/6; overall correct answers5.
+# For 10 questions, answer 6 with 5 correct and abstain on 4.
+# Expected: coverage 0.6; answered accuracy 5/6; overall correct answers 5.
 
 # Exercise 5: Block a severe boundary failure
-# Combine a favorable mean comparison withone access leak and apply a zero-access-leak
+# Combine a favorable mean comparison with one access leak and apply a zero-access-leak
 # gate.
-# Expected: release decisionFalse.
+# Expected: release decision False.
 
 # Exercise 6: Keep final tests out of selection
-# Record retriever selection onvalidation and final scoring ontest; flag a test-based
+# Record retriever selection on validation and final scoring on test; flag a test-based
 # parameter change.
 # Expected: test-based selection rejected.
 

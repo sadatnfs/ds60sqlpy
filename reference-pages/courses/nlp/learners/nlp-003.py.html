@@ -203,15 +203,15 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>match<span class="syntax-operator">.</span>group<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> match<span class="syntax-operator">.</span>group<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">number</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> match<span class="syntax-operator">.</span>span<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Return exact strings, digit groups and source spans.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: INV-1042 at(4,12), INV-9012 at(26,34), each slice matching the raw text.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: INV-1042 at (4, 12), INV-9012 at (26, 34), each slice matching the raw text.</span></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Reject long, prefixed, underscore-prefixed and non-ASCII-digit cases.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: four negative fixtures rejected; parenthesized valid ID retained.</span></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Compare search, match and fullmatch for messages and ID-only fields.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: True,False,True,False for the guide&#x27;s four calls.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: True, False, True, False for the guide&#x27;s four calls.</span></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Accept ordinary ASCII prefix case and exclude all-zero numbers.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: inv-7777 canonicalized to INV-7777 at(10,18) in the third example.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: inv-7777 canonicalized to INV-7777 at (10, 18) in the third example.</span></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Calculate exact entity TP/FP/FN, retaining document identity.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected:2/1/1 and precision=recall=2/3; changing document identity breaks a match.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: 2/1/1 and precision=recall=2/3; changing document identity breaks a match.</span></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Explain why a matching mention cannot authorize an action.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: two contrasting messages and explicit missing semantic/authorization evidence.</span></span>
 <span class="source-line"><span class="syntax-comment"># Add your implementations, assertions and explanation below.</span></span>

@@ -1008,7 +1008,7 @@ assert step+1==40 and float(w[0,0])>0 and np.isfinite(w.numpy()).all()""",
         ex(
             "Account for every test row",
             "Threshold final test logits at 0 and compute all four confusion counts.",
-            "TP1, TN1, FP0, FN0; total 2.",
+            "TP 1, TN 1, FP 0, FN 0; total 2.",
             """pred=(vx@w.numpy()).ravel()>=0; truth=test_y.astype(bool)
 counts={'tp':int(np.sum(pred&truth)),'tn':int(np.sum(~pred&~truth)),'fp':int(np.sum(pred&~truth)),'fn':int(np.sum(~pred&truth))}
 assert counts=={'tp':1,'tn':1,'fp':0,'fn':0} and sum(counts.values())==2""",

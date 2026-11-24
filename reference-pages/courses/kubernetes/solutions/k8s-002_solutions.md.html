@@ -216,7 +216,7 @@ container C2 from I1: exited</code></pre>
 <p>The mapping is an explicit host arrangement. Writing containerPort 8080 into YAML alone does not establish it.</p>
 <pre class="highlighted-code"><code class="language-text">browser -&gt; 127.0.0.1:8765 on host
 forwarding rule -&gt; container app:8080
-process listens on8080</code></pre>
+process listens on 8080</code></pre>
 <p><strong>Expected:</strong> The browser uses 8765; the process listens on 8080.</p>
 <h3 id="exercises-and-explanatory-solutions">Exercises and explanatory solutions<a class="heading-anchor" href="#exercises-and-explanatory-solutions" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-count-images-and-containers">Exercise 1: Count images and containers<a class="heading-anchor" href="#exercise-1-count-images-and-containers" aria-label="Link to this section">#</a></h4>

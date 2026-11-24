@@ -671,7 +671,7 @@ The qualified reference preserves that distinction. It recomputes final training
 
 ## Follow the supervised signal through the decoder
 
-The two training rows contain prompt and answer symbols. After shifting, the model receives three input positions per row and predicts a16-way vocabulary distribution at each position. Only four target positions contribute to the answer objective. The shape ledger later in the chapter shows how a[2,3] token matrix becomes[2,3,32] hidden states, two attention heads and finally[2,3,16] logits.
+The two training rows contain prompt and answer symbols. After shifting, the model receives three input positions per row and predicts a16-way vocabulary distribution at each position. Only four target positions contribute to the answer objective. The shape ledger later in the chapter shows how a [2,3] token matrix becomes [2,3,32] hidden states, two attention heads and finally[2,3,16] logits.
 
 At an active target position, cross entropy encourages the target logit relative to the other vocabulary logits. Its derivative contains the predicted class probabilities minus the target indicator, scaled by the active-event denominator. This local derivative then flows through the output projection, feed-forward and attention paths into earlier parameters. The independent zero-logit probe isolates that first step without relying on the randomly initialized decoder's output.
 
@@ -853,7 +853,7 @@ A pair is also conditional on its context. An answer that is preferable under on
 
 For responses y_plus and y_minus to the same input x, define the policy log-probability difference as log pi_theta(y_plus given x) minus log pi_theta(y_minus given x). Define the analogous difference under a fixed reference policy. A DPO-style margin scales the policy-minus-reference advantage by beta, then applies a logistic loss that becomes smaller when that adjusted advantage increases.
 
-The worked scalar example isolates this arithmetic: at equal adjusted margins, loss is log2 and the derivative has a known sign and magnitude. It performs a real SGD step on that scalar. A full language model would obtain the two log probabilities from token-level predictions and backpropagate through its parameters. The scalar itself is not a complete normalized policy over possible responses.
+The worked scalar example isolates this arithmetic: at equal adjusted margins, loss is log(2) and the derivative has a known sign and magnitude. It performs a real SGD step on that scalar. A full language model would obtain the two log probabilities from token-level predictions and backpropagate through its parameters. The scalar itself is not a complete normalized policy over possible responses.
 
 The reference makes the comparison relative to an existing distribution. A response pair already strongly favored by the reference has a different adjusted margin from an equally scored pair, even if the policy's raw difference is the same. Changing the reference checkpoint therefore changes the training objective. It belongs in the experiment's identity alongside tokenizer, response masks and beta.
 
@@ -861,7 +861,7 @@ The reference makes the comparison relative to an existing distribution. A respo
 
 An illustrative probability example makes the distinction concrete. Suppose the reference assigns probabilities0.4 to the chosen response and0.3 to the rejected response, leaving0.3 for other responses. A candidate assigns0.3 and0.1, leaving0.6 elsewhere. The chosen response became less probable in absolute terms, but its advantage over the rejected response increased from4/3 to3.
 
-The adjusted log-ratio is log(3/(4/3))=log(9/4), about0.81093. At beta0.5, the margin is log(3/2), and the logistic loss is log(5/3), about0.51083, below log2. This is a hand calculation for valid illustrative distributions, not a measured model update. It shows why a preference-loss improvement should not be paraphrased as “every chosen answer became more likely” or as a task-accuracy improvement without examining the actual outputs.
+The adjusted log-ratio is log(3/(4/3))=log(9/4), about 0.81093. At beta 0.5, the margin is log(3/2), and the logistic loss is log(5/3), about 0.51083, below log(2). This is a hand calculation for valid illustrative distributions, not a measured model update. It shows why a preference-loss improvement should not be paraphrased as “every chosen answer became more likely” or as a task-accuracy improvement without examining the actual outputs.
 
 Sequence scoring adds another assumption. A joint response log probability is a sum of conditional token log probabilities under the chosen mask and stopping convention. Averaging by response length defines a different score. Prompt positions, end markers and truncation must be handled consistently for policy and reference. A convenient normalization should not be introduced silently while retaining the interpretation of a different objective.
 
@@ -897,7 +897,7 @@ The task may have several valid positive passages. One can state the rule direct
 
 For a query q, a common single-positive contrastive objective is the negative log of exp(score(q,d_plus)/tau) divided by the sum of those exponentials over the candidate documents. The denominator defines the alternatives the model must distinguish. The temperature tau changes the scale of score differences and the gradient, so it is part of the objective rather than a display parameter.
 
-With two identical scores, the positive probability is one-half and the loss is log2. With three identical scores and one designated positive, the loss is log3. A change in negative-set size can therefore change the initial loss scale even when the representation has not improved or worsened. Compare ranking and held-out relevance beside the optimization curve.
+With two identical scores, the positive probability is one-half and the loss is log(2). With three identical scores and one designated positive, the loss is log(3). A change in negative-set size can therefore change the initial loss scale even when the representation has not improved or worsened. Compare ranking and held-out relevance beside the optimization curve.
 
 A false negative can make the task contradictory. If the positive and negative are the same document under the same representation, their scores cannot be separated by changing a shared encoder. With only those two identical candidates and a single-positive target, the probability remains one-half. A multi-positive formulation or corrected labels may be appropriate, depending on the actual evidence relationship. More training cannot resolve a contradiction created by the dataset definition.
 

@@ -11,7 +11,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 
 # Exercise 2: Enforce expert capacity with residual fallback
 # Route four tokens to experts 0, 0, 1, 0 with capacity 2 and unit top-1 gates.
-# Expected: assigned counts 3, 1; accepted2, 1; last token drops its expert delta and keeps its input.
+# Expected: assigned counts 3, 1; accepted 2, 1; last token drops its expert delta and keeps its input.
 
 # Exercise 3: Compute a load-balancing term
 # Use hard fractions f = [0.75, 0.25], mean router probabilities P = [0.7, 0.3], expert

@@ -211,8 +211,8 @@ Before reading the code for *Preserve untrusted text as data*, predict its resul
    **Verify:** Save the assertion results for exercise 4, including the hash changes.
 
 5. **Keep evaluation examples isolated.** Place demonstration family A in prompt selection and final family B in assessment; inject a family B example and detect the intersection.
-   **Expected:** clean family intersection is empty; injected intersection containsB.
-   **Verify:** Save the assertion results for exercise 5, including clean family intersection is empty; injected intersection containsB.
+   **Expected:** clean family intersection is empty; injected intersection contains B.
+   **Verify:** Save the assertion results for exercise 5, including clean family intersection is empty; injected intersection contains B.
 
 6. **Reject an impossible budget.** Request a response reserve larger than the total context budget.
    **Expected:** ValueError before context selection.

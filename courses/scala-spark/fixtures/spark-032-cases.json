@@ -32,7 +32,7 @@
     },
     {
       "exercise": 5,
-      "title": "Advance event time and distinguish finalized frompending output",
+      "title": "Advance event time and distinguish finalized from pending output",
       "input_contract": "Publish the 00:30 administrative advancer, run phase 4 and return a ledger of total source inputs, observed drops and final business-window records.",
       "expected": "Seven total inputs, one observed drop, five finalized business records across three tuples:(00:00, A,3,35),(00:10, A,1,30),(00:10, B,1,7). The advancer window remains pending.",
       "verification": "Assert all final tuples, input/drop reconciliation and actual watermark at least 00:25."

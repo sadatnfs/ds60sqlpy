@@ -133,9 +133,9 @@ assert not prompt_families & test_families
 assert (prompt_families | {"B"}) & test_families == {"B"}
 ```
 
-**Expected:** clean family intersection is empty; injected intersection containsB.
+**Expected:** clean family intersection is empty; injected intersection contains B.
 
-**Verify:** Compare the computed values or written argument with clean family intersection is empty; injected intersection containsB.
+**Verify:** Compare the computed values or written argument with clean family intersection is empty; injected intersection contains B.
 
 ## Exercise 6: Reject an impossible budget
 

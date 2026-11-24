@@ -18,10 +18,10 @@ end
 
 worked_a()
 
-# Task 1: List values from1:3.
-# Task 2: Run the accumulator over1:0.
-# Task 3: Construct3,2,1 as a range.
-# Task 4: Enumerate values10 and20.
+# Task 1: List values from 1:3.
+# Task 2: Run the accumulator over 1:0.
+# Task 3: Construct 3, 2, 1 as a range.
+# Task 4: Enumerate values 10 and 20.
 # Task 5: Compute only the sum of selected squares.
 # Task 6: Move a reusable accumulation into a function with explicit input.
 

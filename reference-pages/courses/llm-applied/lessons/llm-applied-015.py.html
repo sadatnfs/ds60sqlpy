@@ -200,31 +200,31 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Build an explicit SFT batch</span></span>
-<span class="source-line"><span class="syntax-comment"># Use sequences[1, 2, 5, 3] and[1, 4, 6, 3], masking the first shifted target.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: inputs shape(2, 3); labels[[-100, 5, 3], [-100, 6, 3]]; 4 active targets.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use sequences [1, 2, 5, 3] and [1, 4, 6, 3], masking the first shifted target.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: inputs shape (2, 3); labels [[-100, 5, 3], [-100, 6, 3]]; 4 active targets.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Measure the initial state</span></span>
 <span class="source-line"><span class="syntax-comment"># Calculate initial training loss and a held-out prompt loss before any update; count</span></span>
 <span class="source-line"><span class="syntax-comment"># trainable parameters.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: both losses finite; all model parameters trainable; count below50000.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: both losses finite; all model parameters trainable; count below 50000.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Perform actual full fine-tuning</span></span>
-<span class="source-line"><span class="syntax-comment"># Run20 Adam updates atlearningrate.01, clearing gradients each time.</span></span>
+<span class="source-line"><span class="syntax-comment"># Run 20 Adam updates at learning rate 0.01, clearing gradients each time.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: 20 finite losses; training loss decreases; an embedding parameter changes.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Inspect the mask derivative</span></span>
-<span class="source-line"><span class="syntax-comment"># Differentiate cross entropy with respect to fresh zero logits under the samelabels.</span></span>
+<span class="source-line"><span class="syntax-comment"># Differentiate cross entropy with respect to fresh zero logits under the same labels.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: ignored prompt positions have zero gradient; answer positions do not.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Evaluate the frozen held-out prompt</span></span>
-<span class="source-line"><span class="syntax-comment"># After the declared20 updates, evaluate the held-out sequence without another optimizer</span></span>
+<span class="source-line"><span class="syntax-comment"># After the declared 20 updates, evaluate the held-out sequence without another optimizer</span></span>
 <span class="source-line"><span class="syntax-comment"># step.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: finite held-out loss and unchanged weights during evaluation; no promised improvement.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Write an honest adaptation receipt</span></span>
 <span class="source-line"><span class="syntax-comment"># Record update count, active training targets, train/heldout losses and the literal-token</span></span>
 <span class="source-line"><span class="syntax-comment"># limitation.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: receipt says20 updates, 4 active training targets and no natural-language competence claim.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: receipt says 20 updates, 4 active training targets and no natural-language competence claim.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

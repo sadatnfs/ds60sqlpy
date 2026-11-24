@@ -209,7 +209,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Keep parameter registration separate from trainability and optimizer membership. A registered Parameter can be frozen, and an optimizer can still hold an obsolete parameter object after a module is replaced. This early chapter establishes the state inventory; later transfer and checkpoint chapters examine how that inventory changes over time.</p>
 <h3 id="paired-tensorflow-comparison">Paired TensorFlow comparison<a class="heading-anchor" href="#paired-tensorflow-comparison" aria-label="Link to this section">#</a></h3>
 <p>Compare <a href="../../deep-learning-tensorflow/guides/tf-003.md.html">tf-003</a> after deriving the shared numerical contract.</p>
-<p>Keras Dense stores a kernel shaped(input_features, output_features), while PyTorch nn.Linear stores(output_features, input_features). Copying values without transposing changes or breaks the computation. Both expose tracked trainable state, but PyTorch distinguishes Parameter registration from an ordinary tensor attribute.</p>
+<p>Keras Dense stores a kernel shaped (input_features, output_features), while PyTorch nn.Linear stores(output_features, input_features). Copying values without transposing changes or breaks the computation. Both expose tracked trainable state, but PyTorch distinguishes Parameter registration from an ordinary tensor attribute.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p><strong>Affine map:</strong> A matrix transformation plus an additive bias.</p>
 <p><strong>Parameter registration:</strong> Tracking model state for optimization and serialization.</p>
@@ -320,7 +320,7 @@ torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">
 <p>API and mechanism reference: <a href="https://docs.pytorch.org/docs/2.9/index.html">PyTorch 2.9 reference</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See <a href="../../../docs/validation.md.html">validation</a> for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.</p>
 <h3 id="interview-reasoning-with-worked-answers">Interview reasoning with worked answers<a class="heading-anchor" href="#interview-reasoning-with-worked-answers" aria-label="Link to this section">#</a></h3>
 <p><strong>Why does Linear store a transposed-looking weight?</strong></p>
-<p>Its public contract defines weight as(out, in) and applies the transpose during the batched row-vector computation. The important check is the documented layout, not which notation feels more natural.</p>
+<p>Its public contract defines weight as (out, in) and applies the transpose during the batched row-vector computation. The important check is the documented layout, not which notation feels more natural.</p>
 <p><strong>Can a tensor have gradients but be absent from an optimizer?</strong></p>
 <p>Yes. Autograd tracking and module registration are separate. A plain requires_grad tensor can receive gradients while model.parameters omits it.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>

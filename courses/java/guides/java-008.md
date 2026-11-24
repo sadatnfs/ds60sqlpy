@@ -6,7 +6,7 @@ Beginner, approximately 90 minutes. Direct prerequisites: `java-007`
 
 ## Learning objectives
 
-Write records and constructors that normalize, copy and validate their components so every instance is valid. Along the way, explain record, compact constructor, defensive copy using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Construct another Order with normalizedA and item x. The final exercise transfers the mechanism to reject null collection members.
+Write records and constructors that normalize, copy and validate their components so every instance is valid. Along the way, explain record, compact constructor, defensive copy using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Construct another Order with normalized A and item x. The final exercise transfers the mechanism to reject null collection members.
 
 ## Purpose and mental model
 
@@ -114,7 +114,7 @@ Read the source from the entry point and name each value before executing it. Id
    **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `copied.items().equals(List.of("x"))`; after it the line reads `List<String> supplied = new ArrayList<>(List.of("x"));` again and record retains its original single item.
    **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `copied.items().equals(List.of("x"))` for this input.
 
-3. **Use value equality.** Construct another Order with normalizedA and item x.
+3. **Use value equality.** Construct another Order with normalized A and item x.
    **Expected:** equals true and equal hashCode.
    **Verify:** Keep an assertion equivalent to `order.equals(same) && order.hashCode() == same.hashCode()`. As a control, change `Order same = new Order("A", List.of("x"));` to `Order same = new Order("A!", List.of("x"));`: the run must fail with an `AssertionError` from the assertion on `order.equals(same) && order.hashCode() == same.hashCode()`. Restore the line before continuing.
 

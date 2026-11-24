@@ -202,20 +202,20 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Rank a discriminating term</span></span>
 <span class="source-line"><span class="syntax-comment"># Rank documents a=account randomization, b=visit counts and c=account outcomes for the</span></span>
 <span class="source-line"><span class="syntax-comment"># query randomization.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: a ranks first with a positive score; the other scores are0.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: a ranks first with a positive score; the other scores are 0.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Inspect term rarity</span></span>
-<span class="source-line"><span class="syntax-comment"># Compare IDF for a term present in1 of 3 documents with a term present in2 of 3.</span></span>
+<span class="source-line"><span class="syntax-comment"># Compare IDF for a term present in 1 of 3 documents with a term present in 2 of 3.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: the rarer term has larger IDF.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Verify saturation</span></span>
-<span class="source-line"><span class="syntax-comment"># Disable length normalization with b=0 and compare term frequencies1, 2, 10 under the</span></span>
+<span class="source-line"><span class="syntax-comment"># Disable length normalization with b=0 and compare term frequencies 1, 2, 10 under the</span></span>
 <span class="source-line"><span class="syntax-comment"># same IDF.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: scores increase, but10 occurrences yield less than10 times the single-occurrence score.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: scores increase, but 10 occurrences yield less than 10 times the single-occurrence score.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Expose a synonym miss</span></span>
 <span class="source-line"><span class="syntax-comment"># Query purchase against a document containing only buy.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: score0 despite the semantic relationship.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: score 0 despite the semantic relationship.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Make ties deterministic</span></span>
 <span class="source-line"><span class="syntax-comment"># Query an absent word with document IDs z, a, b.</span></span>

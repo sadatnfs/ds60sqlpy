@@ -6,7 +6,7 @@ Read the [guide](../guides/spark-029.md) and attempt one language first. The [Sc
 
 ### Exercise 1: Validate the product before computing its digest
 
-Require ordered fieldsid, value with bigint types, exactly 30 known unique IDs 0..29, known values equal to 2*id and total 870. Return SHA-256 of sorted Spark JSON lines joined by newline without a trailing newline.
+Require ordered fields id, value with bigint types, exactly 30 known unique IDs 0..29, known values equal to 2*id and total 870. Return SHA-256 of sorted Spark JSON lines joined by newline without a trailing newline.
 
 **Expected:** A64-character lowercase digest for the valid product. Wrong values, counts, types or identities are rejected before hashing.
 
@@ -126,7 +126,7 @@ Staging creates a new data namespace and verifies the actual file product before
 
 Read a run receipt and require its run_id, data_path, row_count, schema and digest to match the declared contract and actual Parquet readback. Construct the read path from validated runId rather than trusting arbitrary receipt text.
 
-**Expected:** Validrun-a receipt returns unchanged. A traversal-style run ID is rejected before path access.
+**Expected:** Valid run-a receipt returns unchanged. A traversal-style run ID is rejected before path access.
 
 ```scala
 def validateStaged(spark: SparkSession, root: Path, runId: String): String = {
@@ -175,7 +175,7 @@ The receipt must agree with both the declared metadata policy and current staged
 
 Validate the staged receipt, write it to a fresh temporary manifest beside current.json, and atomically replace current.json. Support an injected failure before replacement and clean any unpublished temporary manifest in finally.
 
-**Expected:** Publishingrun-a creates current.json selecting its 30-row product. No data is appended or rewritten during publication.
+**Expected:** Publishing run-a creates current.json selecting its 30-row product. No data is appended or rewritten during publication.
 
 ```scala
 def publishRun(spark: SparkSession, root: Path, runId: String, failBeforeReplace: Boolean): Unit = {
@@ -210,13 +210,13 @@ def publish_run(spark, root, run_id, fail_before_replace=False):
 
 Validation precedes the publication point, so the manifest never intentionally names an unvalidated product. The temporary file sits in the same owned directory to support local atomic replacement. This process-level visibility guarantee is narrower than power-loss durability or distributed multi-writer transactions, which require additional storage-specific protocols.
 
-**Verification evidence:** Assert the current manifest equals the validated receipt and points torun-a.
+**Verification evidence:** Assert the current manifest equals the validated receipt and points to run-a.
 
 ### Exercise 5: Keep the previous publication readable after an interrupted replacement
 
-Read the current manifest, validate its selected run and return that product. Stage run-b, inject failure before its manifest replacement, and confirm the reader still seesrun-a.
+Read the current manifest, validate its selected run and return that product. Stage run-b, inject failure before its manifest replacement, and confirm the reader still sees run-a.
 
-**Expected:** The injected error occurs, current.json bytes remain identical torun-a, and the published product still has 30 rows with the original digest.
+**Expected:** The injected error occurs, current.json bytes remain identical to run-a, and the published product still has 30 rows with the original digest.
 
 ```scala
 def readPublished(spark: SparkSession, root: Path): DataFrame = {
@@ -246,9 +246,9 @@ The failure leaves a valid but unreferenced staging product. A manifest-based re
 
 ### Exercise 6: Replay the same input without appending another product
 
-Compose stage, validate/publish and readback for a repeated run ID. Retryrun-a with a different execution partition layout, then attempt an invalid 31-row product and confirm publication stays intact.
+Compose stage, validate/publish and readback for a repeated run ID. Retry run-a with a different execution partition layout, then attempt an invalid 31-row product and confirm publication stays intact.
 
-**Expected:** Manifest bytes and data-file count are unchanged by validrun-a replay; published count remains 30. Invalid input fails before changing current.json.
+**Expected:** Manifest bytes and data-file count are unchanged by valid run-a replay; published count remains 30. Invalid input fails before changing current.json.
 
 ```scala
 def retryProduct(spark: SparkSession, root: Path, runId: String, source: DataFrame): String = {

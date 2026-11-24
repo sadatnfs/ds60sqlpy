@@ -24,7 +24,7 @@ Represent the policy log-probability difference as a trainable scalar for the sm
 
 Let d be the policy chosen-minus-rejected log-probability difference and r the same difference under a fixed reference. The adjusted margin is \(z=\beta\cdot (d-r)\), and the loss is \(\log(1+\exp(-z))\), implemented through softplus for numerical stability. Its derivative with respect to d is \(-\beta\operatorname{sigmoid}(-z)\). The second derivative is \({\beta}^{2}\cdot \sigma(z)\cdot \sigma(-z)\), nonnegative, so this scalar loss is convex in d for a fixed reference.
 
-At \(d=r=0\) and beta 0.5, the loss is log2, about 0.693147. The derivative is -0.5*0.5=-0.25, and the curvature is 0.25*0.25=0.0625. SGD with learning rate 0.2 moves d to 0-0.2*(-0.25)=0.05. The new adjusted margin is 0.025 and the loss is about 0.680725. This is an actual scalar gradient update in the reference.
+At \(d=r=0\) and beta 0.5, the loss is log(2), about 0.693147. The derivative is -0.5*0.5=-0.25, and the curvature is 0.25*0.25=0.0625. SGD with learning rate 0.2 moves d to 0-0.2*(-0.25)=0.05. The new adjusted margin is 0.025 and the loss is about 0.680725. This is an actual scalar gradient update in the reference.
 
 A positive step increases the chosen-response advantage relative to the reference, but it does not uniquely specify the two response probabilities. Many pairs of chosen/rejected log probabilities can have the same difference. The fixture optimizes a free scalar and does not implement a vocabulary softmax, sequence model, KL measurement or normalized policy distribution. Calling it DPO-style margin mechanics preserves that distinction.
 
@@ -46,7 +46,7 @@ Feedback quality remains decisive. If annotators prefer a confident but unsuppor
 
 ## Exercise 1: Calculate the equal-margin loss
 
-The question is: Set policy difference 0, reference difference 0, beta.5.
+The question is: Set policy difference 0, reference difference 0, beta 0.5.
 
 The objective has no preference advantage at equal margins. This exact value is an independent arithmetic check of the loss convention.
 

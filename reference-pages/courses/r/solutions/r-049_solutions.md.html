@@ -208,7 +208,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Applying phi once and repeating 0.2 for all three horizons. That ignores that each forecast feeds the next, and it keeps the forecast from decaying toward the zero mean.</p>
 <p><strong>Verify:</strong> <code>max(abs(as.numeric(f$pred) - c(0.2, 0.1, 0.05)))</code> returns a value below 1e-10.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
-<p>Explain why an ARIMA order(1,0,0) differs from(0,1,0).</p>
+<p>Explain why an ARIMA order (1,0,0) differs from (0,1,0).</p>
 <p>The first is an autoregressive level model; the second differences the series and has a different continuation/mean convention.</p>
 <p><strong>Expected evidence:</strong> Model components and targets distinguished.</p>
 <p><strong>Approach:</strong> Write each model as an equation for this series and compare the three forecasts each implies.</p>

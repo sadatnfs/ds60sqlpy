@@ -207,7 +207,7 @@ Before reading the code for *Separate cosine from magnitude*, predict its result
    **Expected:** both raise ValueError.
    **Verify:** Save the assertion results for exercise 4, including both raise ValueError.
 
-5. **Reject incompatible spaces.** Compare query metadata modelA with an index encoded by modelB, even when both have width 3.
+5. **Reject incompatible spaces.** Compare query metadata model A with an index encoded by model B, even when both have width 3.
    **Expected:** metadata identity mismatch is detected; the caller must enforce the retrieval gate.
    **Verify:** Save the assertion results for exercise 5, including metadata identity mismatch is detected; the caller must enforce the retrieval gate.
 

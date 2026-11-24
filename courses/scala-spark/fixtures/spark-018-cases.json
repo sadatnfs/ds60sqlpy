@@ -26,7 +26,7 @@
     {
       "exercise": 4,
       "title": "Keep an unresolved local timestamp as local fields",
-      "input_contract": "Under bothUTC andAmerica/Los_Angeles, cast 2024-11-03 01:30:00 explicitly to TIMESTAMP_NTZ, inspect its schema and render it as a string. Restore the prior zone.",
+      "input_contract": "Under both UTC and America/Los_Angeles, cast 2024-11-03 01:30:00 explicitly to TIMESTAMP_NTZ, inspect its schema and render it as a string. Restore the prior zone.",
       "expected": "Both outputs are 2024-11-03 01:30:00 and the type is timestamp_ntz. No epoch or unique instant is claimed.",
       "verification": "Assert identical local clock strings and explicit type under both zones, then confirm session restoration."
     },
@@ -40,7 +40,7 @@
     {
       "exercise": 6,
       "title": "Quarantine invalid timestamps without confusing missingness",
-      "input_contract": "Build an inline source containing a valid offset timestamp, bad text andNULL. Use try_to_timestamp with the declared offset pattern and classify accepted, malformed_timestamp, missing_timestamp.",
+      "input_contract": "Build an inline source containing a valid offset timestamp, bad text and NULL. Use try_to_timestamp with the declared offset pattern and classify accepted, malformed_timestamp, missing_timestamp.",
       "expected": "IDs 1, 2, 3 have those reasons respectively;only 1 is accepted while ANSI remains true.",
       "verification": "Assert all reason rows, one known timestamp and unchanged ANSI setting."
     }

@@ -5,7 +5,7 @@
     {
       "exercise": 1,
       "title": "Transform without collapsing occurrences or unknowns",
-      "input_contract": "Keep rows whose amount is nonnegative orNULL, then return entity_id, segment, doubled=amount*2. Preserve duplicate occurrences and unknown values.",
+      "input_contract": "Keep rows whose amount is nonnegative or NULL, then return entity_id, segment, doubled=amount*2. Preserve duplicate occurrences and unknown values.",
       "expected": "Seven rows, known total 130 and one NULL doubled value. The negative entity 6 row is excluded.",
       "verification": "Assert population, total and unknown count, then compare with the literal golden relation in later tasks."
     },

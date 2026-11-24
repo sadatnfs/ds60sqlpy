@@ -40,7 +40,7 @@
     {
       "exercise": 6,
       "title": "Write a future acceptance and failure contract",
-      "input_contract": "Current profile bundles no qualified JDBC driver/remote database; synthetic export and schema mapping only. Optional enrichment IDssql-quality-01 and sql-test-01.",
+      "input_contract": "Current profile bundles no qualified JDBC driver/remote database; synthetic export and schema mapping only. Optional enrichment IDs sql-quality-01 and sql-test-01.",
       "expected": "A reviewable acceptance matrix with unavailable runtime rows, not a fabricated successful connection.",
       "verification": "List positive and negative cases, exact version tuple, source identity, output oracle, connection closure and no-write privileges."
     }

@@ -198,7 +198,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="exercises-and-reasoning">Exercises and reasoning<a class="heading-anchor" href="#exercises-and-reasoning" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-implement-the-pure-scalar-rule-precisely">Exercise 1: Implement the pure scalar rule precisely<a class="heading-anchor" href="#exercise-1-implement-the-pure-scalar-rule-precisely" aria-label="Link to this section">#</a></h4>
 <p>Return NULL/None unchanged; collapse only space, tab, newline and carriage return runs, trim ordinary spaces, and translate ASCII A-Z to a-z. Preserve other Unicode code points.</p>
-<p><strong>Expected:</strong> All 12 golden outputs, includingcafÉ,İi, nonbreaking-space-wrapped a and unchanged decomposed e-plus-accent.</p>
+<p><strong>Expected:</strong> All 12 golden outputs, including cafÉ, İi, nonbreaking-space-wrapped a and unchanged decomposed e-plus-accent.</p>
 <pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">normalizeLabel</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> <span class="syntax-class">String</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">String</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
   <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>value <span class="syntax-operator">==</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">null</span>
   <span class="syntax-keyword">else</span>

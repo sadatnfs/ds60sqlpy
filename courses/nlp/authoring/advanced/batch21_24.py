@@ -467,7 +467,7 @@ The system\'s output contract should include unsupported, stale, unauthorized an
         (
             "Filter permission and freshness",
             "Apply the role/time rule to the three source records at time 10.",
-            "Only policy version2 for ops; unknown role and expired time 30 yield no records.",
+            "Only policy version 2 for ops; unknown role and expired time 30 yield no records.",
             "Evaluate authorization and validity before constructing context.",
             "The result excludes both stale and unauthorized evidence. A production system must obtain identity and time from trusted inputs and preserve why a source was excluded. Relevance scoring should run only inside the permitted corpus rather than override the access decision. Ranking first and filtering afterwards could leak a stale version into intermediate results. Verify that an unknown role and time 30 both return an empty list.",
         ),
@@ -680,7 +680,7 @@ Before scaling, define resource limits, corpus ownership, privacy requirements a
         (
             "Retrieve current permitted evidence",
             "Run the supported network case for ops at time 10.",
-            "Exactly network version2 and the unchanged approval-rule quote; old version absent.",
+            "Exactly network version 2 and the unchanged approval-rule quote; old version absent.",
             "Filter role/time before computing lexical overlap.",
             "The deterministic filters enforce a separate evidence eligibility contract. The quote retains source identity and version, allowing a reviewer to verify what it says. Its presence supports a procedure statement, not an assertion about completed operational work.",
         ),

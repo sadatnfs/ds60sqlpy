@@ -166,7 +166,7 @@ Capture FORMATTED output and extract lines containing ReadSchema. Verify that th
 
 Execute the grouped aggregate and capture its FORMATTED plan. Return group_id, n, total and locate aggregate plus Exchange operators under the fixed AQE-disabled configuration.
 
-**Expected result/shape:** Groups 0,1,2 each have n3 with totals 180,210,240. The plan shows aggregation and an Exchange.
+**Expected result/shape:** Groups 0,1,2 each have n = 3 with totals 180,210,240. The plan shows aggregation and an Exchange.
 
 **Verify:** Assert all group tuples independently, then assert the relevant operator markers and recorded AQE setting.
 

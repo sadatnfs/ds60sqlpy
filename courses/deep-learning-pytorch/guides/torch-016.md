@@ -6,7 +6,7 @@ Intermediate; approximately 120 minutes. Direct prerequisites: `torch-015`. The 
 
 ## Learning objectives
 
-Nonlinearity changes which functions a network can represent. The central investigation is concrete: Use inputs 00, 01, 10, 11 and two rectified differences. The finish condition is outputs 0, 1, 1, 0. both.6; the function is absolute difference. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Nonlinearity changes which functions a network can represent. The central investigation is concrete: Use inputs 00, 01, 10, 11 and two rectified differences. The finish condition is outputs 0, 1, 1, 0. both 0.6; the function is absolute difference. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -48,7 +48,7 @@ Use F.relu after a matrix product. In nn.Linear, the columns of a mathematical p
 
 ## Prove the capacity boundary and then inspect optimization
 
-Suppose a classifier uses an affine score \(s=a\) x1+b x2+c and predicts class 1 when \(s>0\). XOR requires(1, 0) and(0, 1) positive, so \(a+c>0\) and \(b+c>0\). It requires(0, 0) and(1, 1) nonpositive, so c≤0 and a+b+c≤0. Summing the positive requirements gives a+b+2c>0; summing the negative requirements gives the same quantity≤0. The contradiction proves that no such affine separator exists, independent of a random seed or training budget.
+Suppose a classifier uses an affine score \(s=a\) x1+b x2+c and predicts class 1 when \(s>0\). XOR requires (1, 0) and (0, 1) positive, so \(a+c>0\) and \(b+c>0\). It requires (0, 0) and (1, 1) nonpositive, so c≤0 and a+b+c≤0. Summing the positive requirements gives a+b+2c>0; summing the negative requirements gives the same quantity≤0. The contradiction proves that no such affine separator exists, independent of a random seed or training budget.
 
 Stacking affine layers does not remove that boundary. `(XW1+b1)W2+b2 = X(W1W2)+(b1W2+b2)` is still affine in the input. A bottleneck can even restrict the possible rank. Nonlinear parameterization of the weights may change optimization behavior, but it does not create a nonlinear input function. Adding an engineered interaction feature would change the input representation and therefore the problem being considered.
 
@@ -61,9 +61,9 @@ The manual construction uses \(d=x_{1}-x_{2}\), h1=max(d, 0), h2=max(-d, 0), and
 | (1, 0) | (1, -1) | (1, 0) | 1 |
 | (1, 1) | (0, 0) | (0, 0) | 0 |
 
-Without ReLU, the two raw differences cancel everywhere. With ReLU, the sum is|x1-x2|. On binary corners that equals XOR, but on continuous inputs(.2, .8) and(.8, .2) it equals 0.6. That value is a function output, not automatically a calibrated probability or a new definition of a binary logical operator.
+Without ReLU, the two raw differences cancel everywhere. With ReLU, the sum is |x1-x2|. On binary corners that equals XOR, but on continuous inputs (0.2, 0.8) and (0.8, 0.2) it equals 0.6. That value is a function output, not automatically a calibrated probability or a new definition of a binary logical operator.
 
-The XOR projection matrix[[1, -1], [-1, 1]] is symmetric. Consequently, W.T equalsW, so the original fixture alone cannot detect a forgotten transpose when copying a mathematical matrix into nn.Linear's stored(out, in) layout. The strengthened example adds a separate nonsymmetric matrix[[1, 2], [3, 4]]. For input[0, 1], XW gives[3, 4], while XW.T gives[2, 4]. That probe makes the storage translation observable while retaining the original XOR construction unchanged.
+The XOR projection matrix [[1, -1], [-1, 1]] is symmetric. Consequently, W.T equals W, so the original fixture alone cannot detect a forgotten transpose when copying a mathematical matrix into nn.Linear's stored (out, in) layout. The strengthened example adds a separate nonsymmetric matrix [[1, 2], [3, 4]]. For input [0, 1], XW gives [3, 4], while XW.T gives [2, 4]. That probe makes the storage translation observable while retaining the original XOR construction unchanged.
 
 Activation gradients distinguish a dead region from a broken graph. ReLU at a negative preactivation has a connected derivative zero; at a positive one its derivative is one. At the kink, the framework uses its chosen convention. Repeatedly negative preactivations can therefore block useful gradient flow even though every operation is differentiable on the active path. Inspect activation signs and intermediate gradients before declaring the architecture incapable.
 
@@ -123,7 +123,7 @@ assert not torch.equal(x @ asymmetric, x @ asymmetric.T)
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: outputs 0, 1, 1, 0. both.6; the function is absolute difference. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: outputs 0, 1, 1, 0. both 0.6; the function is absolute difference. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
@@ -147,9 +147,9 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** two unit outputs match on every row.
    **Verify:** Save the assertion results for exercise 5, including two unit outputs match on every row.
 
-6. **Transfer to continuous inputs.** Evaluate the fixed construction at(.2, .8) and(.8, .2).
-   **Expected:** both.6; the function is absolute difference.
-   **Verify:** Save the assertion results for exercise 6, including both.6; the function is absolute difference.
+6. **Transfer to continuous inputs.** Evaluate the fixed construction at (0.2, 0.8) and (0.8, 0.2).
+   **Expected:** both 0.6; the function is absolute difference.
+   **Verify:** Save the assertion results for exercise 6, including both 0.6; the function is absolute difference.
 
 ## Common pitfalls and diagnosis
 

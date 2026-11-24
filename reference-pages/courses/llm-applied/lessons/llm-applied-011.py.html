@@ -202,15 +202,15 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Return a supported extractive answer</span></span>
 <span class="source-line"><span class="syntax-comment"># Answer the conversion-definition question from the metric document and its first</span></span>
 <span class="source-line"><span class="syntax-comment"># sentence.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: statusanswered; one claim; citation slices the exact sentence.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: status answered; one claim; citation slices the exact sentence.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Reject a corrupted span</span></span>
 <span class="source-line"><span class="syntax-comment"># Change the stored quote while leaving citation offsets unchanged.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: citation integrity check returnsFalse.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: citation integrity check returns False.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Abstain on missing evidence</span></span>
 <span class="source-line"><span class="syntax-comment"># Request an unsupported comet-period answer with no admitted supporting document.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: statusunknown; claims empty; reasonmissing evidence.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: status unknown; claims empty; reason missing evidence.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Separate a valid citation from support</span></span>
 <span class="source-line"><span class="syntax-comment"># Cite the metric document for a claim about statistical significance and inspect the</span></span>
@@ -218,11 +218,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Expected: document exists but significance claim unsupported.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Bind the source version</span></span>
-<span class="source-line"><span class="syntax-comment"># Compare a citation requiringversion1 with a suppliedversion2 document.</span></span>
+<span class="source-line"><span class="syntax-comment"># Compare a citation requiring version 1 with a supplied version 2 document.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: version mismatch blocks citation reuse.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Keep arithmetic separate from prose</span></span>
-<span class="source-line"><span class="syntax-comment"># Compute3 purchases over10 visits and attach the deterministic result to an explanation</span></span>
+<span class="source-line"><span class="syntax-comment"># Compute 3 purchases over 10 visits and attach the deterministic result to an explanation</span></span>
 <span class="source-line"><span class="syntax-comment"># record.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: rate 0.3 with input counts preserved.</span></span>
 <span class="source-line"></span>

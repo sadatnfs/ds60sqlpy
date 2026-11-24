@@ -231,7 +231,7 @@
       "runtime": "javascript-browser",
       "input": "inline synthetic",
       "no_network": true,
-      "expected": "Only records whose group isA remain."
+      "expected": "Only records whose group is A remain."
     },
     {
       "id": "js-066",
@@ -241,7 +241,7 @@
       "runtime": "javascript-browser",
       "input": "inline synthetic",
       "no_network": true,
-      "expected": "All records total 20; groupA totals 8."
+      "expected": "All records total 20; group A totals 8."
     }
   ]
 }

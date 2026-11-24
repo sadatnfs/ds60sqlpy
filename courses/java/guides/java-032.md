@@ -134,7 +134,7 @@ Read the source from the entry point and name each value before executing it. Id
    **Expected:** checksum 10010000; elapsed nanoseconds nonnegative.
    **Verify:** Keep an assertion equivalent to `checksum == 10_010_000L && elapsed >= 0`. As a control, change `for (int i = 0; i < 20; i++) checksum += sum(1000);` to `for (int i = 0; i <= 20; i++) checksum += sum(1000);`: the run must fail with an `AssertionError` from the assertion on `checksum == 10_010_000L && elapsed >= 0`. Restore the line before continuing.
 
-4. **Record and read an actual JFR event.** Create a bounded recording withoneCalculation event containing input 100 and output 5050.
+4. **Record and read an actual JFR event.** Create a bounded recording with one Calculation event containing input 100 and output 5050.
    **Expected:** one matching event with the declared fields.
    **Verify:** Keep an assertion equivalent to `events.size() == 1 && events.get(0).getLong("input") == 100 && events.get(0).getLong("output") == 5050`. As a control, change `event.input = 100;` to `event.input = 101;`: the run must fail with an `AssertionError` from the assertion on `events.size() == 1 && events.get(0).getLong("input") == 100 && events.get(0).getLong("output") == 5050`. Restore the line before continuing.
 

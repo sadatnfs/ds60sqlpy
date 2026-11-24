@@ -201,26 +201,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Calculate recall and reciprocal rank</span></span>
 <span class="source-line"><span class="syntax-comment"># Use relevant IDs a, c and retrieved b, c, a.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: recall1; reciprocal rank.5.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: recall 1; reciprocal rank 0.5.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Measure a retrieval miss</span></span>
 <span class="source-line"><span class="syntax-comment"># Use relevant a and retrieved b, c.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: recall0; reciprocal rank 0.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: recall 0; reciprocal rank 0.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Handle an unanswerable question</span></span>
 <span class="source-line"><span class="syntax-comment"># Use an empty relevant set and a saved abstention result.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: recallNone; appropriate abstentionTrue.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: recall None; appropriate abstention True.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Separate support from correctness</span></span>
 <span class="source-line"><span class="syntax-comment"># Record a correct-looking answer whose cited context does not support it.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: correctTrue but supportedFalse.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: correct True but supported False.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Apply an oracle-context control</span></span>
 <span class="source-line"><span class="syntax-comment"># Compare q1 observed incorrect with oracle-context correct under the same rubric.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: paired improvement1 for q1.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: paired improvement 1 for q1.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Reject duplicate result identities</span></span>
-<span class="source-line"><span class="syntax-comment"># Validate one score row per question and inject a duplicateq1.</span></span>
+<span class="source-line"><span class="syntax-comment"># Validate one score row per question and inject a duplicate q1.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: duplicate ID detected.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>

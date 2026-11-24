@@ -3,7 +3,7 @@
 // Answer-free learner artifact. Save your own copy before editing.
 
 // Exercise 1: Predict baseline and filtered totals.
-// Expected: All records total 20; groupA totals 8.
+// Expected: All records total 20; group A totals 8.
 
 // Exercise 2: Change one value and update the independent expectations.
 // Expected: The corresponding bar, text row and total change together.

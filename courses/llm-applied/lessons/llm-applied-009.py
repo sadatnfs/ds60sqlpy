@@ -9,20 +9,20 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: private-v1 absent before ranking.
 
 # Exercise 2: Permit an explicitly privileged scope
-# Use allowed scopespublic, restricted and compare the admitted set.
-# Expected: all6 documents admitted.
+# Use allowed scopes public, restricted and compare the admitted set.
+# Expected: all 6 documents admitted.
 
 # Exercise 3: Partition answer caches
 # Build cache keys for the same question under public-only and privileged scope sets.
 # Expected: keys differ.
 
 # Exercise 4: Invalidate on corpus change
-# Change corpus-v1 tocorpus-v2 under the same access policy.
+# Change corpus-v1 to corpus-v2 under the same access policy.
 # Expected: cache key changes.
 
 # Exercise 5: Keep hostile evidence inert
-# Inspectattack-v1 while retaining a public-only policy.
-# Expected: scope set remains exactlypublic; private-v1 still excluded.
+# Inspect attack-v1 while retaining a public-only policy.
+# Expected: scope set remains exactly public; private-v1 still excluded.
 
 # Exercise 6: Avoid restricted identifiers in public traces
 # Create a trace from admitted result IDs only and check it contains no restricted ID.

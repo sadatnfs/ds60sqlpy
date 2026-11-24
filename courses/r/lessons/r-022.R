@@ -5,7 +5,7 @@ values <- c(1, 3)
 second_values <- 5
 unit <- "ms"
 
-# Exercise 1: Predict the result of combining c(1,3)ms with5ms.
+# Exercise 1: Predict the result of combining c(1,3) ms with 5 ms.
 # TODO: The operation concatenates observations.
 # Exercise 2: Change the second input to seconds and test the failure.
 # TODO: The signature still matches; values within the slots differ.

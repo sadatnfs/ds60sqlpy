@@ -14,14 +14,14 @@ Copy to .learning before editing. Six independent attempts belong below.
 
 # Exercise 3: Calculate a SwiGLU gate derivative
 # Use scalar g=0, u=2 and output SiLU(g)*u.
-# Expected: output0; gradient with respect to g is 1; with respect to u is 0.
+# Expected: output 0; gradient with respect to g is 1; with respect to u is 0.
 
 # Exercise 4: Check the RMSNorm Jacobian formula
 # Compare autograd with J=I/r-xxT/(d*r³) at x = [1, 2, 3].
 # Expected: matrices agree within 1e-10.
 
 # Exercise 5: Match feed-forward parameter budgets
-# Compare plain FFN model width d=4, hidden6 with SwiGLU hidden width 4, excluding biases;
+# Compare plain FFN model width d=4, hidden 6 with SwiGLU hidden width 4, excluding biases;
 # execute a gated block with input and output width 4.
 # Expected: both 48 weight entries; output shape(2, 4).
 

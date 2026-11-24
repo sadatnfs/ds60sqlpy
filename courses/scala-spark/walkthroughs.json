@@ -60,7 +60,7 @@
       "title": "PySpark window functions: deterministic winners, running totals and lag",
       "anchor": "reference",
       "source_path": "courses/scala-spark/solutions/spark-019_solution.py",
-      "source_sha256": "32f32f09dfdf1816d963b2d414d0b6bb205c956c22a8451baec4464e2a45bd01",
+      "source_sha256": "3ee960dd9c17ac9a413b46eb9c1782871a8dbaa9005b0482d348a64a2b8d6b5d",
       "expected_output": ["spark-019: six PySpark reference contracts passed; Spark=4.3.0"],
       "steps": [
         {

@@ -130,7 +130,7 @@ def main():
     parser.add_argument("--report", type=Path)
     args = parser.parse_args()
     if not 1 <= args.timeout <= 300:
-        parser.error("timeout must be from1 to300 seconds")
+        parser.error("timeout must be from 1 to 300 seconds")
     subprocess.run([sys.executable, str(HERE / "build.py"), "--check"], check=True)
     inspected = subprocess.run(
         ["docker", "image", "inspect", args.image], capture_output=True, text=True, check=True

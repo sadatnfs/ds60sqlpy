@@ -13,7 +13,7 @@
       "exercise": 2,
       "title": "Construct an explicit streaming relation without starting it",
       "input_contract": "Read the owned JSON input through readStream with the declared schema and maxFilesPerTrigger 1. Return the streamingDataFrame;do not call an ordinary batch collect on it.",
-      "expected": "isStreaming istrue, columns areid, team, amount and their types arebigint, string, bigint. No query is started by construction alone.",
+      "expected": "isStreaming is true, columns are id, team, amount and their types are bigint, string, bigint. No query is started by construction alone.",
       "verification": "Assert streaming status and exact type mapping while the active query list remains empty."
     },
     {
@@ -27,7 +27,7 @@
       "exercise": 4,
       "title": "Run AvailableNow with a deadline and owned cleanup",
       "input_contract": "Start the aggregate in a uniquely named memory sink with complete mode, a fresh checkpoint and AvailableNow. Await at most 30 seconds, require termination and always stop the query in finally.",
-      "expected": "The query terminates and isActive isfalse. The memory table holds the final finite aggregate;the checkpoint belongs only to this run.",
+      "expected": "The query terminates and isActive is false. The memory table holds the final finite aggregate;the checkpoint belongs only to this run.",
       "verification": "Assert bounded await success, no query exception and inactive state. No sleep or external producer is used."
     },
     {

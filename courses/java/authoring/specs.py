@@ -521,7 +521,7 @@ assert copied.items().equals(List.of("x"));""",
         ),
         ex(
             "Use value equality",
-            "Construct another Order with normalizedA and item x.",
+            "Construct another Order with normalized A and item x.",
             "equals true and equal hashCode.",
             """Order same = new Order("A", List.of("x"));
 assert order.equals(same) && order.hashCode() == same.hashCode();""",
@@ -586,7 +586,7 @@ assert events.equals(List.of("body", "closeA"));""",
         ex(
             "Close in reverse order",
             "Declare resourcesA then B and leave the block.",
-            "closeB before close A.",
+            "closeB before closeA.",
             """events.clear();
 try (Probe a = new Probe("A", events, false); Probe b = new Probe("B", events, false)) { events.add("body"); }
 assert events.equals(List.of("body", "closeB", "closeA"));""",
@@ -1917,7 +1917,7 @@ add(
 add(
     27,
     "A build turns source and declared dependencies into an artifact. Reproducibility requires identifying the compiler, target level, inputs, dependency versions and packaging metadata. A source repository alone is not enough if a build fetches moving dependency versions or embeds timestamps that change every run. Maven and Gradle can manage larger builds, but their configuration still needs explicit versions, verification and offline preparation. This default lesson uses only the JDK'sjavac and jar tools on a literal source fixture.\n\nThe example compiles one small application, packages it twice with a fixed archive timestamp, and compares the resulting bytes in the same prepared JDK environment. It then executes the JAR. This establishes a bounded local reproducibility property, not byte-identical builds across every JDK or OS. A dependency lock or checksum is an identity control, not proof that a dependency is safe or appropriate.",
-    "The JavaCompiler API invokes the prepared compiler with --release 21. The JDK jar tool can be accessed through java.util.spi.ToolProvider and given a fixed--date plusmain-class. Package only the intended classes directory. SHA256 compares artifact bytes; use a fresh child JVM to prove the JAR entrypoint works. A changed source or dependency identity should change the recorded build manifest.",
+    "The JavaCompiler API invokes the prepared compiler with --release 21. The JDK jar tool can be accessed through java.util.spi.ToolProvider and given a fixed --date plus --main-class. Package only the intended classes directory. SHA256 compares artifact bytes; use a fresh child JVM to prove the JAR entrypoint works. A changed source or dependency identity should change the recorded build manifest.",
     [
         ("Build input", "Source, toolchain and dependency state used to produce an artifact."),
         (
@@ -2368,7 +2368,7 @@ assert checksum==10_010_000L && elapsed>=0;""",
         ),
         ex(
             "Record and read an actual JFR event",
-            "Create a bounded recording withoneCalculation event containing input 100 and output 5050.",
+            "Create a bounded recording with one Calculation event containing input 100 and output 5050.",
             "one matching event with the declared fields.",
             """var root=java.nio.file.Files.createTempDirectory("ds60-jfr-");var file=root.resolve("fixture.jfr");
 try {

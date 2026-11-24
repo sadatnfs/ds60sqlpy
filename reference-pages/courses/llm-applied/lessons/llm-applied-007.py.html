@@ -200,13 +200,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Rank fixed topic vectors</span></span>
-<span class="source-line"><span class="syntax-comment"># Use query[1, 0, 0] and documents purchase[1, .1, 0], geometry[0, 1, 0], mixed[.5, .5,</span></span>
+<span class="source-line"><span class="syntax-comment"># Use query [1, 0, 0] and documents purchase [1, .1, 0], geometry [0, 1, 0], mixed [.5, .5,</span></span>
 <span class="source-line"><span class="syntax-comment"># 0].</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: purchase ranks first, mixed second, geometry last.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Separate cosine from magnitude</span></span>
 <span class="source-line"><span class="syntax-comment"># Scale the purchase vector by 10 and compare its cosine score with the original.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: cosine unchanged within1e-12; raw dot product multiplies by 10.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: cosine unchanged within 1e-12; raw dot product multiplies by 10.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Expose hand-authored synonym knowledge</span></span>
 <span class="source-line"><span class="syntax-comment"># Assign buy the same literal vector as purchase and compare retrieval with an exact-token</span></span>
@@ -214,18 +214,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Expected: vector scores match; literal word overlap is empty.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Reject zero and nonfinite vectors</span></span>
-<span class="source-line"><span class="syntax-comment"># Normalize[0, 0] and[1, NaN] through the checked helper.</span></span>
+<span class="source-line"><span class="syntax-comment"># Normalize [0, 0] and [1, NaN] through the checked helper.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: both raise ValueError.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Reject incompatible spaces</span></span>
-<span class="source-line"><span class="syntax-comment"># Compare query metadata modelA with an index encoded by modelB, even when both have</span></span>
-<span class="source-line"><span class="syntax-comment"># width3.</span></span>
+<span class="source-line"><span class="syntax-comment"># Compare query metadata model A with an index encoded by model B, even when both have</span></span>
+<span class="source-line"><span class="syntax-comment"># width 3.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: metadata identity mismatch is detected; the caller must enforce the retrieval gate.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Measure a domain failure</span></span>
 <span class="source-line"><span class="syntax-comment"># Give an irrelevant document a high-scoring vector and record that geometric rank does</span></span>
 <span class="source-line"><span class="syntax-comment"># not establish relevance.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: top-ranked IDwrong is outside the authored relevant set.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: top-ranked ID wrong is outside the authored relevant set.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

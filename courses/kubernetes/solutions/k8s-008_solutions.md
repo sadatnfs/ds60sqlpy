@@ -20,7 +20,7 @@ The evidence table should contain these independent observations:
 
 | Layer | Expected controlled-fixture evidence |
 | --- | --- |
-| Desired and observed controller state | replicas 2, updated/ready/available2, observedGeneration at least metadata.generation |
+| Desired and observed controller state | replicas 2, updated/ready/available 2, observedGeneration at least metadata.generation |
 | Application Pods | Two controlled Ready Pod UIDs; phase alone is not the check |
 | Service membership | Selector `app: hello`; the same two unique Pod UIDs have explicit ready endpoints |
 | Application path | New client Job succeeds and prints `client exits0 with exact trimmed /version body ds60-fixture-v1` |

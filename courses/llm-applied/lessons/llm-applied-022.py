@@ -5,31 +5,31 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Execute a bounded grouped mean
-# Use rowsA1, A3, B10 and the admittedgroup_mean request.
-# Expected: A count 2 mean2; B count 1 mean10.
+# Use rows A1, A3, B10 and the admitted group_mean request.
+# Expected: A count 2 mean 2; B count 1 mean 10.
 
 # Exercise 2: Reject an arbitrary operation
-# Submitoperationrun_sql or an extraquery field.
+# Submit operation run_sql or an extra query field.
 # Expected: ValueError before any computation.
 
 # Exercise 3: Reject invalid numeric values
 # Replace one value with True, NaN or None, then check large finite values and
 # cancellation under the same numeric policy.
-# Expected: invalid rows are rejected; equal1e308 values have finite mean1e308 and opposite values have mean0.
+# Expected: invalid rows are rejected; equal 1e308 values have finite mean 1e308 and opposite values have mean 0.
 
 # Exercise 4: Enforce identity and work limits
-# Duplicatea1, then supply21 unique rows.
+# Duplicate a1, then supply 21 unique rows.
 # Expected: duplicate identity and row-limit violations rejected.
 
 # Exercise 5: Verify an explanation against the artifact
-# Check a proposed sentence saying groupAmean2 against the result; reject a
-# proposedmean20.
-# Expected: 2accepted; 20mismatch.
+# Check a proposed sentence saying group A mean 2 against the result; reject a
+# proposed mean 20.
+# Expected: 2 accepted; 20 mismatch.
 
 # Exercise 6: Refuse an unsupported causal interpretation
 # Attach a descriptive result to a claim that group caused the difference without
 # assignment-design evidence.
-# Expected: descriptive statisticavailable; causal claimnot established.
+# Expected: descriptive statistic available; causal claim not established.
 
 if __name__ == "__main__":
     print("Read the guide and implement the six exercises in your saved copy.")

@@ -54,7 +54,7 @@ assert copied.items().equals(List.of("x"));
 
 ## Exercise 3: Use value equality
 
-Task: Construct another Order with normalizedA and item x.
+Task: Construct another Order with normalized A and item x.
 
 Record equality compares component values. This is useful for stable data carriers and differs from default object identity equality.
 

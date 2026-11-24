@@ -7,7 +7,7 @@
       "title": "Inspect statistics and the automatic threshold separately",
       "input_contract": "Return the optimized-plan size estimate for dimension as a nonnegative integer, and record the configured automatic broadcast threshold and actual dimension row count.",
       "expected": "A positive finite estimate below 10485760 bytes, threshold 10485760 and actual row count 20. The estimate is not a peak-memory measurement.",
-      "verification": "Assert the finite estimate range and print estimate, threshold, rows andSpark version as separate fields."
+      "verification": "Assert the finite estimate range and print estimate, threshold, rows and Spark version as separate fields."
     },
     {
       "exercise": 2,

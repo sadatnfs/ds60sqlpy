@@ -200,30 +200,30 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Quantize a fixed matrix</span></span>
-<span class="source-line"><span class="syntax-comment"># QuantizeW[[.1, -.9], [1.7, -.2]] withscale1.7/7 andnearest-even rounding.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: codes[[0, -4], [7, -1]].</span></span>
+<span class="source-line"><span class="syntax-comment"># Quantize W [[.1, -.9], [1.7, -.2]] with scale 1.7/7 and nearest-even rounding.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: codes [[0, -4], [7, -1]].</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Pack and unpack real nibbles</span></span>
 <span class="source-line"><span class="syntax-comment"># Offset codes by 8, pack adjacent values into two bytes, then unpack.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: packed bytes[72, 127]; round-trip codes exact.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: packed bytes [72, 127]; round-trip codes exact.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Measure dequantization error</span></span>
-<span class="source-line"><span class="syntax-comment"># Reconstructfloat32weights and compareW@x forx[1, -2] with full precision.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: reference[1.9, 2.1]; finite nonzero approximation error.</span></span>
+<span class="source-line"><span class="syntax-comment"># Reconstruct float32 weights and compare W@x for x [1, -2] with full precision.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: reference [1.9, 2.1]; finite nonzero approximation error.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Train only a small adapter</span></span>
-<span class="source-line"><span class="syntax-comment"># Use frozen dequantizedW, rank 1 A/B and10SGD updates towardzero output.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use frozen dequantized W, rank 1 A/B and 10 SGD updates toward zero output.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: adapter loss decreases; packed base bytes unchanged.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Account for storage honestly</span></span>
-<span class="source-line"><span class="syntax-comment"># Count2 packed bytes plusonefloat32scale, and separately count the</span></span>
-<span class="source-line"><span class="syntax-comment"># dequantized2x2float32buffer.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: packed representation6 bytes; dequantizedbuffer16 bytes; overheadexcluded.</span></span>
+<span class="source-line"><span class="syntax-comment"># Count 2 packed bytes plus one float32 scale, and separately count the</span></span>
+<span class="source-line"><span class="syntax-comment"># dequantized 2x2 float32 buffer.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: packed representation 6 bytes; dequantized buffer 16 bytes; overhead excluded.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: State what was not measured</span></span>
-<span class="source-line"><span class="syntax-comment"># Write a receipt distinguishing uniform4-bitCPU packing fromNF4, double quantization,</span></span>
-<span class="source-line"><span class="syntax-comment"># paged optimizers andGPU memory.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: all four unimplemented claims explicitlyFalse.</span></span>
+<span class="source-line"><span class="syntax-comment"># Write a receipt distinguishing uniform 4-bit CPU packing from NF4, double quantization,</span></span>
+<span class="source-line"><span class="syntax-comment"># paged optimizers and GPU memory.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: all four unimplemented claims explicitly False.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

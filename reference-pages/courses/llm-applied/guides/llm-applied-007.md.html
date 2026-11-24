@@ -361,7 +361,7 @@ np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 <li><strong>Reject zero and nonfinite vectors.</strong> Normalize <code>[0, 0]</code> and <code>[1, NaN]</code> through the checked helper. <strong>Expected:</strong> both raise ValueError. <strong>Verify:</strong> Save the assertion results for exercise 4, including both raise ValueError.</li>
 </ol>
 <ol start="5">
-<li><strong>Reject incompatible spaces.</strong> Compare query metadata modelA with an index encoded by modelB, even when both have width 3. <strong>Expected:</strong> metadata identity mismatch is detected; the caller must enforce the retrieval gate. <strong>Verify:</strong> Save the assertion results for exercise 5, including metadata identity mismatch is detected; the caller must enforce the retrieval gate.</li>
+<li><strong>Reject incompatible spaces.</strong> Compare query metadata model A with an index encoded by model B, even when both have width 3. <strong>Expected:</strong> metadata identity mismatch is detected; the caller must enforce the retrieval gate. <strong>Verify:</strong> Save the assertion results for exercise 5, including metadata identity mismatch is detected; the caller must enforce the retrieval gate.</li>
 </ol>
 <ol start="6">
 <li><strong>Measure a domain failure.</strong> Give an irrelevant document a high-scoring vector and record that geometric rank does not establish relevance. <strong>Expected:</strong> top-ranked ID wrong is outside the authored relevant set. <strong>Verify:</strong> Save the assertion results for exercise 6, including top-ranked ID wrong is outside the authored relevant set.</li>

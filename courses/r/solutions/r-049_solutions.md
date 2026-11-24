@@ -28,7 +28,7 @@ The means are 0.2,0.1 and 0.05.
 
 ### Exercise 2
 
-Explain why an ARIMA order(1,0,0) differs from(0,1,0).
+Explain why an ARIMA order (1,0,0) differs from (0,1,0).
 
 The first is an autoregressive level model; the second differences the series and has a different continuation/mean convention.
 

@@ -4,7 +4,7 @@
     {
       "exercise": 1,
       "task": "Apply the role/time rule to the three source records at time 10.",
-      "expected": "Only policy version2 for ops; unknown role and expired time 30 yield no records."
+      "expected": "Only policy version 2 for ops; unknown role and expired time 30 yield no records."
     },
     {
       "exercise": 2,

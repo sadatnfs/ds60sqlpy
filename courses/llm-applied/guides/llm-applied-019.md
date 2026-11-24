@@ -26,7 +26,7 @@ A pair is also conditional on its context. An answer that is preferable under on
 
 For responses y_plus and y_minus to the same input x, define the policy log-probability difference as log pi_theta(y_plus given x) minus log pi_theta(y_minus given x). Define the analogous difference under a fixed reference policy. A DPO-style margin scales the policy-minus-reference advantage by beta, then applies a logistic loss that becomes smaller when that adjusted advantage increases.
 
-The worked scalar example isolates this arithmetic: at equal adjusted margins, loss is log2 and the derivative has a known sign and magnitude. It performs a real SGD step on that scalar. A full language model would obtain the two log probabilities from token-level predictions and backpropagate through its parameters. The scalar itself is not a complete normalized policy over possible responses.
+The worked scalar example isolates this arithmetic: at equal adjusted margins, loss is log(2) and the derivative has a known sign and magnitude. It performs a real SGD step on that scalar. A full language model would obtain the two log probabilities from token-level predictions and backpropagate through its parameters. The scalar itself is not a complete normalized policy over possible responses.
 
 The reference makes the comparison relative to an existing distribution. A response pair already strongly favored by the reference has a different adjusted margin from an equally scored pair, even if the policy's raw difference is the same. Changing the reference checkpoint therefore changes the training objective. It belongs in the experiment's identity alongside tokenizer, response masks and beta.
 
@@ -34,7 +34,7 @@ The reference makes the comparison relative to an existing distribution. A respo
 
 An illustrative probability example makes the distinction concrete. Suppose the reference assigns probabilities 0.4 to the chosen response and 0.3 to the rejected response, leaving 0.3 for other responses. A candidate assigns 0.3 and 0.1, leaving 0.6 elsewhere. The chosen response became less probable in absolute terms, but its advantage over the rejected response increased from \(\frac{4}{3}\) to 3.
 
-The adjusted log-ratio is \(\log(\frac{3}{\frac{4}{3}})=\log(\frac{9}{4})\), about 0.81093. At beta 0.5, the margin is \(\log(\frac{3}{2})\), and the logistic loss is \(\log(\frac{5}{3})\), about 0.51083, below log2. This is a hand calculation for valid illustrative distributions, not a measured model update. It shows why a preference-loss improvement should not be paraphrased as “every chosen answer became more likely” or as a task-accuracy improvement without examining the actual outputs.
+The adjusted log-ratio is \(\log(\frac{3}{\frac{4}{3}})=\log(\frac{9}{4})\), about 0.81093. At beta 0.5, the margin is \(\log(\frac{3}{2})\), and the logistic loss is \(\log(\frac{5}{3})\), about 0.51083, below log(2). This is a hand calculation for valid illustrative distributions, not a measured model update. It shows why a preference-loss improvement should not be paraphrased as “every chosen answer became more likely” or as a task-accuracy improvement without examining the actual outputs.
 
 Sequence scoring adds another assumption. A joint response log probability is a sum of conditional token log probabilities under the chosen mask and stopping convention. Averaging by response length defines a different score. Prompt positions, end markers and truncation must be handled consistently for policy and reference. A convenient normalization should not be introduced silently while retaining the interpretation of a different objective.
 
@@ -90,7 +90,7 @@ Represent the policy log-probability difference as a trainable scalar for the sm
 
 Let d be the policy chosen-minus-rejected log-probability difference and r the same difference under a fixed reference. The adjusted margin is \(z=\beta\cdot (d-r)\), and the loss is \(\log(1+\exp(-z))\), implemented through softplus for numerical stability. Its derivative with respect to d is \(-\beta\operatorname{sigmoid}(-z)\). The second derivative is \({\beta}^{2}\cdot \sigma(z)\cdot \sigma(-z)\), nonnegative, so this scalar loss is convex in d for a fixed reference.
 
-At \(d=r=0\) and beta 0.5, the loss is log2, about 0.693147. The derivative is -0.5*0.5=-0.25, and the curvature is \(0.25\cdot 0.25=0.0625\). SGD with learning rate 0.2 moves d to \(0-0.2\cdot (-0.25)=0.05\). The new adjusted margin is 0.025 and the loss is about 0.680725. This is an actual scalar gradient update in the reference.
+At \(d=r=0\) and beta 0.5, the loss is log(2), about 0.693147. The derivative is -0.5*0.5=-0.25, and the curvature is \(0.25\cdot 0.25=0.0625\). SGD with learning rate 0.2 moves d to \(0-0.2\cdot (-0.25)=0.05\). The new adjusted margin is 0.025 and the loss is about 0.680725. This is an actual scalar gradient update in the reference.
 
 A positive step increases the chosen-response advantage relative to the reference, but it does not uniquely specify the two response probabilities. Many pairs of chosen/rejected log probabilities can have the same difference. The fixture optimizes a free scalar and does not implement a vocabulary softmax, sequence model, KL measurement or normalized policy distribution. Calling it DPO-style margin mechanics preserves that distinction.
 
@@ -162,7 +162,7 @@ Before reading the code for *Inspect the preference gradient*, predict its resul
 
 ## Exercises
 
-1. **Calculate the equal-margin loss.** Set policy difference 0, reference difference 0, beta.5.
+1. **Calculate the equal-margin loss.** Set policy difference 0, reference difference 0, beta 0.5.
    **Expected:** loss log 2.
    **Verify:** Save the assertion results for exercise 1, including loss log 2.
    **Transfer:** This repeats Example A; reproduce it closed-book, then change one literal and predict the new result before running it.

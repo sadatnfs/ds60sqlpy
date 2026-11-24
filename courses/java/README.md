@@ -8,7 +8,7 @@
 > work.
 
 
-All36 lessons in the [reviewed route](track.json) now have complete authored bundles in the [manifest](lessons.json). The course starts with source, types, control flow and objects, then develops collections, generics, functional code, testing, algorithms, concurrency, files, HTTP, JDBC, serialization, service discovery, profiling and release engineering. Every guide has two complete worked examples, six inspectable exercises, mechanism explanations, diagnosis, hints and separate executable/explanatory solutions.
+All 36 lessons in the [reviewed route](track.json) now have complete authored bundles in the [manifest](lessons.json). The course starts with source, types, control flow and objects, then develops collections, generics, functional code, testing, algorithms, concurrency, files, HTTP, JDBC, serialization, service discovery, profiling and release engineering. Every guide has two complete worked examples, six inspectable exercises, mechanism explanations, diagnosis, hints and separate executable/explanatory solutions.
 
 Use the Docker classroom's prepared Java 21 profile. The pad is compiled as `Main.java` with `--release 21` and run with assertions enabled. Helper classes can share that file. You do not need a host JDK. Source viewing, compilation, reference execution and learner mastery are separate evidence; the [validation guide](../../docs/validation.md) defines checks, while exact-revision CI artifacts record the observed prepared-container results.
 

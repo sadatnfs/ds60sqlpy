@@ -42,7 +42,7 @@
       "title": "Choose Cartesian or positional array semantics",
       "input_contract": "For one parent with SKUs[a, b] and channels[web, shop, api], return both independent exploded pairs and arrays_zip positional rows. Explain the relationship required for each interpretation.",
       "expected": "Independent generators produce 6 pairs;zip produces(a, web),(b, shop),(NULL, api), three rows.",
-      "verification": "Assert the complete Cartesian pair set and all three ordered zipped rows including the paddedNULL."
+      "verification": "Assert the complete Cartesian pair set and all three ordered zipped rows including the padded NULL."
     }
   ],
   "golden": {

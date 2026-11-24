@@ -200,31 +200,31 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Execute a bounded grouped mean</span></span>
-<span class="source-line"><span class="syntax-comment"># Use rowsA1, A3, B10 and the admittedgroup_mean request.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: A count 2 mean2; B count 1 mean10.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use rows A1, A3, B10 and the admitted group_mean request.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: A count 2 mean 2; B count 1 mean 10.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Reject an arbitrary operation</span></span>
-<span class="source-line"><span class="syntax-comment"># Submitoperationrun_sql or an extraquery field.</span></span>
+<span class="source-line"><span class="syntax-comment"># Submit operation run_sql or an extra query field.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: ValueError before any computation.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Reject invalid numeric values</span></span>
 <span class="source-line"><span class="syntax-comment"># Replace one value with True, NaN or None, then check large finite values and</span></span>
 <span class="source-line"><span class="syntax-comment"># cancellation under the same numeric policy.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: invalid rows are rejected; equal1e308 values have finite mean1e308 and opposite values have mean0.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: invalid rows are rejected; equal 1e308 values have finite mean 1e308 and opposite values have mean 0.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Enforce identity and work limits</span></span>
-<span class="source-line"><span class="syntax-comment"># Duplicatea1, then supply21 unique rows.</span></span>
+<span class="source-line"><span class="syntax-comment"># Duplicate a1, then supply 21 unique rows.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: duplicate identity and row-limit violations rejected.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Verify an explanation against the artifact</span></span>
-<span class="source-line"><span class="syntax-comment"># Check a proposed sentence saying groupAmean2 against the result; reject a</span></span>
-<span class="source-line"><span class="syntax-comment"># proposedmean20.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: 2accepted; 20mismatch.</span></span>
+<span class="source-line"><span class="syntax-comment"># Check a proposed sentence saying group A mean 2 against the result; reject a</span></span>
+<span class="source-line"><span class="syntax-comment"># proposed mean 20.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: 2 accepted; 20 mismatch.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Refuse an unsupported causal interpretation</span></span>
 <span class="source-line"><span class="syntax-comment"># Attach a descriptive result to a claim that group caused the difference without</span></span>
 <span class="source-line"><span class="syntax-comment"># assignment-design evidence.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: descriptive statisticavailable; causal claimnot established.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: descriptive statistic available; causal claim not established.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

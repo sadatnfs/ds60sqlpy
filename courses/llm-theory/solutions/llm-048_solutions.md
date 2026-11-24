@@ -109,7 +109,7 @@ assert (
 
 The question is: Start with cache prefix [2], append the two proposals, then roll back and append the correction; compare with a fresh cache [2, 0, 0].
 
-The cache stores numerical position-dependentkeys, not only a token list. Retaining a rejected suffix changes both context and position offsets even if the next sampled token is correct.
+The cache stores numerical position-dependent keys, not only a token list. Retaining a rejected suffix changes both context and position offsets even if the next sampled token is correct.
 
 ```python
 cache = TinyCache([2])
@@ -134,7 +134,7 @@ assert broken.tokens != fresh.tokens and not np.allclose(broken.output(), fresh.
 
 The question is: Check that \(p=q\) has no residual, stop on an accepted EOS 2, cap output at 2 tokens, and reject a zero-probability draft proposal.
 
-An accepted EOS ends generation immediately, andabudget is not permission to append an extra bonus. Equal distributions must avoid dividingbyazero residual normalizer. Invalidsupport should fail clearly rather than fabricate a probability.
+An accepted EOS ends generation immediately, and a budget is not permission to append an extra bonus. Equal distributions must avoid dividing by a zero residual normalizer. Invalid support should fail clearly rather than fabricate a probability.
 
 ```python
 alpha, none, mass = correction(p, p)

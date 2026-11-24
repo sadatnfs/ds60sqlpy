@@ -94,7 +94,7 @@ counts = {
 assert counts == {"tp": 1, "tn": 1, "fp": 0, "fn": 0} and sum(counts.values()) == 2
 ```
 
-**Expected:** TP1, TN1, FP0, FN0; total 2.
+**Expected:** TP 1, TN 1, FP 0, FN 0; total 2.
 
 **Verify:** In a fresh process, the exercise checks confirm `counts == {'tp': 1, 'tn': 1, 'fp': 0, 'fn': 0}` and `sum(counts.values()) == 2`.
 

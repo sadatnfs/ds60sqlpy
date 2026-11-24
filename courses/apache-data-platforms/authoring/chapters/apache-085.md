@@ -27,7 +27,7 @@ to that data and start the actual prepared reference server. List the expected
 names, request version 0, inspect protocol/metadata and read the signed Parquet
 files through the compatible client.
 
-Require exact IDs 1/2/3 and amounts 4/9/7plus regional totals11and9. The contract
+Require exact IDs 1/2/3 and amounts 4/9/7 plus regional totals 11 and 9. The contract
 should state UTC/time units where relevant, nullability, money units and whether
 IDs are unique business events or current entities. A schema that merely says
 amount INT leaves important interpretation unstated.

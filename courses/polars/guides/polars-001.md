@@ -58,7 +58,7 @@ if __name__ == "__main__":
 
 The second case defines column types explicitly, then filters every row out. An empty table remains a typed result. Its existence is different from a missing variable or a failed query. Reordering columns changes the presentation contract while preserving values.
 
-**Expected evidence:** The empty frame has 0 rows and the original Int64/String schema; selecting label,id produces that order.
+**Expected evidence:** The empty frame has 0 rows and the original Int64/String schema; selecting label, id produces that order.
 
 ```python
 import polars as pl

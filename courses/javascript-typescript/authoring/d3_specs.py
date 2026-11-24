@@ -2677,8 +2677,8 @@ svg
     ),
     [
         (
-            "Predict selected IDs for groupA.",
-            "Only records whose group isA remain.",
+            "Predict selected IDs for group A.",
+            "Only records whose group is A remain.",
             "A filter is a precise predicate. Check IDs before trusting a changed chart.",
         ),
         (
@@ -2832,7 +2832,7 @@ check(totals.map(([, total]) => total).join(",") === "8,12", "Totals describe on
     [
         (
             "Predict baseline and filtered totals.",
-            "All records total20; groupA totals8.",
+            "All records total20; group A totals8.",
             "Calculate from the source rows before running. The expected values should be independent of the render code.",
         ),
         (

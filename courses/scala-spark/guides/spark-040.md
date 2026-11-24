@@ -157,7 +157,7 @@ Review a fake options record containing a URL, user, password and operational se
 
 Specify the evidence required before enabling a JDBC profile, including missing-driver, mapping, timeout, cancellation and least-privilege checks.
 
-**Inputs/evidence:** Current profile bundles no qualified JDBC driver/remote database; synthetic export and schema mapping only. Optional enrichment IDssql-quality-01 and sql-test-01.
+**Inputs/evidence:** Current profile bundles no qualified JDBC driver/remote database; synthetic export and schema mapping only. Optional enrichment IDs sql-quality-01 and sql-test-01.
 
 **Expected result/shape:** A reviewable acceptance matrix with unavailable runtime rows, not a fabricated successful connection.
 

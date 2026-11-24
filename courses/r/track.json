@@ -934,7 +934,7 @@
       ],
       "outcome": "Construct validation procedures whose partitions and preprocessing match the intended transfer claim.",
       "lab": "Perform leave-one-group-out prediction for the exact rule y=1+2x.",
-      "verification": "Reproduce the worked observations: No shared row IDs can coexist with four shared groups; group split has zero shared groups. Training center1; global center51; valid held-out transformed values 99/101."
+      "verification": "Reproduce the worked observations: No shared row IDs can coexist with four shared groups; group split has zero shared groups. Training center 1; global center 51; valid held-out transformed values 99/101."
     },
     {
       "id": "r-046",
@@ -954,7 +954,7 @@
       ],
       "outcome": "Fit and inspect PCA while preserving its preprocessing, orientation and interpretation contracts.",
       "lab": "Reverse the first loading and score signs together.",
-      "verification": "Reproduce the worked observations: Raw large-unit loading magnitude10/sqrt101; standardized magnitudes1/sqrt2. Near-exact reconstruction and orthonormal loading columns."
+      "verification": "Reproduce the worked observations: Raw large-unit loading magnitude 10/sqrt(101); standardized magnitudes 1/sqrt(2). Near-exact reconstruction and orthonormal loading columns."
     },
     {
       "id": "r-047",
@@ -1015,7 +1015,7 @@
       ],
       "outcome": "Fit and evaluate a small time-series model while preserving temporal information boundaries and forecast targets.",
       "lab": "Construct rolling-origin naive predictions for origins 4 through 7 of 1:8.",
-      "verification": "Reproduce the worked observations: Forecasts 0.2,0.1,0.05 with finite nonnegative SEs. Four one-step forecasts, all errors1, MSE 1."
+      "verification": "Reproduce the worked observations: Forecasts 0.2,0.1,0.05 with finite nonnegative SEs. Four one-step forecasts, all errors 1, MSE 1."
     },
     {
       "id": "r-050",
@@ -1116,7 +1116,7 @@
       ],
       "outcome": "Choose a statistic and grouping contract that matches whether the input contains raw observations or precomputed summaries.",
       "lab": "Diagnose geom_bar(aes(category,n)) with the default statistic.",
-      "verification": "Reproduce the worked observations: Both plots have heights2/1/3, from different declared data representations. Six observations arranged into two line groups."
+      "verification": "Reproduce the worked observations: Both plots have heights 2/1/3, from different declared data representations. Six observations arranged into two line groups."
     },
     {
       "id": "r-055",
@@ -1157,7 +1157,7 @@
       ],
       "outcome": "Construct diagnostic graphics from fitted quantities and explain which model concerns they can investigate without treating a plot as proof.",
       "lab": "Construct a normal Q-Q graphic of those residuals.",
-      "verification": "Reproduce the worked observations: Coefficients1/2 and eight correctly paired residual marks. Slope 2 with residual magnitude increasing exactly with fitted value."
+      "verification": "Reproduce the worked observations: Coefficients 1/2 and eight correctly paired residual marks. Slope 2 with residual magnitude increasing exactly with fitted value."
     },
     {
       "id": "r-057",
@@ -1177,7 +1177,7 @@
       ],
       "outcome": "Construct and inspect a small Plotly figure whose trace data and layout correspond to a declared analytical view.",
       "lab": "Set axis titles through layout.",
-      "verification": "Reproduce the worked observations: Two traces with observed 2/4/3 and rule2/4/6 values. Three bars with named categories and supplied heights2/1/3."
+      "verification": "Reproduce the worked observations: Two traces with observed 2/4/3 and rule 2/4/6 values. Three bars with named categories and supplied heights 2/1/3."
     },
     {
       "id": "r-058",

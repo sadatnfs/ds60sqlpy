@@ -209,17 +209,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Expected: the string remains an evidence value; authorized_operations is unchanged.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Reserve response capacity</span></span>
-<span class="source-line"><span class="syntax-comment"># Use a whitespace budget 12 with response reserve 4 and evidence items of lengths 5 and4.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: first item selected; second omitted; used5 of 8 available units.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use a whitespace budget 12 with response reserve 4 and evidence items of lengths 5 and 4.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: first item selected; second omitted; used 5 of 8 available units.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Version prompt changes</span></span>
 <span class="source-line"><span class="syntax-comment"># Hash the prompt artifact, change the unknown-answer instruction, and compare hashes.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: the hash changes.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Keep evaluation examples isolated</span></span>
-<span class="source-line"><span class="syntax-comment"># Place demonstration familyA in prompt selection and final familyB in assessment; inject</span></span>
-<span class="source-line"><span class="syntax-comment"># a familyB example and detect the intersection.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: clean family intersection is empty; injected intersection containsB.</span></span>
+<span class="source-line"><span class="syntax-comment"># Place demonstration family A in prompt selection and final family B in assessment; inject</span></span>
+<span class="source-line"><span class="syntax-comment"># a family B example and detect the intersection.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: clean family intersection is empty; injected intersection contains B.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Reject an impossible budget</span></span>
 <span class="source-line"><span class="syntax-comment"># Request a response reserve larger than the total context budget.</span></span>

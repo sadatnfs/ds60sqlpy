@@ -58,7 +58,7 @@
     {
       "path": "courses/llm-applied/solutions/llm-applied-003_solutions.md",
       "historical_sha256": "4e775351aa61698442c14aeac79dbee8217cc7f048371a691ff30cb33fb1f77d",
-      "presentation_sha256": "a0968ea79955743b3c8a54a0de3c84d9efc1251a24213e1aa3b239dd6dd0e125",
+      "presentation_sha256": "c4547305c9c5f69107608073ec48805c426d120424bc059d9c5988607fecfe5a",
       "code_block_sha256": [
         "a6120c26245c506326e6d6a59deac0f241455220a9f215c942925881fa253248",
         "038aeffa108d9e12f1a667ab4c9c8a1901cd462150960b28e5c31984f7d5603e",
@@ -74,6 +74,12 @@
           "previous_sha256": "fb449a4cb64904ade99413b3235a5fd2fedfdafb6bd2ef72367ef8bcc4702c80",
           "updated_sha256": "a0968ea79955743b3c8a54a0de3c84d9efc1251a24213e1aa3b239dd6dd0e125",
           "reason": "Prose-only specialization of llm-applied guides and solutions (content-fix pass); code fences byte-identical"
+        },
+        {
+          "baseline_commit": "e5ebc20a5a1def5f1e11e3a512656f54ac437d78",
+          "previous_sha256": "a0968ea79955743b3c8a54a0de3c84d9efc1251a24213e1aa3b239dd6dd0e125",
+          "updated_sha256": "c4547305c9c5f69107608073ec48805c426d120424bc059d9c5988607fecfe5a",
+          "reason": "Prose-only spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code fences byte-identical"
         }
       ]
     },
@@ -146,7 +152,7 @@
     {
       "path": "courses/llm-applied/solutions/llm-applied-007_solutions.md",
       "historical_sha256": "74bb98b2dadb398871f442d4956133e2eaac6f2bfe77a1352650da367b937978",
-      "presentation_sha256": "fff10c347ddb98c8f44c902d7508e73e299a810e592e0eb618729de48dd1478f",
+      "presentation_sha256": "e3dee133aa57eeca25c65341f42f8bfe1519f0b56065d7cf7d94baf8694c7703",
       "code_block_sha256": [
         "7a8f3ada73cd6bb987f1d0b1651c5dbb2692004c1decc8e96f0ce926f78f9c12",
         "3677e56127857b02f6348340d20c62a956468fdabab9055315638d3d4b097fda",
@@ -162,6 +168,12 @@
           "previous_sha256": "ef19fcab1034bf7a21fb6686168f97e521eb51ed1fcaeaaffe09f6027c144a64",
           "updated_sha256": "fff10c347ddb98c8f44c902d7508e73e299a810e592e0eb618729de48dd1478f",
           "reason": "Prose-only specialization of llm-applied guides and solutions (content-fix pass); code fences byte-identical"
+        },
+        {
+          "baseline_commit": "e5ebc20a5a1def5f1e11e3a512656f54ac437d78",
+          "previous_sha256": "fff10c347ddb98c8f44c902d7508e73e299a810e592e0eb618729de48dd1478f",
+          "updated_sha256": "e3dee133aa57eeca25c65341f42f8bfe1519f0b56065d7cf7d94baf8694c7703",
+          "reason": "Prose-only spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code fences byte-identical"
         }
       ]
     },
@@ -306,7 +318,7 @@
     {
       "path": "courses/llm-applied/solutions/llm-applied-014_solutions.md",
       "historical_sha256": "9772400a0eafae378f900f79e805db2ec5a0455bbd25aa0e0bdcc51fe558d6a3",
-      "presentation_sha256": "73fdeca6667fe84ae5d1c633ed49210395d140a959acd5fe42ab6dfe4720565f",
+      "presentation_sha256": "5e8646223d3b4f26604a980fc61594c29621f21d20a038e6bd96a7697b4a0b0a",
       "code_block_sha256": [
         "f0e05f5e521d9707442c4cb584d830b5cea65f0ebda7347ee21cf67d856d9c51",
         "c9e7963e11a3f08172b09107da0be9fd40f7902c2c3ecd5b558ba79542f7588f",
@@ -322,13 +334,19 @@
           "previous_sha256": "bdeda842e57c8823826451ffd6b0d46ec3518cc4cd511087fe6d8e26bb4d44e6",
           "updated_sha256": "73fdeca6667fe84ae5d1c633ed49210395d140a959acd5fe42ab6dfe4720565f",
           "reason": "Prose-only specialization of llm-applied guides and solutions (content-fix pass); code fences byte-identical"
+        },
+        {
+          "baseline_commit": "e5ebc20a5a1def5f1e11e3a512656f54ac437d78",
+          "previous_sha256": "73fdeca6667fe84ae5d1c633ed49210395d140a959acd5fe42ab6dfe4720565f",
+          "updated_sha256": "5e8646223d3b4f26604a980fc61594c29621f21d20a038e6bd96a7697b4a0b0a",
+          "reason": "Prose-only spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code fences byte-identical"
         }
       ]
     },
     {
       "path": "courses/llm-applied/solutions/llm-applied-015_solutions.md",
       "historical_sha256": "8b96e046876d195ddf9841777e0270226aa56eac1fe7f9b661d1919cb858084f",
-      "presentation_sha256": "23779f59a064c5e388fc15e5c98ebb53e71a971098ac1a5429685b5a44b043ef",
+      "presentation_sha256": "35104f840f9d28e417cccafbdda83fa83b6412f18dc0cc164691668dcbb83891",
       "code_block_sha256": [
         "d3490ab00937b4efbf620e4d5277dfece4169abf650634d71cf0637fb23d2830",
         "9c5c01960de1d2886152ade31f1aab484a3058c7068c28f712fa602603ed27c7",
@@ -344,6 +362,12 @@
           "previous_sha256": "c35776d15654b52696d0ee31b14f8126ac4c19dfc5f42430eb3dc15450f23d9d",
           "updated_sha256": "23779f59a064c5e388fc15e5c98ebb53e71a971098ac1a5429685b5a44b043ef",
           "reason": "Prose-only specialization of llm-applied guides and solutions (content-fix pass); code fences byte-identical"
+        },
+        {
+          "baseline_commit": "e5ebc20a5a1def5f1e11e3a512656f54ac437d78",
+          "previous_sha256": "23779f59a064c5e388fc15e5c98ebb53e71a971098ac1a5429685b5a44b043ef",
+          "updated_sha256": "35104f840f9d28e417cccafbdda83fa83b6412f18dc0cc164691668dcbb83891",
+          "reason": "Prose-only spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code fences byte-identical"
         }
       ]
     },
@@ -372,7 +396,7 @@
     {
       "path": "courses/llm-applied/solutions/llm-applied-017_solutions.md",
       "historical_sha256": "7bf5bdd4ccdcd66689972e4ea497b6a36547c7258edcbe9014360353e2a3b5c2",
-      "presentation_sha256": "1577018e5316a81b8cd4e07bad11503dcf3ed4864004bae7b177b8e646bd3e88",
+      "presentation_sha256": "9fe32347e32137d64e0997b787d17e38d1fb04543d11d413f3cd7a5e13b92a7c",
       "code_block_sha256": [
         "378bf67d06b34c20b892739ea6d8c180dceb92c90ee4569ea3ba446411ae7a99",
         "1e5fd03d25142cac72c0c84a7d5baa5cc9c065d887a43f51d6b35d5b17c09f1c",
@@ -388,13 +412,19 @@
           "previous_sha256": "0e75df2bbfa9fcc7208d120d1c18d312a4527b21355bb8e89b1377a455c6abc3",
           "updated_sha256": "1577018e5316a81b8cd4e07bad11503dcf3ed4864004bae7b177b8e646bd3e88",
           "reason": "Prose-only specialization of llm-applied guides and solutions (content-fix pass); code fences byte-identical"
+        },
+        {
+          "baseline_commit": "e5ebc20a5a1def5f1e11e3a512656f54ac437d78",
+          "previous_sha256": "1577018e5316a81b8cd4e07bad11503dcf3ed4864004bae7b177b8e646bd3e88",
+          "updated_sha256": "9fe32347e32137d64e0997b787d17e38d1fb04543d11d413f3cd7a5e13b92a7c",
+          "reason": "Prose-only spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code fences byte-identical"
         }
       ]
     },
     {
       "path": "courses/llm-applied/solutions/llm-applied-018_solutions.md",
       "historical_sha256": "bef1629a2ef5a23474a9f78b9455854f7064ec11dde668a11093580acd4284bf",
-      "presentation_sha256": "312eb4fab9af6e0ec1e3b65d1f8461bda245ce959789f3e14f0d3947892ba640",
+      "presentation_sha256": "d0a31588c26004b092034fbd2d7454a540a53a35d921c256ec8dde3792c2e779",
       "code_block_sha256": [
         "9a5160274ea20afae2f7d62cb7b7a8143fdb55929fe4ad3834d09bad897dad30",
         "c61447b99b7360cb86e7e467c50146d8c7c8cce2a1646a1a36ce89498644ab87",
@@ -410,13 +440,19 @@
           "previous_sha256": "5dc8c99f1464a83fcd5eaed9be1c6a15c82f976784596ae49fc5ef1904337676",
           "updated_sha256": "312eb4fab9af6e0ec1e3b65d1f8461bda245ce959789f3e14f0d3947892ba640",
           "reason": "Prose-only specialization of llm-applied guides and solutions (content-fix pass); code fences byte-identical"
+        },
+        {
+          "baseline_commit": "e5ebc20a5a1def5f1e11e3a512656f54ac437d78",
+          "previous_sha256": "312eb4fab9af6e0ec1e3b65d1f8461bda245ce959789f3e14f0d3947892ba640",
+          "updated_sha256": "d0a31588c26004b092034fbd2d7454a540a53a35d921c256ec8dde3792c2e779",
+          "reason": "Prose-only spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code fences byte-identical"
         }
       ]
     },
     {
       "path": "courses/llm-applied/solutions/llm-applied-019_solutions.md",
       "historical_sha256": "b0f112eab7967fb4b238b41c99ab6c084332fdca033323c22237fa3e1073ab97",
-      "presentation_sha256": "e6ef83a295680ccdf596733f6335d3dc390c94b691a0cdbe4678e8a90b717785",
+      "presentation_sha256": "fc653dda5cd35adcad03ece0972f5633a6a402b5e2bd0d5b138743ab67a42e92",
       "code_block_sha256": [
         "62ce10639c86c5e4838f4416fb8fa68e71671e8f028b185294af4746d442efc8",
         "517c5cad811e1a0e857a659b02e0c7f8bf7e42ac120f3789970f0709886d6033",
@@ -438,13 +474,19 @@
           "previous_sha256": "6e826f0b25fbffd5b36e6df93e5fe83c71b390de8467fa9d27933e0b87b8f432",
           "updated_sha256": "e6ef83a295680ccdf596733f6335d3dc390c94b691a0cdbe4678e8a90b717785",
           "reason": "spot-check fix"
+        },
+        {
+          "baseline_commit": "e5ebc20a5a1def5f1e11e3a512656f54ac437d78",
+          "previous_sha256": "e6ef83a295680ccdf596733f6335d3dc390c94b691a0cdbe4678e8a90b717785",
+          "updated_sha256": "fc653dda5cd35adcad03ece0972f5633a6a402b5e2bd0d5b138743ab67a42e92",
+          "reason": "Prose-only spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code fences byte-identical"
         }
       ]
     },
     {
       "path": "courses/llm-applied/solutions/llm-applied-020_solutions.md",
       "historical_sha256": "7a351cd30f8281e48ceeb15fe4d630a0c8ca4af4da82af80a3a600c414b5542a",
-      "presentation_sha256": "5e36153353859439a680fd6d945d8a294abcb7f8dbb4f3bdd150233d1ace2bc3",
+      "presentation_sha256": "77671e2a248d1659f9a8be09d01c56c8ec4d129d8c5a4e9e108b651de823b9c2",
       "code_block_sha256": [
         "cf95ecb2210182d1412939188268ab372dd50911417f2f57207c923af7fd2552",
         "ece34bdc353d6b76c3e8351f7b6aae5bd5c2445ff5992cd6d3b43d316048a7be",
@@ -460,6 +502,12 @@
           "previous_sha256": "90e07aa54a93835b6d24fb44fc6496d28a478f0d4ac694fb94ecf99aff7f3fbe",
           "updated_sha256": "5e36153353859439a680fd6d945d8a294abcb7f8dbb4f3bdd150233d1ace2bc3",
           "reason": "Prose-only specialization of llm-applied guides and solutions (content-fix pass); code fences byte-identical"
+        },
+        {
+          "baseline_commit": "e5ebc20a5a1def5f1e11e3a512656f54ac437d78",
+          "previous_sha256": "5e36153353859439a680fd6d945d8a294abcb7f8dbb4f3bdd150233d1ace2bc3",
+          "updated_sha256": "77671e2a248d1659f9a8be09d01c56c8ec4d129d8c5a4e9e108b651de823b9c2",
+          "reason": "Prose-only spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code fences byte-identical"
         }
       ]
     },
@@ -488,7 +536,7 @@
     {
       "path": "courses/llm-applied/solutions/llm-applied-022_solutions.md",
       "historical_sha256": "1703504390d064eb4e0d1bf6f98f204e9d7a4c652bae1cd1aa89ee0606fecaf5",
-      "presentation_sha256": "85d19db1ea49a89ebf99d537db4479b88923ee784525106f15a4ee80c89d3e22",
+      "presentation_sha256": "a4ea651ae88d92e023ce9c401b6f4ce069187cd869bea922a3ecbc07ad121eb7",
       "code_block_sha256": [
         "3a78e154c9a4e8da368da9fce5295cffdd7e2ba8ba089b2faa95a433d5710434",
         "e326d8d4553c0f0599517a7bdccc5a6f1f396b083e0b0a7f5de899033cebc10c",
@@ -504,6 +552,12 @@
           "previous_sha256": "078f57b22355b17b0b3bc3952be9ba2a536f574a9d03b551ac8675b15063cb91",
           "updated_sha256": "85d19db1ea49a89ebf99d537db4479b88923ee784525106f15a4ee80c89d3e22",
           "reason": "Prose-only specialization of llm-applied guides and solutions (content-fix pass); code fences byte-identical"
+        },
+        {
+          "baseline_commit": "e5ebc20a5a1def5f1e11e3a512656f54ac437d78",
+          "previous_sha256": "85d19db1ea49a89ebf99d537db4479b88923ee784525106f15a4ee80c89d3e22",
+          "updated_sha256": "a4ea651ae88d92e023ce9c401b6f4ce069187cd869bea922a3ecbc07ad121eb7",
+          "reason": "Prose-only spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code fences byte-identical"
         }
       ]
     },
@@ -580,7 +634,7 @@
     {
       "path": "courses/deep-learning-pytorch/guides/torch-012.md",
       "historical_sha256": "90019fddbdacdf0c6efe211c13e708e2a93f9549195c89e9635322afa688aef3",
-      "presentation_sha256": "a2dea94f89ccaf9dd3bed232af8aaf6b2635be35d7d47074bad6b55fd2707332",
+      "presentation_sha256": "57caa5cead2e9fca295dd5701964e4a7afef27c9ee16ab8553abc68b5af3a3cb",
       "code_block_sha256": [
         "d4c93b21a4b208f699d313c3c6205057b177b89b77d9822dc586c922dc683547",
         "350a6ab02aa8ff72dd664de997d4207f5ae1ebc4c95e53b9ff6d66e2b91b74f8",
@@ -594,13 +648,19 @@
           "previous_sha256": "2b264e07951966d76dbc031b7de6b604ae611de5823e21eba26d87504fcc7a0f",
           "updated_sha256": "a2dea94f89ccaf9dd3bed232af8aaf6b2635be35d7d47074bad6b55fd2707332",
           "reason": "Replace the retired status-page reference and native Windows setup directions with maintained validation and Docker/WSL guidance. Protected code blocks are byte-identical."
+        },
+        {
+          "baseline_commit": "e5ebc20a5a1def5f1e11e3a512656f54ac437d78",
+          "previous_sha256": "a2dea94f89ccaf9dd3bed232af8aaf6b2635be35d7d47074bad6b55fd2707332",
+          "updated_sha256": "57caa5cead2e9fca295dd5701964e4a7afef27c9ee16ab8553abc68b5af3a3cb",
+          "reason": "Prose-only spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code fences byte-identical"
         }
       ]
     },
     {
       "path": "courses/deep-learning-pytorch/guides/torch-016.md",
       "historical_sha256": "208d77980330fe66a1b917dba3f396f8a71291aa52df4e935cb03acd08bc105b",
-      "presentation_sha256": "c510b43a84497059f28c2a0539a7169ce7bf96a7413ed27428e06a788385d614",
+      "presentation_sha256": "8a71d07fd4fc78e0930f76e912f1bbc24f8bb96fa6949af6e6c6d61d97539f2f",
       "code_block_sha256": [
         "bcf36df2c10f62e86bba9526bfed4d33845ac5740d0696bb77ed8ca06c37edf7",
         "d3437f49f12ddc5ae24a2190891c9031deea8a659e1d7bf14a95eac1f828bdbc",
@@ -614,6 +674,12 @@
           "previous_sha256": "d3d3fd1b1db18e14d82690ca5be36a2ccb824ddb8ab81fdd3d927f055a77fc0e",
           "updated_sha256": "c510b43a84497059f28c2a0539a7169ce7bf96a7413ed27428e06a788385d614",
           "reason": "Replace the retired status-page reference and native Windows setup directions with maintained validation and Docker/WSL guidance. Protected code blocks are byte-identical."
+        },
+        {
+          "baseline_commit": "e5ebc20a5a1def5f1e11e3a512656f54ac437d78",
+          "previous_sha256": "c510b43a84497059f28c2a0539a7169ce7bf96a7413ed27428e06a788385d614",
+          "updated_sha256": "8a71d07fd4fc78e0930f76e912f1bbc24f8bb96fa6949af6e6c6d61d97539f2f",
+          "reason": "Prose-only spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code fences byte-identical"
         }
       ]
     },
@@ -621,7 +687,7 @@
       "path": "courses/llm-applied/track.json",
       "kind": "display_metadata",
       "historical_sha256": "ff50a33b82c114aa48d9bb427893e570e06e3186146385fdb6ecc37a005d6041",
-      "presentation_sha256": "88977bf35a9c15c472b3a36345be62a919b757620dbfda024516b2a88c0a6325",
+      "presentation_sha256": "53ea55db4b13c7ebecef40958ef349482ece9c1022229b702e53f6d7c245ae54",
       "protected_metadata_sha256": "b7dcc4c22362fcac1451d673f2da3cee49224bd208805ca526ed760c73c3c270",
       "presentation_history": [
         {
@@ -629,13 +695,19 @@
           "previous_sha256": "b006c84830213d0b4e91879cd6ee70e5e9b8d311bb45f5dd95b592c28f84655c",
           "updated_sha256": "88977bf35a9c15c472b3a36345be62a919b757620dbfda024516b2a88c0a6325",
           "reason": "Lesson outcomes rewritten as measurable learner actions (CURR-07); non-prose metadata unchanged"
+        },
+        {
+          "baseline_commit": "e5ebc20a5a1def5f1e11e3a512656f54ac437d78",
+          "previous_sha256": "88977bf35a9c15c472b3a36345be62a919b757620dbfda024516b2a88c0a6325",
+          "updated_sha256": "53ea55db4b13c7ebecef40958ef349482ece9c1022229b702e53f6d7c245ae54",
+          "reason": "Prose-only spacing correction in display text (restored spaces around numbers and inline names lost by an old math normalizer); protected metadata unchanged"
         }
       ]
     },
     {
       "path": "courses/deep-learning-pytorch/guides/torch-015.md",
       "historical_sha256": "04bb96e04a3cc0c8beb3ff3aad8d9ae45c7ce740e3afa4c614e50afe4b965eaa",
-      "presentation_sha256": "1f2b54d31c20526fbab3da987403e414a10662db4f3bd0747c8530a51e3eb5fc",
+      "presentation_sha256": "9194a45639f2a95be432d304f8782db617b221b396d52239e9f8a25cf85bb6f0",
       "code_block_sha256": [
         "20c7b4e7e3a2c8f18cacff595e6bf582c6b4302e35e616408f19b1a98aab35f1",
         "bd658da66120d46a6c8f7c5b62538eaef0d8e70584d714c57a36f773ff8294e0",
@@ -649,6 +721,12 @@
           "previous_sha256": "ae229623997ef6934b27584b2ad9abcfc2e6e4c0f124c68e94af0c7a45de5ca3",
           "updated_sha256": "1f2b54d31c20526fbab3da987403e414a10662db4f3bd0747c8530a51e3eb5fc",
           "reason": "Replace the retired status-page reference and native Windows setup directions with maintained validation and Docker/WSL guidance. Protected code blocks are byte-identical."
+        },
+        {
+          "baseline_commit": "e5ebc20a5a1def5f1e11e3a512656f54ac437d78",
+          "previous_sha256": "1f2b54d31c20526fbab3da987403e414a10662db4f3bd0747c8530a51e3eb5fc",
+          "updated_sha256": "9194a45639f2a95be432d304f8782db617b221b396d52239e9f8a25cf85bb6f0",
+          "reason": "Prose-only spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code fences byte-identical"
         }
       ]
     }

@@ -74,7 +74,7 @@ The check targets the file-scan field requirement, which is where pruning is obs
 
 Execute the grouped aggregate and capture its FORMATTED plan. Return group_id, n, total and locate aggregate plus Exchange operators under the fixed AQE-disabled configuration.
 
-**Expected:** Groups 0,1,2 each have n3 with totals 180,210,240. The plan shows aggregation and an Exchange.
+**Expected:** Groups 0,1,2 each have n = 3 with totals 180,210,240. The plan shows aggregation and an Exchange.
 
 ```scala
 def aggregateResult(spark: SparkSession, query: String): Seq[(Long, Long, Long)] = {

@@ -100,7 +100,7 @@ cd courses/python-web/projects/web-lab
 
 The actual test opens an SSE connection and receives a queued/running event while
 the job is still unreleased. Only after receiving bytes does it release the job.
-It disconnects, reconnects with Last-Event-ID and verifies the committed result10.
+It disconnects, reconnects with Last-Event-ID and verifies the committed result 10.
 It also performs a real one-message WebSocket exchange. Inspect the source-bound
 receipt under this owned project's `.workshop/acceptance.json`.
 

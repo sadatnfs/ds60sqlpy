@@ -14,17 +14,17 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: the string remains an evidence value; authorized_operations is unchanged.
 
 # Exercise 3: Reserve response capacity
-# Use a whitespace budget 12 with response reserve 4 and evidence items of lengths 5 and4.
-# Expected: first item selected; second omitted; used5 of 8 available units.
+# Use a whitespace budget 12 with response reserve 4 and evidence items of lengths 5 and 4.
+# Expected: first item selected; second omitted; used 5 of 8 available units.
 
 # Exercise 4: Version prompt changes
 # Hash the prompt artifact, change the unknown-answer instruction, and compare hashes.
 # Expected: the hash changes.
 
 # Exercise 5: Keep evaluation examples isolated
-# Place demonstration familyA in prompt selection and final familyB in assessment; inject
-# a familyB example and detect the intersection.
-# Expected: clean family intersection is empty; injected intersection containsB.
+# Place demonstration family A in prompt selection and final family B in assessment; inject
+# a family B example and detect the intersection.
+# Expected: clean family intersection is empty; injected intersection contains B.
 
 # Exercise 6: Reject an impossible budget
 # Request a response reserve larger than the total context budget.

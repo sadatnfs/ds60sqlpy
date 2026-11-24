@@ -6,7 +6,7 @@ Read these sparse experts, routing capacity and load balancing answers after att
 
 A mixture-of-experts layer routes each token to a subset of specialized transformations. The total model can contain many expert parameters while activating only a few per token. That does not make memory or communication free: all experts must be stored somewhere, and distributed routing moves token activations to the devices owning selected experts. Uneven routing can overload one expert while others remain idle.
 
-The router produces scores or probabilities over experts. A top-k decision selects indices, then a declared gate rule weights the selected outputs. Some designs retain selected probabilities from the full softmax; others renormalize among selected experts. Those choices change gradients and output scale. This lesson states its rule explicitly: the top-k mixture renormalizes selected mass, while the capacity demonstration uses a unit-weight top1 expert delta inside a residual path.
+The router produces scores or probabilities over experts. A top-k decision selects indices, then a declared gate rule weights the selected outputs. Some designs retain selected probabilities from the full softmax; others renormalize among selected experts. Those choices change gradients and output scale. This lesson states its rule explicitly: the top-k mixture renormalizes selected mass, while the capacity demonstration uses a unit-weight top-1 expert delta inside a residual path.
 
 Capacity bounds how many tokens an expert accepts in one batch. Overflow needs a visible policy, such as dropping the expert delta and using the residual path. A load-balancing auxiliary objective can encourage less concentrated routing, but it does not prove that a system achieves good load balance, quality or throughput. The reference uses literal linear experts and finite-difference router gradients; it does not launch expert-parallel workers or claim large-model scaling.
 
@@ -90,7 +90,7 @@ np.testing.assert_allclose(
 
 The question is: Perturb the first logit of the first top-2 mixture row without changing selected experts.
 
-Within a fixedselectedset, the normalized gates vary smoothly. At a top-k membership boundary, the hard index choice is not differentiable in the same way. Do not interpret this local derivative as differentiating through every routing decision.
+Within a fixed selected set, the normalized gates vary smoothly. At a top-k membership boundary, the hard index choice is not differentiable in the same way. Do not interpret this local derivative as differentiating through every routing decision.
 
 ```python
 h = 1e-6

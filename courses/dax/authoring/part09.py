@@ -985,7 +985,7 @@ LESSONS = [
             ),
             t(
                 "Transfer the capstone to currency conversion.",
-                "The exchange rate depends ondate andcurrency, not product alone.",
+                "The exchange rate depends on date and currency, not product alone.",
                 (
                     "Group only by keys that preserve the full rate domain, "
                     "then compare row-level and grouped results across "

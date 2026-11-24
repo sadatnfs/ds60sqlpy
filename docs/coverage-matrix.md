@@ -18,7 +18,7 @@ file drifts from the catalogs or a cataloged lesson is missing.
 - Execution: 1478 runnable, 348 reading, 12 operations
 - Module variants folded into canonical rows: 236 across 173 lessons
 - Lessons with no recorded gap: 1838
-- Templated prose words: 835280
+- Templated prose words: 835278
 
 ## Gap codes
 
@@ -58,11 +58,11 @@ lessons are complete worked chapters and carry no exercise contract.
 | module | Scientific visualization with Plotly: Python and JavaScript (`data-visualization`) | 8 | 8 | 0 | 8 | 0 | 0 | 0 | 1157 | 640 | 8 |
 | module | DAX: semantic models, context and analytical reasoning (`dax`) | 60 | 60 | 0 | 60 | 0 | 0 | 0 | 1181 | 26172 | 60 |
 | module | dbt and analytics engineering (`dbt`) | 26 | 26 | 0 | 26 | 0 | 0 | 0 | 1439 | 10128 | 26 |
-| module | Deep Learning with PyTorch: tensors to reliable model releases (`deep-learning-pytorch`) | 36 | 36 | 0 | 35 | 1 | 0 | 0 | 2724 | 19980 | 36 |
+| module | Deep Learning with PyTorch: tensors to reliable model releases (`deep-learning-pytorch`) | 36 | 36 | 0 | 35 | 1 | 0 | 0 | 2728 | 19980 | 36 |
 | module | Deep learning with TensorFlow and Keras (`deep-learning-tensorflow`) | 36 | 36 | 0 | 35 | 1 | 0 | 3 | 1912 | 17628 | 36 |
 | module | Docker: images, applications and operating containers (`docker`) | 42 | 42 | 0 | 0 | 42 | 0 | 0 | 1246 | 15734 | 42 |
 | module | Go: practical programs, concurrency and Kubernetes controllers (`go`) | 48 | 48 | 0 | 48 | 0 | 0 | 0 | 2209 | 61712 | 48 |
-| module | Java: from the first compile to reliable applications (`java`) | 36 | 36 | 0 | 36 | 0 | 0 | 0 | 2271 | 54234 | 36 |
+| module | Java: from the first compile to reliable applications (`java`) | 36 | 36 | 0 | 36 | 0 | 0 | 0 | 2270 | 54232 | 36 |
 | module | JavaScript and TypeScript: language, browser and Node applications (`javascript-typescript`) | 66 | 66 | 0 | 63 | 3 | 0 | 0 | 2122 | 69429 | 66 |
 | module | JAX: numerical functions to independent scientific work (`jax`) | 34 | 34 | 0 | 31 | 3 | 0 | 0 | 1552 | 5332 | 34 |
 | module | Julia language and scientific computing (`julia`) | 32 | 32 | 0 | 32 | 0 | 0 | 0 | 1121 | 4663 | 32 |
@@ -74,7 +74,7 @@ lessons are complete worked chapters and carry no exercise contract.
 | module | Natural Language Processing: from text to reliable language systems (`nlp`) | 24 | 24 | 0 | 24 | 0 | 0 | 0 | 1906 | 2687 | 24 |
 | module | Polars: columnar data engineering (`polars`) | 18 | 18 | 0 | 18 | 0 | 0 | 0 | 1160 | 3719 | 18 |
 | module | Python web development: HTTP, Flask, FastAPI and Django (`python-web`) | 72 | 0 | 72 | 69 | 3 | 0 | 0 | 1184 | 3838 | 72 |
-| module | R: programming, statistical computing and visualization (`r`) | 60 | 60 | 0 | 60 | 0 | 0 | 0 | 1227 | 11266 | 60 |
+| module | R: programming, statistical computing and visualization (`r`) | 60 | 60 | 0 | 60 | 0 | 0 | 0 | 1229 | 11266 | 60 |
 | module | Rust: ownership, reliable systems and Arrow data engineering (`rust`) | 48 | 48 | 0 | 48 | 0 | 0 | 0 | 1163 | 27935 | 48 |
 | module | Scala and Apache Spark: Correct Data, Measured Execution, Recoverable Products (`scala-spark`) | 42 | 42 | 0 | 39 | 3 | 0 | 3 | 2283 | 13549 | 42 |
 | module | Spark deployment: Compose, notebooks and Kubernetes (`spark-deployment`) | 18 | 0 | 18 | 0 | 18 | 0 | 0 | 1307 | 720 | 18 |

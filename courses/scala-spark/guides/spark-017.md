@@ -192,7 +192,7 @@ For one parent with SKUs [a, b] and channels [web, shop, api], return both indep
 
 **Expected result/shape:** Independent generators produce 6 pairs; zip produces (a, web), (b, shop), (NULL, api), three rows.
 
-**Verify:** Assert the complete Cartesian pair set and all three ordered zipped rows including the paddedNULL.
+**Verify:** Assert the complete Cartesian pair set and all three ordered zipped rows including the padded NULL.
 
 **Progressive hint:** Consecutive explodes multiply occurrence counts; arrays_zip aligns by position and pads the shorter side.
 

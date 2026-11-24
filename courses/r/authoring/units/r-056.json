@@ -37,7 +37,7 @@
       "title": "Tie diagnostic marks to fitted residuals",
       "code": "d <- data.frame(id = 1:8, x = 0:7)\nd$y <- 1 + 2 * d$x + c(-0.3, 0.2, 0.1, -0.2, 0.4, -0.1, 0.2, -0.3)\nfit <- lm(y ~ x, data = d)\ndiagnostic <- data.frame(id = d$id, fitted = fitted(fit), residual = residuals(fit))\np <- ggplot2::ggplot(diagnostic, ggplot2::aes(fitted, residual)) +\n  ggplot2::geom_point() +\n  ggplot2::geom_hline(yintercept = 0, linetype = \"dashed\") +\n  ggplot2::labs(x = \"Fitted response\", y = \"Residual\", title = \"Residuals from the declared linear fit\")\nstopifnot(max(abs(unname(coef(fit)) - c(1, 2))) < 1e-10)\nstopifnot(max(abs(ggplot2::ggplot_build(p)$data[[1]]$y - diagnostic$residual)) < 1e-12)\nprint(p)\n",
       "explanation": "The numerical oracle validates the fit and the actual residual values passed to the layer. The plot then supports inspection of patterns rather than replacing those calculations.",
-      "expected": "Coefficients1/2 and eight correctly paired residual marks."
+      "expected": "Coefficients 1/2 and eight correctly paired residual marks."
     },
     {
       "title": "Separate mean fit from changing spread",

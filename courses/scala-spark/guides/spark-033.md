@@ -32,7 +32,7 @@ The [Scala learner](../lessons/spark-033.scala) and [PySpark learner](../lessons
 
 - **Branch input accounting:** The distinction between source deliveries and processing counts from multiple queries reading the same input.
 
-The fixture distinguishes deliveries from events. Delivery 1 represents evente 1, delivery 2 represents e2, and delivery 4 is a replay ofe 1 with the same amount and event time. Delivery 5 representse 3. All three business events happen to have amount 10. A correct event-ID deduplication keeps e1, e2, e3, for a business total of 30; deduplicating only by amount would collapse distinct events and produce an incorrect total 10.
+The fixture distinguishes deliveries from events. Delivery 1 represents event e1, delivery 2 represents e2, and delivery 4 is a replay of e1 with the same amount and event time. Delivery 5 represents e3. All three business events happen to have amount 10. A correct event-ID deduplication keeps e1, e2, e3, for a business total of 30; deduplicating only by amount would collapse distinct events and produce an incorrect total 10.
 
 Delivery 3 has a NULL event ID and amount 99. It cannot be confidently attributed to a business event, so it enters a quarantine output with reason missing_event_id. Treating every NULL ID as one shared entity would merge unrelated unknown records. Generating a new arbitrary ID would hide the missing-identity defect. The original delivery ID remains available so the quarantine row can be reconciled with the source occurrence.
 

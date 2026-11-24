@@ -7,61 +7,87 @@
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-002.py",
-      "sha256": "290785023ab9daf99485211a4f9525a1d2e8f9608fb4356963d5287a67a68f4d"
+      "sha256": "92492b159cfb0d3a2c8a4abd9022ca43255461a4dca62c17b96639c5e15f3e93",
+      "previous_sha256": "290785023ab9daf99485211a4f9525a1d2e8f9608fb4356963d5287a67a68f4d",
+      "revision": "Comment-only prose spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code unchanged."
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-003.py",
-      "sha256": "a733eeb1ab76384030b48eb3c5c840b8d66d22b4fa4af9c0625e8fbfa9f41cd7"
+      "sha256": "94119f8e0c28ca9a3869ddda75445278d562d55893f26cd1a6edab04f71b2cc5",
+      "previous_sha256": "a733eeb1ab76384030b48eb3c5c840b8d66d22b4fa4af9c0625e8fbfa9f41cd7",
+      "revision": "Comment-only prose spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code unchanged."
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-004.py",
-      "sha256": "a0d4e151aeea952d23e9589dbaf56e4f9a9217d94444641b70aa53ba800a0b10"
+      "sha256": "f1736266bd1fb08a166e372a122db3e7b571c27d86a35a9073d175518ef98a0c",
+      "previous_sha256": "a0d4e151aeea952d23e9589dbaf56e4f9a9217d94444641b70aa53ba800a0b10",
+      "revision": "Comment-only prose spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code unchanged."
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-005.py",
-      "sha256": "b6c593b8670305745ae05dd320aa882332821800fd7a10e5d6f23a775de0992e"
+      "sha256": "1741a39c231b8aba29db81166cb98a60f73b089be064e7c5568f1a62e174ba84",
+      "previous_sha256": "b6c593b8670305745ae05dd320aa882332821800fd7a10e5d6f23a775de0992e",
+      "revision": "Comment-only prose spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code unchanged."
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-006.py",
-      "sha256": "5df69d761006a006c0c9e0a29be4733b7b2d613eda70689f401d9e4e7e0c2aaa"
+      "sha256": "8e9a7cf375a924174b76a3ac2905e95bce0b1b02ea58e6038bc1e4125f858356",
+      "previous_sha256": "5df69d761006a006c0c9e0a29be4733b7b2d613eda70689f401d9e4e7e0c2aaa",
+      "revision": "Comment-only prose spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code unchanged."
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-007.py",
-      "sha256": "6f980519a8a35301b82503eb9ea936d1c97425f0de44c3d802a360c1dcd67d3d"
+      "sha256": "72fe8fc8474bd275a785ae63080ebf1c2e302b817fb38816348463c63fc78560",
+      "previous_sha256": "6f980519a8a35301b82503eb9ea936d1c97425f0de44c3d802a360c1dcd67d3d",
+      "revision": "Comment-only prose spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code unchanged."
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-008.py",
-      "sha256": "694b1c221c7839d7fb8ff96ad81b6caa3be4aeb07c7a3ae9effe5d874ad425ac"
+      "sha256": "51964e0e768eac4d87367e9e5d7143c7755e44fdeae5e943ee458b52ec5da7c6",
+      "previous_sha256": "694b1c221c7839d7fb8ff96ad81b6caa3be4aeb07c7a3ae9effe5d874ad425ac",
+      "revision": "Comment-only prose spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code unchanged."
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-009.py",
-      "sha256": "f4f395a37d4bbfb07b672d8e8f842f8a45cd51be9b1b572018861039dd4a1fe8"
+      "sha256": "0e67c7003615bc7b73bcca336087dcaedd7d5d74acbb4daf889e710aee7b4fd9",
+      "previous_sha256": "f4f395a37d4bbfb07b672d8e8f842f8a45cd51be9b1b572018861039dd4a1fe8",
+      "revision": "Comment-only prose spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code unchanged."
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-010.py",
-      "sha256": "ee95fd51c95ee903283bf39ae632c78a3da125e9985a47631fcb0f90793407b3"
+      "sha256": "27fe5c7b72765f25af12dcd62e68d0ac4075e3be4675de1083bfa6cdd652c5b8",
+      "previous_sha256": "ee95fd51c95ee903283bf39ae632c78a3da125e9985a47631fcb0f90793407b3",
+      "revision": "Comment-only prose spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code unchanged."
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-011.py",
-      "sha256": "b837bc9f9ea311d0140e40925561eaab2fdcc843f3430496fd51ccf1c5ea2f30",
+      "sha256": "01ffa4bcbb36fac7e9c6945442f47953c8d88efc5d564451c8025f70838f8809",
       "previous_sha256": "f4290435f19323d208644d78d60dbca571a6b7641bba67ae77278ba8162cf725",
-      "revision": "Comment-only correction of numerals that lost their spacing or leading zero (for example rate.3 to rate 0.3); code unchanged."
+      "revision": "Comment-only correction of numerals that lost their spacing or leading zero (for example rate.3 to rate 0.3); code unchanged. Comment-only prose spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code unchanged."
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-012.py",
-      "sha256": "19dcc1b13934612920d224545ed529c7fe76fa67894ec9065b4171f03d89aa38"
+      "sha256": "aeced8c8bfcb966ed93532cb325711aa518667a252117c08a40949efb6194b6b",
+      "previous_sha256": "19dcc1b13934612920d224545ed529c7fe76fa67894ec9065b4171f03d89aa38",
+      "revision": "Comment-only prose spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code unchanged."
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-013.py",
-      "sha256": "4efdb474d2bc9e160812801b03e30cb8e6577bd7c179004f0938eb8172f517b9"
+      "sha256": "b8b792ba2a4b9e172534b98e066439b090fc43d7010d86e910c3e77d6e879247",
+      "previous_sha256": "4efdb474d2bc9e160812801b03e30cb8e6577bd7c179004f0938eb8172f517b9",
+      "revision": "Comment-only prose spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code unchanged."
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-014.py",
-      "sha256": "c42425f671b8f9def2eb5cc8005f9bab1df07b0d23749e7cc8ca171e294d60c7"
+      "sha256": "1220e464b674c520d4fe392451323a4f057418d64979cb351bdc7ca578f1bb89",
+      "previous_sha256": "c42425f671b8f9def2eb5cc8005f9bab1df07b0d23749e7cc8ca171e294d60c7",
+      "revision": "Comment-only prose spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code unchanged."
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-015.py",
-      "sha256": "ab94e21300cac50baa6027720873ded3bdf8153062c8bc85706e3beff2b4d167"
+      "sha256": "3e1770226c780e8713c7e4ac859ce2bf78c69be43ea4f85c40b993460c141b7e",
+      "previous_sha256": "ab94e21300cac50baa6027720873ded3bdf8153062c8bc85706e3beff2b4d167",
+      "revision": "Comment-only prose spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code unchanged."
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-016.py",
@@ -69,21 +95,27 @@
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-017.py",
-      "sha256": "c960968717e69e91af7303ccbc544c4fb3e376f195412fe1ca2cb46b3989fd7d"
+      "sha256": "d3976facebe1c1fb8ac65d9c6a480e0dd0b120dbcb039967cf0c1a71b75608d8",
+      "previous_sha256": "c960968717e69e91af7303ccbc544c4fb3e376f195412fe1ca2cb46b3989fd7d",
+      "revision": "Comment-only prose spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code unchanged."
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-018.py",
-      "sha256": "7635b871dcca079b526f7f9b24385255ea97e19a371058a7247d40964483d66a"
+      "sha256": "37b8c6c97e9d7782f7809454d67a85bf39a3d098c6e3f7df971463141ea380e7",
+      "previous_sha256": "7635b871dcca079b526f7f9b24385255ea97e19a371058a7247d40964483d66a",
+      "revision": "Comment-only prose spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code unchanged."
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-019.py",
-      "sha256": "ec8e507b19f860871e4ba60641aeab89d7e740e06e67a99822040070c35c330d",
+      "sha256": "8185f8a969a43c7e04c2849598e95ce4ccbe35d0c8db602a20c36e68dd8c25ec",
       "previous_sha256": "03274fabb23d8b35c871426c47482c70fabef47f02237c6d3dbe3c2d06525697",
-      "revision": "Comment-only correction of numerals that lost their spacing or leading zero (for example rate.3 to rate 0.3); code unchanged."
+      "revision": "Comment-only correction of numerals that lost their spacing or leading zero (for example rate.3 to rate 0.3); code unchanged. Comment-only prose spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code unchanged."
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-020.py",
-      "sha256": "52cb50bbd3dfe7139e3ffb166c4d238c9bf314c36de884f7608b784ea43a3756"
+      "sha256": "8751632edce7a0d2640ceb83c55bfbeb3e8c3a9a7853cda534d012c011928cca",
+      "previous_sha256": "52cb50bbd3dfe7139e3ffb166c4d238c9bf314c36de884f7608b784ea43a3756",
+      "revision": "Comment-only prose spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code unchanged."
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-021.md",
@@ -91,17 +123,21 @@
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-022.py",
-      "sha256": "acd441032670e7c746bc9eab73473f293403d8a5694e16b9418179f61e2e3134"
+      "sha256": "ad0be0e2bd4ea5cf1e454ecfc274474f71f7ea33b1b3a6cf59e479ba7b0dd19d",
+      "previous_sha256": "acd441032670e7c746bc9eab73473f293403d8a5694e16b9418179f61e2e3134",
+      "revision": "Comment-only prose spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code unchanged."
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-023.py",
-      "sha256": "5fb6f1eaf10eac04ee2b4ebb60feff9c6b530a74e1410382e002f177cd0a6e08"
+      "sha256": "31e5358263554b99f1ed80f945407dc99c2d9e22edad95df5e7f1c32b1433041",
+      "previous_sha256": "5fb6f1eaf10eac04ee2b4ebb60feff9c6b530a74e1410382e002f177cd0a6e08",
+      "revision": "Comment-only prose spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code unchanged."
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-024.py",
-      "sha256": "ef77a8ba3f840cd048ffdb17c3c0ab27f62736d223a71837397ffb08eeb4d934",
+      "sha256": "ccc737f51cb63ae9e677ff23c7458b8f930cc231bf7a93a7af24caa6ae17187b",
       "previous_sha256": "1cf16fb23b5b7b2ddf28efcfea8d5cde8a5a605f4a4cf89d871a5610d213fe87",
-      "revision": "Comment-only correction of numerals that lost their spacing or leading zero (for example rate.3 to rate 0.3); code unchanged."
+      "revision": "Comment-only correction of numerals that lost their spacing or leading zero (for example rate.3 to rate 0.3); code unchanged. Comment-only prose spacing correction (restored spaces around numbers, commas and inline names lost by an old math normalizer); code unchanged."
     },
     {
       "path": "courses/llm-applied/solutions/llm-applied-001_solution.py",

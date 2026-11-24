@@ -1378,7 +1378,7 @@ else: raise AssertionError('empty answer accepted')""",
 add(
     "llm-032",
     "Low-rank adaptation freezes a base matrix and learns an additive product of two smaller matrices. Here row-vector inputs multiply W+A@B, with W shaped 8x8, A 8x2 and B shaped 2 by 8. The adapter has 32 trainable scalars compared with 64 in the base. Initializing B to zero makes the initial adapter contribution exactly zero, preserving base behavior. On the first update, the gradient of A can be zero because it is multiplied by B, while B receives a nonzero gradient through A. This is expected under the stated initialization, not a disconnected graph. Low rank limits the update space; it is not a universal guarantee of equal quality to full fine-tuning.",
-    "Keep W as a tensor without requires_grad. Wrap A and B as Parameters and pass only those to SGD. The row-vector convention differs from frameworks that store Linear weights as(out, in), so record the orientation before transplanting equations. Compute delta=A@B and compare its shape with W. Snapshot the base bytes and assert exact preservation after the adapter update.",
+    "Keep W as a tensor without requires_grad. Wrap A and B as Parameters and pass only those to SGD. The row-vector convention differs from frameworks that store Linear weights as (out, in), so record the orientation before transplanting equations. Compute delta=A@B and compare its shape with W. Snapshot the base bytes and assert exact preservation after the adapter update.",
     [
         ("Low-rank update", "A matrix change represented as the product of two smaller matrices."),
         ("Frozen base", "Parameters excluded from the adaptation optimizer."),

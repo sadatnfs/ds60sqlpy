@@ -307,7 +307,7 @@ spark<span class="syntax-operator">.</span>sql<span class="syntax-punctuation">(
 <p><strong>Progressive hint:</strong> Original relation schemas may remain visible in earlier planning stages even after physical pruning.</p>
 <h4 id="exercise-4-connect-grouped-output-to-a-redistribution-boundary">Exercise 4: Connect grouped output to a redistribution boundary<a class="heading-anchor" href="#exercise-4-connect-grouped-output-to-a-redistribution-boundary" aria-label="Link to this section">#</a></h4>
 <p>Execute the grouped aggregate and capture its FORMATTED plan. Return group_id, n, total and locate aggregate plus Exchange operators under the fixed AQE-disabled configuration.</p>
-<p><strong>Expected result/shape:</strong> Groups 0,1,2 each have n3 with totals 180,210,240. The plan shows aggregation and an Exchange.</p>
+<p><strong>Expected result/shape:</strong> Groups 0,1,2 each have n = 3 with totals 180,210,240. The plan shows aggregation and an Exchange.</p>
 <p><strong>Verify:</strong> Assert all group tuples independently, then assert the relevant operator markers and recorded AQE setting.</p>
 <p><strong>Progressive hint:</strong> A local partial aggregate can reduce data before equal keys meet at a later aggregate.</p>
 <h4 id="exercise-5-normalize-incidental-identifiers-without-erasing-semantics">Exercise 5: Normalize incidental identifiers without erasing semantics<a class="heading-anchor" href="#exercise-5-normalize-incidental-identifiers-without-erasing-semantics" aria-label="Link to this section">#</a></h4>

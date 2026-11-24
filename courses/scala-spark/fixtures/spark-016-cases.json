@@ -14,7 +14,7 @@
       "title": "Verify equality pairs and quantify fanout",
       "input_contract": "Return fact_id, dimension_row, amount_cents from an ordinary inner equality join. Compare both DataFrame and SQL pair identities with the seven literal expected pairs.",
       "expected": "Facts 1 and 2 each match dimension rows 101,102,103;fact 3 matches 104. There are 7 pairs and the repeated joined amount totals 120, while matched fact amounts total 60.",
-      "verification": "Assert every pair, count 7 and pair-grain sum 120;compare a SQL join to the same pair list."
+      "verification": "Assert every pair, count 7 and pair-grain sum 120; compare a SQL join to the same pair list."
     },
     {
       "exercise": 3,

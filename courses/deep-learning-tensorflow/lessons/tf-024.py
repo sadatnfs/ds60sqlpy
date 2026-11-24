@@ -19,7 +19,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 
 # Exercise 4: Account for every test row
 # Threshold final test logits at 0 and compute all four confusion counts.
-# Expected: TP1, TN1, FP0, FN0; total 2.
+# Expected: TP 1, TN 1, FP 0, FN 0; total 2.
 
 # Exercise 5: Compare a baseline
 # Predict class 0 for every held-out row and report its error count beside the model.

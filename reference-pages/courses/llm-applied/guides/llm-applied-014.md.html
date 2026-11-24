@@ -333,7 +333,7 @@ inputs<span class="syntax-punctuation">,</span> labels <span class="syntax-opera
 <li><strong>Detect destructive truncation.</strong> Use a context limit 2 for a prompt of length 2 and answer length 3. <strong>Expected:</strong> ValueError because truncation removes every answer target. <strong>Verify:</strong> Save the assertion results for exercise 4, including ValueError because truncation removes every answer target.</li>
 </ol>
 <ol start="5">
-<li><strong>Keep family splits disjoint.</strong> Assign two formatting variants to family F and test that they cannot cross train/test. <strong>Expected:</strong> family intersectionF is a leak. <strong>Verify:</strong> Save the assertion results for exercise 5, including family intersectionF is a leak.</li>
+<li><strong>Keep family splits disjoint.</strong> Assign two formatting variants to family F and test that they cannot cross train/test. <strong>Expected:</strong> family intersection F is a leak. <strong>Verify:</strong> Save the assertion results for exercise 5, including family intersection F is a leak.</li>
 </ol>
 <ol start="6">
 <li><strong>Reject unsupported targets before training.</strong> Mark a target answer as unsupported by its cited source and apply an admission gate. <strong>Expected:</strong> record excluded despite valid token arrays. <strong>Verify:</strong> Save the assertion results for exercise 6, including record excluded despite valid token arrays.</li>

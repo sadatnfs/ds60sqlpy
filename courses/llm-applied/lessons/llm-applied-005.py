@@ -19,7 +19,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Exercise 4: Measure overlap duplication
 # Count total stored chunk token occurrences versus original source token positions in the
 # first fixture.
-# Expected: 9 stored token occurrences versus7 source positions.
+# Expected: 9 stored token occurrences versus 7 source positions.
 
 # Exercise 5: Reject invalid policies
 # Try overlap equal to window size, negative overlap and size 0.

@@ -200,16 +200,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Apply a controlled synonym rewrite</span></span>
-<span class="source-line"><span class="syntax-comment"># Rewritebuy rate usingbuy-&gt;purchase while preserving the original question.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: rewrittenpurchase rate; original unchanged.</span></span>
+<span class="source-line"><span class="syntax-comment"># Rewrite buy rate using buy-&gt;purchase while preserving the original question.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: rewritten purchase rate; original unchanged.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Retain a rewrite trace</span></span>
 <span class="source-line"><span class="syntax-comment"># Record the original, rewritten query and policy version.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: trace includes all three fields.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Follow two evidence hops</span></span>
-<span class="source-line"><span class="syntax-comment"># Use graphmetric-&gt;exclusions-&gt;test_accounts with a two-hop bound.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: visitedmetric, exclusions, test_accounts.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use graph metric-&gt;exclusions-&gt;test_accounts with a two-hop bound.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: visited metric, exclusions, test_accounts.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Stop at the declared depth</span></span>
 <span class="source-line"><span class="syntax-comment"># Run the same graph with a one-hop bound, then reject fractional, Boolean, NaN and</span></span>
@@ -217,7 +217,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Expected: test_accounts is absent; invalid budgets raise ValueError before traversal.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Break a retrieval cycle</span></span>
-<span class="source-line"><span class="syntax-comment"># Addtest_accounts-&gt;metric and traverse with a larger bound.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add test_accounts-&gt;metric and traverse with a larger bound.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: each document appears once.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Preserve authorization across hops</span></span>

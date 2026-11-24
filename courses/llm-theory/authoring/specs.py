@@ -34,7 +34,7 @@ expert(
 The training objective is another choice. A masked-token encoder predicts selected corrupted source positions using surrounding context. An autoregressive decoder predicts the next token from a prefix. A sequence-to-sequence model predicts target tokens conditioned on an entire source and an earlier target prefix. Teacher forcing supplies the correct previous target tokens during training;it does not permit the current target answer to leak into its own prediction. An encoder may use future source words because the complete source is available,but a streaming task may impose a different availability contract.
 
 This lesson implements the three attention information patterns on literal vectors. It does not train BERT,T5 or a foundation model. The small calculation is enough to show which perturbations may affect which outputs,which axes a cross-attention score matrix has,and why objective masks and attention masks must be checked separately.""",
-    """The attention helper accepts Q shaped(Tq,d),K shaped(Tk,d),V shaped(Tk,dv) and a boolean allowed matrix(Tq,Tk). It validates nonempty legal rows,then uses a stable row-wise softmax of Q@K.T/sqrt(d). Encoder self-attention has Tq=Tk=source length and an all-allowed source mask. Causal decoder self-attention has a lower triangle over target-prefix positions. Cross-attention can be rectangular,with target queries and source keys/values. Labels and loss masks are constructed independently from these attention masks.""",
+    """The attention helper accepts Q shaped (Tq,d), K shaped (Tk,d), V shaped (Tk,dv) and a boolean allowed matrix (Tq,Tk). It validates nonempty legal rows,then uses a stable row-wise softmax of Q@K.T/sqrt(d). Encoder self-attention has Tq=Tk=source length and an all-allowed source mask. Causal decoder self-attention has a lower triangle over target-prefix positions. Cross-attention can be rectangular,with target queries and source keys/values. Labels and loss masks are constructed independently from these attention masks.""",
     [
         (
             "Encoder",
@@ -291,7 +291,7 @@ torch.testing.assert_close(post@torch.ones(3,dtype=torch.float64),torch.zeros(3,
         ex(
             "Calculate a SwiGLU gate derivative",
             "Use scalar g=0, u=2 and output SiLU(g)*u.",
-            "output0;gradient with respect to g is 1;with respect to u is 0.",
+            "output 0; gradient with respect to g is 1; with respect to u is 0.",
             """gate=torch.tensor(0.,dtype=torch.float64,requires_grad=True); up=torch.tensor(2.,dtype=torch.float64,requires_grad=True)
 output=F.silu(gate)*up; output.backward()
 assert output.item()==0 and gate.grad.item()==1 and up.grad.item()==0""",
@@ -305,11 +305,11 @@ assert output.item()==0 and gate.grad.item()==1 and up.grad.item()==0""",
 analytic=torch.eye(width,dtype=torch.float64)/r-torch.outer(value,value)/(width*r**3)
 automatic=torch.autograd.functional.jacobian(rms_norm,value)
 torch.testing.assert_close(automatic,analytic,atol=1e-10,rtol=0)""",
-            "The derivative contains a direct coordinate term andacoupling term through the sharedRMSdenominator. Omitting the coupling would treat normalization as constant scaling and produce incorrect gradients.",
+            "The derivative contains a direct coordinate term and a coupling term through the shared RMS denominator. Omitting the coupling would treat normalization as constant scaling and produce incorrect gradients.",
         ),
         ex(
             "Match feed-forward parameter budgets",
-            "Compare plain FFN model width d=4,hidden6 with SwiGLU hidden width 4,excluding biases;execute a gated block with input and output width 4.",
+            "Compare plain FFN model width d=4, hidden 6 with SwiGLU hidden width 4, excluding biases; execute a gated block with input and output width 4.",
             "both 48 weight entries;output shape(2,4).",
             """d=4; plain_hidden=6; gated_hidden=4
 assert 2*d*plain_hidden==3*d*gated_hidden==48
@@ -521,7 +521,7 @@ expert(
     47,
     """A mixture-of-experts layer routes each token to a subset of specialized transformations. The total model can contain many expert parameters while activating only a few pertoken. That does not make memory orcommunication free:all experts must be stored somewhere,and distributed routing moves token activations to the devices owning selected experts. Uneven routing can overload one expert while others remain idle.
 
-The router produces scores orprobabilities overexperts. A top-k decision selects indices,then a declared gate rule weights the selected outputs. Some designs retain selected probabilities from thefullsoftmax;others renormalize among selected experts. Those choices change gradients andoutput scale. This lesson states its rule explicitly:the top-k mixture renormalizes selected mass,while thecapacity demonstration uses a unit-weight top1 expert delta inside a residual path.
+The router produces scores orprobabilities overexperts. A top-k decision selects indices,then a declared gate rule weights the selected outputs. Some designs retain selected probabilities from thefullsoftmax;others renormalize among selected experts. Those choices change gradients andoutput scale. This lesson states its rule explicitly:the top-k mixture renormalizes selected mass,while thecapacity demonstration uses a unit-weight top-1 expert delta inside a residual path.
 
 Capacity bounds how many tokens anexpert accepts inonebatch. Overflow needs a visible policy,such asdropping theexpert delta andusing the residual path. A load-balancing auxiliary objective can encourage lessconcentrated routing,butit doesnot prove that a system achieves good load balance,quality orthroughput. The reference uses literal linear experts andfinite-difference router gradients;it doesnot launch expert-parallel workers orclaim large-model scaling.""",
     """Inputs have shape(tokens,model_width),routerlogits(tokens,experts),andexpertmatrices(experts,model_width,output_width). Stable descending argsort declares a lowest-index tie policy. The selected gates are normalized before combining expert outputs. Thecapacity helper tracks assignedcounts,acceptedcounts anddropped-token flags separately. A Switch-style auxiliary term uses hard assignment fractionsf andmean router probabilitiesP,with thehard fractions heldfixed for a local gradient calculation.""",
@@ -554,7 +554,7 @@ np.testing.assert_allclose(gates.sum(1),1,atol=1e-12,rtol=0)""",
         ex(
             "Enforce expert capacity with residual fallback",
             "Route four tokens to experts 0, 0, 1, 0 with capacity 2 and unit top-1 gates.",
-            "assigned counts 3,1;accepted2,1;last token drops its expert delta and keeps its input.",
+            "assigned counts 3, 1; accepted 2, 1; last token drops its expert delta and keeps its input.",
             """tokens=np.array([[1.,0.],[0.,1.],[1.,1.],[2.,1.]])
 route_logits=np.array([[5.,0.],[4.,0.],[0.,4.],[3.,0.]])
 residual,dropped,assigned,accepted=capacity_route(tokens,route_logits,experts[:2],2)
@@ -579,7 +579,7 @@ np.testing.assert_allclose(coefficient*2*np.dot([.5,.5],[.5,.5]),.01,atol=1e-12,
             """h=1e-6; plus=logits.copy(); minus=logits.copy(); plus[0,0]+=h; minus[0,0]-=h
 numeric=(mixture(x,plus,experts,2)[0][0,0]-mixture(x,minus,experts,2)[0][0,0])/(2*h)
 np.testing.assert_allclose(numeric,-3/16,atol=1e-8,rtol=0)""",
-            "Within a fixedselectedset,the normalized gates vary smoothly. At a top-k membership boundary,the hard index choice is not differentiable in the same way. Do not interpret this local derivative as differentiating through every routing decision.",
+            "Within a fixed selected set, the normalized gates vary smoothly. At a top-k membership boundary, the hard index choice is not differentiable in the same way. Do not interpret this local derivative as differentiating through every routing decision.",
         ),
         ex(
             "Separate total and active parameter counts",
@@ -603,13 +603,13 @@ for action in [lambda:mixture(x,logits,experts,0),lambda:capacity_route(tokens,r
         ),
     ],
     ("Switch Transformers", "https://arxiv.org/abs/2101.03961"),
-    r"""For tokenx_t,router probabilities arep_t=softmax(z_t). LetS_t bethetop-kexpert set. Thisreference usesg_ti=p_ti/sum_(j in S_t)p_tj fori inS_t andzerootherwise,theny_t=sum_i g_ti E_i(x_t). Thisrenormalizedgatepolicy isnotidentical toretaining theoriginalselected probabilities.
+    r"""For token x_t, router probabilities are p_t=softmax(z_t). Let S_t be the top-k expert set. This reference uses g_ti=p_ti/sum_(j in S_t)p_tj for i in S_t and zero otherwise, then y_t=sum_i g_ti E_i(x_t). This renormalized gate policy is not identical to retaining the original selected probabilities.
 
-For a fixedselectedset,the derivative of aweightedscalar expertoutputy withrespecttorouterlogitz_j isg_j*(e_j-y). Withselectedexpertoutputs1 and2 andgates3/4,1/4,wehavey=5/4 anddy/dz_0=(3/4)*(1-5/4)=-3/16. Hardchanges intop-kmembership requireseparate reasoning.
+For a fixed selected set, the derivative of a weighted scalar expert output y with respect to router logit z_j is g_j*(e_j-y). With selected expert outputs 1 and 2 and gates 3/4, 1/4, we have y=5/4 and dy/dz_0=(3/4)*(1-5/4)=-3/16. Hard changes in top-k membership require separate reasoning.
 
-A Switch-style auxiliary term isL_aux=alpha*N*sum_i f_i P_i,wheref_i isthefractionofhardassignments toexperti andP_i isthemeanrouterprobability. Thehardfraction vector isnotdifferentiable;theprobability vector is. ForTtokens andfixedf,thelocal derivative isalpha*N/T * p_tj * (f_j-sum_i f_i p_ti). Theexamplecoefficient.01 is a declaredfixture choice,not a universal setting.
+A Switch-style auxiliary term is L_aux=alpha*N*sum_i f_i P_i, where f_i is the fraction of hard assignments to expert i and P_i is the mean router probability. The hard fraction vector is not differentiable; the probability vector is. For T tokens and fixed f, the local derivative is alpha*N/T * p_tj * (f_j-sum_i f_i p_ti). The example coefficient 0.01 is a declared fixture choice, not a universal setting.
 
-ForEexperts eachwithtwo bias-freelinear matricesD-by-H andH-by-D,totalexpertweightsare2EDH. Top-k activatesk experts pertoken,butstorageandcommunicationdependonhowallEexperts areplacedandserved.""",
+For E experts each with two bias-free linear matrices D-by-H and H-by-D, total expert weights are 2EDH. Top-k activates k experts per token, but storage and communication depend on how all E experts are placed and served.""",
     """A batch routes 75 percent of its tokens to one of two experts. Capacity allows only half the batch per expert, so some expert deltas are dropped despite low average device utilization. Reporting only “two active experts per token” hides the bottleneck. A useful trace records pre-capacity assignments, accepted counts, drops and task errors for affected tokens. Increasing capacity may reduce drops while increasing activation memory. Changing router regularization may improve balance while altering task quality. Those are measurable tradeoffs, not consequences of parameter count alone.""",
     """Use sparse experts when the architecture, training and serving stack can support conditional computation and its routing overhead. Measure token load distributions and tail behavior, not just mean expert utilization. Keep capacity, tie handling, gate normalization and overflow policy in the artifact contract.
 
@@ -705,7 +705,7 @@ broken=TinyCache(cache.tokens)
 apply_round(cache,old_length,round_result); fresh=TinyCache([2,0,0])
 assert cache.tokens==fresh.tokens; np.testing.assert_allclose(cache.keys,fresh.keys,atol=0,rtol=0); np.testing.assert_allclose(cache.output(),fresh.output(),atol=1e-12,rtol=0)
 broken.append(0); assert broken.tokens!=fresh.tokens and not np.allclose(broken.output(),fresh.output())""",
-            "The cache stores numerical position-dependentkeys,not only a token list. Retaining a rejected suffix changes both context and position offsets even if the next sampled token is correct.",
+            "The cache stores numerical position-dependent keys, not only a token list. Retaining a rejected suffix changes both context and position offsets even if the next sampled token is correct.",
         ),
         ex(
             "Handle equality, EOS, budgets and invalid support",
@@ -717,7 +717,7 @@ limited=speculative_round([],same,same,[.1,.6],[.9,.9],.7,budget=2); assert len(
 try: one_step(np.array([.5,.5]),np.array([1.,0.]),1,.2,.3)
 except ValueError: pass
 else: raise AssertionError('impossible draft token accepted')""",
-            "An accepted EOS ends generation immediately,andabudget is not permission to append an extra bonus. Equal distributions must avoid dividingbyazero residual normalizer. Invalidsupport should fail clearly rather than fabricate a probability.",
+            "An accepted EOS ends generation immediately, and a budget is not permission to append an extra bonus. Equal distributions must avoid dividing by a zero residual normalizer. Invalid support should fail clearly rather than fabricate a probability.",
         ),
     ],
     ("Exact speculative decoding", "https://arxiv.org/abs/2211.17192"),

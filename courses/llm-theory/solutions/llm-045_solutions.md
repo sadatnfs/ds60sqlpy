@@ -90,7 +90,7 @@ assert output.item() == 0 and gate.grad.item() == 1 and up.grad.item() == 0
 
 The question is: Compare autograd with \(J=\frac{I}{r}-\frac{xx^{\mathsf T}}{d\cdot {r}^{3}}\) at x = [1, 2, 3].
 
-The derivative contains a direct coordinate term andacoupling term through the sharedRMSdenominator. Omitting the coupling would treat normalization as constant scaling and produce incorrect gradients.
+The derivative contains a direct coordinate term and a coupling term through the shared RMS denominator. Omitting the coupling would treat normalization as constant scaling and produce incorrect gradients.
 
 ```python
 value = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64, requires_grad=True)

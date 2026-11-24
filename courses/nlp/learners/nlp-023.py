@@ -17,7 +17,7 @@ def main():
 if __name__ == "__main__":
     main()
 
-# Exercise 1: Filter permission and freshness. Apply the role/time rule to the three source records at time 10. Expected: Only policy version2 for ops; unknown role and expired time 30 yield no records.
+# Exercise 1: Filter permission and freshness. Apply the role/time rule to the three source records at time 10. Expected: Only policy version 2 for ops; unknown role and expired time 30 yield no records.
 # Exercise 2: Fingerprint content reproducibly. Hash canonical records, reverse their input order and change one text field. Expected: Reordering leaves hash unchanged; text change produces a different hash.
 # Exercise 3: Measure a defined drift. Compute total variation for [50,50] and [80,20]. Expected: Distance .3; negative, nonfinite or zero-total count vectors are rejected.
 # Exercise 4: Respect label maturity. Evaluate predictions [1, 1, 0] with labels [1, None, 0], then an all-unknown case. Expected: Two mature cases with accuracy 1; all-unknown returns count 0 and no accuracy.

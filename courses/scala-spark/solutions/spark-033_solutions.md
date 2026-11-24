@@ -89,7 +89,7 @@ def run_branches(spark, root):
     return accepted, rejected
 ```
 
-The two sink populations are complementary business decisions. In this prepared plan, the reported source metrics reflect branch filtering: 2 known-ID rows and 1 missing-ID row. A separate static read proves the raw source count 3. Separate checkpoints prevent one branch from advancing another branch source progress. The exact NULL quarantine row proves that unknown identity was retained for review rather than silently discarded ormerged into an accepted key.
+The two sink populations are complementary business decisions. In this prepared plan, the reported source metrics reflect branch filtering: 2 known-ID rows and 1 missing-ID row. A separate static read proves the raw source count 3. Separate checkpoints prevent one branch from advancing another branch source progress. The exact NULL quarantine row proves that unknown identity was retained for review rather than silently discarded or merged into an accepted key.
 
 **Verification evidence:** Assert both exact output populations, branch metrics 2/1 and an independent raw batch-source count 3.
 

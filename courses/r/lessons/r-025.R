@@ -5,7 +5,7 @@ values <- c(2, 4)
 unit <- "ms"
 plot_data <- data.frame(time = c(1, 2, 3), latency = c(4, 7, 9))
 
-# Exercise 1: Predict the record summary for values c(2,4) and unitms.
+# Exercise 1: Predict the record summary for values c(2,4) and unit ms.
 # TODO: Retain count and unit alongside the mean.
 # Exercise 2: Write an R6 adapter using public values() and unit() methods.
 # TODO: Do not read private environments.

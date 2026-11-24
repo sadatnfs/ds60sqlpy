@@ -30,7 +30,7 @@ Keep parameter registration separate from trainability and optimizer membership.
 
 Compare [tf-003](../../deep-learning-tensorflow/guides/tf-003.md) after deriving the shared numerical contract.
 
-Keras Dense stores a kernel shaped(input_features, output_features), while PyTorch nn.Linear stores(output_features, input_features). Copying values without transposing changes or breaks the computation. Both expose tracked trainable state, but PyTorch distinguishes Parameter registration from an ordinary tensor attribute.
+Keras Dense stores a kernel shaped (input_features, output_features), while PyTorch nn.Linear stores(output_features, input_features). Copying values without transposing changes or breaks the computation. Both expose tracked trainable state, but PyTorch distinguishes Parameter registration from an ordinary tensor attribute.
 
 ## Vocabulary and concepts
 
@@ -176,7 +176,7 @@ API and mechanism reference: [PyTorch 2.9 reference](https://docs.pytorch.org/do
 
 **Why does Linear store a transposed-looking weight?**
 
-Its public contract defines weight as(out, in) and applies the transpose during the batched row-vector computation. The important check is the documented layout, not which notation feels more natural.
+Its public contract defines weight as (out, in) and applies the transpose during the batched row-vector computation. The important check is the documented layout, not which notation feels more natural.
 
 **Can a tensor have gradients but be absent from an optimizer?**
 

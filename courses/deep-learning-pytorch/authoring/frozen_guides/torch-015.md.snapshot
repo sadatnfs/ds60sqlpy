@@ -54,7 +54,7 @@ For five records and batch size two without dropping, the traversal has three ba
 
 A local torch.Generator makes the source of sampler randomness explicit. Constructing two fresh generators with seed 7 starts two equivalent sequences in the pinned runtime. Reusing one consumed generator does not reset it: the next traversal begins from later RNG state. A global manual_seed call also does not describe which later operations consume draws. Reproducibility needs the generator ownership, draw order, dataset state and runtime, not only one integer seed. [PyTorch 2.9 reproducibility notes](https://docs.pytorch.org/docs/2.9/notes/randomness.html).
 
-Default collation can stack compatible tensor shapes, but variable-length sequences require a declared representation. For[2, 3] and[4], this helper produces Long tokens shaped(2, 2), lengths shaped(2, ), and values[[2, 3], [4, 0]] with lengths[2, 1]. The corresponding validity mask from position<length is[[True, True], [True, False]]. There are three participating tokens, not four.
+Default collation can stack compatible tensor shapes, but variable-length sequences require a declared representation. For [2, 3] and [4], this helper produces Long tokens shaped (2, 2), lengths shaped (2, ), and values [[2, 3], [4, 0]] with lengths [2, 1]. The corresponding validity mask from position<length is [[True, True], [True, False]]. There are three participating tokens, not four.
 
 Padding fills storage; it does not create an observed token. Lengths remain authoritative even if zero can occur as an actual token ID in another contract. A later embedding padding_idx, attention mask or loss mask must agree on the sentinel and validity policy. A token loss averaged over all four stored positions would give the padded slot denominator weight it did not earn. Mask polarity also belongs to the consuming API, so a valid-position mask may need inversion for an API whose True means blocked.
 
@@ -151,9 +151,9 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** same permutation; all five IDs retained.
    **Verify:** Save the assertion results for exercise 3, including same permutation; all five IDs retained.
 
-4. **Collate variable-length sequences.** Pad sequences[2, 3] and[4] with zero while keeping lengths.
-   **Expected:** batch[[2, 3], [4, 0]] and lengths 2, 1.
-   **Verify:** Save the assertion results for exercise 4, including batch[[2, 3], [4, 0]] and lengths 2, 1.
+4. **Collate variable-length sequences.** Pad sequences [2, 3] and [4] with zero while keeping lengths.
+   **Expected:** batch [[2, 3], [4, 0]] and lengths 2, 1.
+   **Verify:** Save the assertion results for exercise 4, including batch [[2, 3], [4, 0]] and lengths 2, 1.
 
 5. **Preserve pairing after shuffle.** Load values=2*IDs with shuffling and check each batch.
    **Expected:** every target equals twice its ID.

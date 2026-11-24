@@ -149,7 +149,7 @@
         "validation"
       ],
       "outcome": "Write records and constructors that normalize, copy and validate their components so every instance is valid.",
-      "lab": "Construct another Order with normalizedA and item x.",
+      "lab": "Construct another Order with normalized A and item x.",
       "verification": "equals true and equal hashCode."
     },
     {

@@ -60,7 +60,7 @@ an import error as a defect in the lesson.
 
 ## Optional realistic pretrained experiment
 
-Lesson021 links a complete [separate pretrained recipe](fixtures/pretrained/README.md), including direct dependency pins, a model revision and license note, an explicit connected acquisition script, local hash verification, template/mask checks, bounded full or LoRA SFT and local inference. No weights were downloaded and no pretrained training was executed during authoring. The recipe must not be counted as runtime-accepted until its own actual receipts exist.
+Lesson 021 links a complete [separate pretrained recipe](fixtures/pretrained/README.md), including direct dependency pins, a model revision and license note, an explicit connected acquisition script, local hash verification, template/mask checks, bounded full or LoRA SFT and local inference. No weights were downloaded and no pretrained training was executed during authoring. The recipe must not be counted as runtime-accepted until its own actual receipts exist.
 
 ## Evidence to retain
 

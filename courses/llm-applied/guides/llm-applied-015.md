@@ -24,7 +24,7 @@ The qualified reference preserves that distinction. It recomputes final training
 
 ## Follow the supervised signal through the decoder
 
-The two training rows contain prompt and answer symbols. After shifting, the model receives three input positions per row and predicts a 16-way vocabulary distribution at each position. Only four target positions contribute to the answer objective. The shape ledger later in the chapter shows how a[2,3] token matrix becomes `[2, 3, 32]` hidden states, two attention heads and finally `[2, 3, 16]` logits.
+The two training rows contain prompt and answer symbols. After shifting, the model receives three input positions per row and predicts a 16-way vocabulary distribution at each position. Only four target positions contribute to the answer objective. The shape ledger later in the chapter shows how a [2,3] token matrix becomes `[2, 3, 32]` hidden states, two attention heads and finally `[2, 3, 16]` logits.
 
 At an active target position, cross entropy encourages the target logit relative to the other vocabulary logits. Its derivative contains the predicted class probabilities minus the target indicator, scaled by the active-event denominator. This local derivative then flows through the output projection, feed-forward and attention paths into earlier parameters. The independent zero-logit probe isolates that first step without relying on the randomly initialized decoder's output.
 
@@ -105,7 +105,7 @@ The trainable parameter ledger is explicit:
 
 No weights are tied in this decoder. Parameter count does not equal total training memory: gradients, Adam moment state, activations and temporary attention tensors contribute separately. The CPU example does not measure GPU peak allocation or optimizer sharding.
 
-The two sequences yield four active targets: 5, 3, 6, 3. For an independent zero-logit probe, each class initially has probability \(\frac{1}{16}\) and each active event has loss log16. The mean over the four active events is still log16. At an active position, the target-logit gradient is (\(\frac{1}{16}\)-1)/4=-15/64, and every other class gradient is \(\frac{1}{64}\). The ignored prompt-prediction positions have zero direct logit gradient. These derivatives explain both the mask and the denominator without relying on the trained decoder's internal state.
+The two sequences yield four active targets: 5, 3, 6, 3. For an independent zero-logit probe, each class initially has probability \(\frac{1}{16}\) and each active event has loss log(16). The mean over the four active events is still log(16). At an active position, the target-logit gradient is (\(\frac{1}{16}\)-1)/4=-15/64, and every other class gradient is \(\frac{1}{64}\). The ignored prompt-prediction positions have zero direct logit gradient. These derivatives explain both the mask and the denominator without relying on the trained decoder's internal state.
 
 Each optimizer iteration computes loss at the current parameters, records it, backpropagates and then updates. Thus a 20-entry curve records states before updates 1 through 20: its final element describes the model after 19 updates. It is useful optimization history, but it is not the post-twentieth-update loss. The repaired final evaluation recomputes training and held-out objectives from the same frozen final state. This prevents a reporting label from mixing two parameter versions.
 

@@ -19,7 +19,7 @@
     {
       "exercise": 4,
       "task": "Run the supported network case for ops at time 10.",
-      "expected": "Exactly network version2 and the unchanged approval-rule quote; old version absent."
+      "expected": "Exactly network version 2 and the unchanged approval-rule quote; old version absent."
     },
     {
       "exercise": 5,

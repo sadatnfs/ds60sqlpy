@@ -26,7 +26,7 @@ The accepted request is exactly operation=group_mean, group_by=group, value=valu
 
 The input grain is one identified observation per row. The output grain is one row per group, carrying count and mean. For A values 1, 3, the sum is four, count two and mean two. B has value ten, count one and mean ten. The descriptive difference B minus A is eight. The output preserves the different sample counts instead of presenting both means as equally supported by data.
 
-Aggregation can change meaning. The overall observation mean is (1+3+10)/3=14/3. Averaging the two group means gives(2+10)/2=6 and weights groups equally rather than observations. Carrying counts makes the distinction reconstructible. The request schema does not authorize a later explanation to substitute either aggregate silently.
+Aggregation can change meaning. The overall observation mean is (1+3+10)/3=14/3. Averaging the two group means gives (2+10)/2=6 and weights groups equally rather than observations. Carrying counts makes the distinction reconstructible. The request schema does not authorize a later explanation to substitute either aggregate silently.
 
 Finite input checks alone do not prevent intermediate overflow. With values `[1e308, 1e308]`, ordinary floating summation can become infinity before division by two, although the mathematical mean is 1e308. The repaired calculation uses s=max(abs(values)), computes a mean of scaled values v/s, then multiplies by s. Every scaled magnitude is at most one, so the bounded group cannot overflow that summation. A zero scale returns zero directly. The result is also checked for finiteness.
 

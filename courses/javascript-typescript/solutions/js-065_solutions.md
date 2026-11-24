@@ -14,11 +14,11 @@ Use one `state` object and an `update(nextState)` function that derives data and
 
 The reference links a category filter to bars and a numeric summary. Programmatic control activation checks state wiring, while manual keyboard review checks the actual user experience. Saving a dashboard view should record filter values and data identity, not only a screenshot.
 
-## Exercise 1: Predict selected IDs for groupA.
+## Exercise 1: Predict selected IDs for group A.
 
 A filter is a precise predicate. Check IDs before trusting a changed chart. Clicking "Show A" sets state.group to "A", and the filter keeps A1 (2) and A2 (3), so the summary reads "A: 2 records; total 5". A filter written as d.group.includes(state.group) would still work for A but would also match a future group "AA". The reference checks the summary text and two rects.
 
-**Expected:** Only records whose group isA remain.
+**Expected:** Only records whose group is A remain.
 
 ## Exercise 2: Reset the dashboard to all groups.
 

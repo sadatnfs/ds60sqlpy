@@ -440,7 +440,7 @@ def main():
     args = parser.parse_args()
     records = units()
     if [u["id"] for u in records] != [f"r-{n:03}" for n in range(1, 61)]:
-        parser.error("All60 ordered units are required before publishing R admission.")
+        parser.error("All 60 ordered units are required before publishing R admission.")
     changed = []
     for relative, value in artifacts().items():
         path = ROOT / relative

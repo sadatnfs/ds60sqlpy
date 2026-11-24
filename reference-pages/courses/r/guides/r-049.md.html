@@ -249,13 +249,13 @@ records <span class="syntax-operator">&lt;-</span> <span class="syntax-function"
 records<span class="syntax-operator">$</span>error <span class="syntax-operator">&lt;-</span> records<span class="syntax-operator">$</span>actual <span class="syntax-operator">-</span> records<span class="syntax-operator">$</span>prediction
 <span class="syntax-function">stopifnot</span><span class="syntax-punctuation">(</span><span class="syntax-function">all</span><span class="syntax-punctuation">(</span>records<span class="syntax-operator">$</span>origin <span class="syntax-operator">&lt;</span> records<span class="syntax-operator">$</span>target_time<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-function">all</span><span class="syntax-punctuation">(</span>records<span class="syntax-operator">$</span>error <span class="syntax-operator">==</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-function">mean</span><span class="syntax-punctuation">(</span>records<span class="syntax-operator">$</span>error<span class="syntax-operator">^</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
 <span class="syntax-function">print</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected observation:</strong> Four one-step forecasts, all errors1, MSE 1.</p>
+<p><strong>Expected observation:</strong> Four one-step forecasts, all errors 1, MSE 1.</p>
 <p>Every prediction uses only its prefix. The exact trend fixture gives error one for the last-value baseline, making the information boundary and error calculation visible.</p>
 <h3 id="practice-with-evidence">Practice with evidence<a class="heading-anchor" href="#practice-with-evidence" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Derive three forecasts for a zero-mean AR(1) with phi 0.5 and latest value 0.4.</p>
 <h4 id="exercise-2-modify">Exercise 2: Modify<a class="heading-anchor" href="#exercise-2-modify" aria-label="Link to this section">#</a></h4>
-<p>Explain why an ARIMA order(1,0,0) differs from(0,1,0).</p>
+<p>Explain why an ARIMA order (1,0,0) differs from (0,1,0).</p>
 <h4 id="exercise-3-construct">Exercise 3: Construct<a class="heading-anchor" href="#exercise-3-construct" aria-label="Link to this section">#</a></h4>
 <p>Construct rolling-origin naive predictions for origins 4 through 7 of 1:8.</p>
 <h4 id="exercise-4-diagnose">Exercise 4: Diagnose<a class="heading-anchor" href="#exercise-4-diagnose" aria-label="Link to this section">#</a></h4>

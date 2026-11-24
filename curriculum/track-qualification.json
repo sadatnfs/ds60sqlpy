@@ -1241,8 +1241,8 @@
         },
         "R8": {
           "status": "pass",
-          "templated_baseline": 54234,
-          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used."
+          "templated_baseline": 54232,
+          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used. Lowered from 54234 to 54232 by the comment and guide prose spacing correction that restored spaces stripped by an old math normalizer; no templated content was added."
         },
         "R9": {
           "status": "pass"

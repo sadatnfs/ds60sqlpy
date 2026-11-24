@@ -233,7 +233,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>example_one<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="worked-case-2-an-empty-result-still-has-a-schema">Worked case 2: An empty result still has a schema<a class="heading-anchor" href="#worked-case-2-an-empty-result-still-has-a-schema" aria-label="Link to this section">#</a></h3>
 <p>The second case defines column types explicitly, then filters every row out. An empty table remains a typed result. Its existence is different from a missing variable or a failed query. Reordering columns changes the presentation contract while preserving values.</p>
-<p><strong>Expected evidence:</strong> The empty frame has 0 rows and the original Int64/String schema; selecting label,id produces that order.</p>
+<p><strong>Expected evidence:</strong> The empty frame has 0 rows and the original Int64/String schema; selecting label, id produces that order.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> polars <span class="syntax-keyword">as</span> pl
 
 

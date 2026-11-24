@@ -160,7 +160,7 @@ Apply withWatermark(event_time, 5 minutes) before grouping by a 5-minute window 
 
 **Verify:** Assert streaming status and the four output fields before starting the first phase.
 
-**Progressive hint:** Placing a watermark after aggregation oron a different timestamp does not establish this append-finalization contract.
+**Progressive hint:** Placing a watermark after aggregation or on a different timestamp does not establish this append-finalization contract.
 
 ### Exercise 2: Record actual watermark progress after the first phase
 

@@ -6,7 +6,7 @@ results <- vector("list", 6L)
 
 # Exercise 1: Derive three forecasts for a zero-mean AR(1) with phi 0.5 and latest value 0.4.
 # TODO: Apply the coefficient once per horizon.
-# Exercise 2: Explain why an ARIMA order(1,0,0) differs from(0,1,0).
+# Exercise 2: Explain why an ARIMA order (1,0,0) differs from (0,1,0).
 # TODO: Identify the modeled level versus differenced quantity.
 # Exercise 3: Construct rolling-origin naive predictions for origins 4 through 7 of 1:8.
 # TODO: Slice the training prefix at each origin.

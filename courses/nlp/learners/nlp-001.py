@@ -18,9 +18,9 @@ print("Class counts:", dict(Counter(row["label"] for row in documents)))
 # Exercise 3: Count documents, class labels and whitespace pieces separately.
 # Expected: 4 documents, 2 labels per class and 9 pieces; repeated text changes only pieces.
 # Exercise 4: Compare unweighted and length-weighted accuracy.
-# Expected: .5 unweighted; 1000/1010 or 10/1010 under the two weight assignments.
+# Expected: 0.5 unweighted; 1000/1010 or 10/1010 under the two weight assignments.
 # Exercise 5: Audit and repair family overlap without losing rows.
-# Expected: original account-reset overlap; a disjoint repair retaining a,b,c,d once.
+# Expected: original account-reset overlap; a disjoint repair retaining a, b, c, d once.
 # Exercise 6: Write a task contract that rejects a fluent summary when a queue label is required.
 # Expected: explicit prediction unit, allowed outputs and limits of this tiny corpus.
 # Add your functions, assertions, observations and written contract below.

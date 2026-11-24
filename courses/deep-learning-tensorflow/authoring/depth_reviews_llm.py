@@ -451,7 +451,7 @@ Keep prompt and threshold selection in the development process and reserve indep
 """,
         "llm-041": """## Match a mathematical map before matching framework names
 
-For row input x=[1, 2] and W=[[1, 2, 3], [4, 5, 6]], x*W=[9, 12, 15]. A Keras Dense kernel for this map has shape [2, 3]. PyTorch Linear stores its weight as[out_features, in_features], so the same map uses W transposed with shape [3, 2], because its forward operation multiplies by the stored weight's transpose. Comparing equal-shaped square matrices can conceal this orientation error, which is why the worksheet uses a rectangular example.
+For row input x=[1, 2] and W=[[1, 2, 3], [4, 5, 6]], x*W=[9, 12, 15]. A Keras Dense kernel for this map has shape [2, 3]. PyTorch Linear stores its weight as [out_features, in_features], so the same map uses W transposed with shape [3, 2], because its forward operation multiplies by the stored weight's transpose. Comparing equal-shaped square matrices can conceal this orientation error, which is why the worksheet uses a rectangular example.
 
 A meaningful parity experiment explicitly assigns weights and biases, fixes dtype, uses the same epsilon and reduction rules, and selects equivalent training/evaluation modes. Matching a seed across two frameworks does not assign identical parameter arrays, since initialization algorithms and random streams can differ. Equal layer names are also insufficient when defaults, layouts or state updates differ.
 

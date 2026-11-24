@@ -33,9 +33,9 @@ int main() {
   }
   return 0;
 }
-// Exercise 1: Predict copy3 versus alias4 for values{3,8}, then retain an ownership trace.
-// Exercise 2: positive_sum reads at most10000 integers in[-1000000,1000000]; mixed result20 and large result10000000000.
-// Exercise 3: replace_at changes valid index1; index==size and empty input return false without mutation.
+// Exercise 1: Predict copy 3 versus alias 4 for values {3,8}, then retain an ownership trace.
+// Exercise 2: positive_sum reads at most 10000 integers in [-1000000,1000000]; mixed result 20 and large result 10000000000.
+// Exercise 3: replace_at changes valid index 1; index==size and empty input return false without mutation.
 // Exercise 4: Repair the borrowed-element proposal using an owned snapshot or a checked later lookup; never run a dangling read.
 // Exercise 5: checked_read rejects negative, one-past and unrepresentable signed indices before casting.
 // Exercise 6: nonnegative_copy({3,-1,0,5}) returns independent{3,0,5}; source remains unchanged.

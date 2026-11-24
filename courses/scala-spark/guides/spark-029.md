@@ -38,13 +38,13 @@ The product contract is intentionally concrete: id and value are bigints, IDs 0 
 
 A digest is not a substitute for validation. A file full of incorrect rows still has a perfectly valid SHA-256. The validator therefore checks schema, population, identity range, uniqueness, missingness and the value rule before producing the digest. The staged Parquet product is read back and validated again, so the receipt describes actual persisted data rather than only an in-memory input that was intended to be written.
 
-Each run ID is a restricted relative identifier such asrun-a. Paths are constructed inside the fresh owned root; manifest metadata cannot choose an arbitrary external file. The receipt records runs/run-a/data, row count 30, the declared schema and the content digest. Validation requires the stored run identity and relative path to match the expected values before opening that fixed owned path. This makes the manifest a governed pointer rather than a general filesystem command.
+Each run ID is a restricted relative identifier such as run-a. Paths are constructed inside the fresh owned root; manifest metadata cannot choose an arbitrary external file. The receipt records runs/run-a/data, row count 30, the declared schema and the content digest. Validation requires the stored run identity and relative path to match the expected values before opening that fixed owned path. This makes the manifest a governed pointer rather than a general filesystem command.
 
 Publication writes the validated receipt text to a fresh temporary manifest in the same directory as current.json, then replaces the current manifest atomically. On the prepared local filesystem, the rename is the visibility boundary. The code does not claim a distributed transaction, object-store rename guarantee, concurrent multi-writer conflict protocol or power-loss durability. Those need storage-specific semantics and often a transactional catalog or conditional compare-and-swap operation.
 
-The failure scenario starts from a successfully publishedrun-a. Run-b is staged and validated, but an injected error occurs after the temporary manifest is written and before replacement. The temporary manifest is cleaned in finally. The old current.json bytes must remain unchanged, and the reader must still returnrun-a's30 rows. The unreferencedrun-b directory is an orphan staging product, not another 30 rows in the published logical dataset.
+The failure scenario starts from a successfully published run-a. Run-b is staged and validated, but an injected error occurs after the temporary manifest is written and before replacement. The temporary manifest is cleaned in finally. The old current.json bytes must remain unchanged, and the reader must still return run-a's 30 rows. The unreferenced run-b directory is an orphan staging product, not another 30 rows in the published logical dataset.
 
-A retry ofrun-a checks the existing staged receipt and data against the new input's canonical digest. It reuses that validated product rather than appending more files. Repartitioning the same input changes its physical order but not the canonical digest. Replacing current.json with the same deterministic receipt leaves the same logical publication and identical manifest bytes. A source violating the 30-row/value contract is rejected before staging or publication can modify the current pointer.
+A retry of run-a checks the existing staged receipt and data against the new input's canonical digest. It reuses that validated product rather than appending more files. Repartitioning the same input changes its physical order but not the canonical digest. Replacing current.json with the same deterministic receipt leaves the same logical publication and identical manifest bytes. A source violating the 30-row/value contract is rejected before staging or publication can modify the current pointer.
 
 The reader validates the selected staged receipt against the published manifest before returning the DataFrame. This detects a manifest/receipt inconsistency and keeps the schema/count/digest boundary explicit. It does not make the local data directory immutable against arbitrary concurrent writers. The demonstration has one writer and a fresh namespace, so no other process is authorized to mutate its product during the run.
 
@@ -126,7 +126,7 @@ These synthetic receipt strings illustrate run identity without publishing anyth
 
 ### Exercise 1: Validate the product before computing its digest
 
-Require ordered fieldsid, value with bigint types, exactly 30 known unique IDs 0..29, known values equal to 2*id and total 870. Return SHA-256 of sorted Spark JSON lines joined by newline without a trailing newline.
+Require ordered fields id, value with bigint types, exactly 30 known unique IDs 0..29, known values equal to 2*id and total 870. Return SHA-256 of sorted Spark JSON lines joined by newline without a trailing newline.
 
 **Expected result/shape:** A64-character lowercase digest for the valid product. Wrong values, counts, types or identities are rejected before hashing.
 
@@ -148,7 +148,7 @@ Restrict run IDs to 1..32 lowercase letters, digits or hyphens. Validate input, 
 
 Read a run receipt and require its run_id, data_path, row_count, schema and digest to match the declared contract and actual Parquet readback. Construct the read path from validated runId rather than trusting arbitrary receipt text.
 
-**Expected result/shape:** Validrun-a receipt returns unchanged. A traversal-style run ID is rejected before path access.
+**Expected result/shape:** Valid run-a receipt returns unchanged. A traversal-style run ID is rejected before path access.
 
 **Verify:** Assert receipt equality and explicit rejection of../outside.
 
@@ -158,17 +158,17 @@ Read a run receipt and require its run_id, data_path, row_count, schema and dige
 
 Validate the staged receipt, write it to a fresh temporary manifest beside current.json, and atomically replace current.json. Support an injected failure before replacement and clean any unpublished temporary manifest in finally.
 
-**Expected result/shape:** Publishingrun-a creates current.json selecting its 30-row product. No data is appended or rewritten during publication.
+**Expected result/shape:** Publishing run-a creates current.json selecting its 30-row product. No data is appended or rewritten during publication.
 
-**Verify:** Assert the current manifest equals the validated receipt and points torun-a.
+**Verify:** Assert the current manifest equals the validated receipt and points to run-a.
 
 **Progressive hint:** The same-filesystem manifest replacement is the local visibility boundary; it is not a generic object-store transaction.
 
 ### Exercise 5: Keep the previous publication readable after an interrupted replacement
 
-Read the current manifest, validate its selected run and return that product. Stage run-b, inject failure before its manifest replacement, and confirm the reader still seesrun-a.
+Read the current manifest, validate its selected run and return that product. Stage run-b, inject failure before its manifest replacement, and confirm the reader still sees run-a.
 
-**Expected result/shape:** The injected error occurs, current.json bytes remain identical torun-a, and the published product still has 30 rows with the original digest.
+**Expected result/shape:** The injected error occurs, current.json bytes remain identical to run-a, and the published product still has 30 rows with the original digest.
 
 **Verify:** Assert the named exception, unchanged manifest and exact published product digest; run-b staging must not enter the reader population.
 
@@ -176,9 +176,9 @@ Read the current manifest, validate its selected run and return that product. St
 
 ### Exercise 6: Replay the same input without appending another product
 
-Compose stage, validate/publish and readback for a repeated run ID. Retryrun-a with a different execution partition layout, then attempt an invalid 31-row product and confirm publication stays intact.
+Compose stage, validate/publish and readback for a repeated run ID. Retry run-a with a different execution partition layout, then attempt an invalid 31-row product and confirm publication stays intact.
 
-**Expected result/shape:** Manifest bytes and data-file count are unchanged by validrun-a replay; published count remains 30. Invalid input fails before changing current.json.
+**Expected result/shape:** Manifest bytes and data-file count are unchanged by valid run-a replay; published count remains 30. Invalid input fails before changing current.json.
 
 **Verify:** Assert digest, manifest bytes, file-count equality and negative-control rejection.
 

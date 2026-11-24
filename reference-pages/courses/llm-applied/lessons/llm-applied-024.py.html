@@ -200,30 +200,30 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Answer a supported domain definition</span></span>
-<span class="source-line"><span class="syntax-comment"># Ask the public assistant forconversion_definition.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: answered withmetric-v1 citation and source text.</span></span>
+<span class="source-line"><span class="syntax-comment"># Ask the public assistant for conversion_definition.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: answered with metric-v1 citation and source text.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Abstain on missing evidence</span></span>
-<span class="source-line"><span class="syntax-comment"># Ask forcomet_period, which has no supporting corpus entry.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: unknown withmissing evidence reason.</span></span>
+<span class="source-line"><span class="syntax-comment"># Ask for comet_period, which has no supporting corpus entry.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: unknown with missing evidence reason.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Enforce access before answering</span></span>
-<span class="source-line"><span class="syntax-comment"># Ask a public-only assistant forrestricted_threshold, then ask a separately authorized</span></span>
+<span class="source-line"><span class="syntax-comment"># Ask a public-only assistant for restricted_threshold, then ask a separately authorized</span></span>
 <span class="source-line"><span class="syntax-comment"># assistant.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: publicunknown; authorizedanswercitesprivate-v1.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: public unknown; authorized answer cites private-v1.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Compute a data-science result deterministically</span></span>
-<span class="source-line"><span class="syntax-comment"># Calculate3 purchases over10 eligible visits and reject11 purchases over10 visits.</span></span>
+<span class="source-line"><span class="syntax-comment"># Calculate 3 purchases over 10 eligible visits and reject 11 purchases over 10 visits.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: rate 0.3; invalid counts raise ValueError.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Evaluate fixed task and boundary cases</span></span>
-<span class="source-line"><span class="syntax-comment"># Score supported, missing andrestricted-public questions against their expected statuses.</span></span>
+<span class="source-line"><span class="syntax-comment"># Score supported, missing and restricted-public questions against their expected statuses.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: 3 of 3 status contracts pass; citation integrity checked separately.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Issue a bounded capstone decision</span></span>
-<span class="source-line"><span class="syntax-comment"># Record local fixture acceptance while leaving pretrained generation, realidentity</span></span>
-<span class="source-line"><span class="syntax-comment"># integration andproduction readiness unverified.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: local_fixture_passTrue; production_gono-go.</span></span>
+<span class="source-line"><span class="syntax-comment"># Record local fixture acceptance while leaving pretrained generation, real identity</span></span>
+<span class="source-line"><span class="syntax-comment"># integration and production readiness unverified.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: local_fixture_pass True; production_go no-go.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

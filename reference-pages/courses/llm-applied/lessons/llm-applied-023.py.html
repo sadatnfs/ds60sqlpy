@@ -200,29 +200,29 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Check evidence freshness</span></span>
-<span class="source-line"><span class="syntax-comment"># Use fixedUTCnow2026-10-22 and a document published one day earlier under a two-day</span></span>
+<span class="source-line"><span class="syntax-comment"># Use fixed UTC now 2026-10-22 and a document published one day earlier under a two-day</span></span>
 <span class="source-line"><span class="syntax-comment"># limit.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: freshTrue.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: fresh True.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Reject stale and future evidence</span></span>
 <span class="source-line"><span class="syntax-comment"># Test a three-day-old document and a document dated one hour in the future.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: both fail freshness admission.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Enforce a three-call budget</span></span>
-<span class="source-line"><span class="syntax-comment"># Consume exactly3 operations, then attempt a fourth.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: used3; fourth raisesRuntimeError before increment.</span></span>
+<span class="source-line"><span class="syntax-comment"># Consume exactly 3 operations, then attempt a fourth.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: used 3; fourth raises RuntimeError before increment.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Reject naive timestamp assumptions</span></span>
 <span class="source-line"><span class="syntax-comment"># Pass a datetime without timezone information.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: ValueError.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Build an allowlisted trace</span></span>
-<span class="source-line"><span class="syntax-comment"># Create a trace from metadata plussecret/source_text fields and inspect the output.</span></span>
+<span class="source-line"><span class="syntax-comment"># Create a trace from metadata plus secret/source_text fields and inspect the output.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: only request_id, corpus_version, policy, result fields retained.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Make stale evidence produce abstention</span></span>
-<span class="source-line"><span class="syntax-comment"># Combine authorizedTrue withfreshFalse and require both before answering.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: answer admissionFalse; reasonstale evidence.</span></span>
+<span class="source-line"><span class="syntax-comment"># Combine authorized True with fresh False and require both before answering.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: answer admission False; reason stale evidence.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

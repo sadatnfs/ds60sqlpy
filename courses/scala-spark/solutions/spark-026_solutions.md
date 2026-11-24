@@ -8,7 +8,7 @@ Read the [guide](../guides/spark-026.md) and attempt one language first. The [Sc
 
 Return NULL/None unchanged; collapse only space, tab, newline and carriage return runs, trim ordinary spaces, and translate ASCII A-Z to a-z. Preserve other Unicode code points.
 
-**Expected:** All 12 golden outputs, includingcafÉ,İi, nonbreaking-space-wrapped a and unchanged decomposed e-plus-accent.
+**Expected:** All 12 golden outputs, including cafÉ, İi, nonbreaking-space-wrapped a and unchanged decomposed e-plus-accent.
 
 ```scala
 def normalizeLabel(value: String): String = {

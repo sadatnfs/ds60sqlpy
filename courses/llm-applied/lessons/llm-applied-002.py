@@ -14,7 +14,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 
 # Exercise 3: Trace extracted values to text
 # Parse the source text Visits: 10; Purchases: 3; Unit: account and retain source spans.
-# Expected: values10 and3; each span slices the original digits.
+# Expected: values 10 and 3; each span slices the original digits.
 
 # Exercise 4: Distinguish missing from zero
 # Submit a record with purchases=None and compare it with a real zero-purchase record.

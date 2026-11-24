@@ -200,28 +200,28 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Fuse two rankings</span></span>
-<span class="source-line"><span class="syntax-comment"># Fuse lexical[a, b, c] and dense[b, d, a] with constant60.</span></span>
+<span class="source-line"><span class="syntax-comment"># Fuse lexical [a, b, c] and dense [b, d, a] with constant 60.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: b ranks first, a second.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Inspect one exact contribution</span></span>
-<span class="source-line"><span class="syntax-comment"># Calculate the fused score ofb as1/62+1/61.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: computed b score equals that sum within1e-12.</span></span>
+<span class="source-line"><span class="syntax-comment"># Calculate the fused score of b as 1/62+1/61.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: computed b score equals that sum within 1e-12.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Prevent duplicate votes</span></span>
-<span class="source-line"><span class="syntax-comment"># Repeatb inside one ranking and compare with its deduplicated form.</span></span>
+<span class="source-line"><span class="syntax-comment"># Repeat b inside one ranking and compare with its deduplicated form.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: fusion result unchanged.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Rerank a bounded candidate set</span></span>
-<span class="source-line"><span class="syntax-comment"># Use candidatesa, b, c with authored relevance features0, 2, 1 and sort descending</span></span>
+<span class="source-line"><span class="syntax-comment"># Use candidates a, b, c with authored relevance features 0, 2, 1 and sort descending</span></span>
 <span class="source-line"><span class="syntax-comment"># feature then ID.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: orderb, c, a.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: order b, c, a.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Expose a candidate-recall ceiling</span></span>
-<span class="source-line"><span class="syntax-comment"># Declare relevant documentd but supply only candidatesa, b, c.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: candidate recall0 and reranker cannot return d.</span></span>
+<span class="source-line"><span class="syntax-comment"># Declare relevant document d but supply only candidates a, b, c.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: candidate recall 0 and reranker cannot return d.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Reject invalid fusion policy</span></span>
-<span class="source-line"><span class="syntax-comment"># Use constant0 or a repeated non-string identifier and apply the declared validation.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use constant 0 or a repeated non-string identifier and apply the declared validation.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: ValueError for nonpositive constant; TypeError for non-string ID.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>

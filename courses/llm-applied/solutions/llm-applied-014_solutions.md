@@ -131,9 +131,9 @@ test_families = {"F", "G"}
 assert train_families & test_families == {"F"}
 ```
 
-**Expected:** family intersectionF is a leak.
+**Expected:** family intersection F is a leak.
 
-**Verify:** Compare the computed values or written argument with family intersectionF is a leak.
+**Verify:** Compare the computed values or written argument with family intersection F is a leak.
 
 ## Exercise 6: Reject unsupported targets before training
 

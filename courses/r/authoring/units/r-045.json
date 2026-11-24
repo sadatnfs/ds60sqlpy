@@ -43,7 +43,7 @@
       "title": "Fit preprocessing on the training partition",
       "code": "train <- c(0, 2)\nheldout <- c(100, 102)\ncenter <- mean(train)\ntransformed <- heldout - center\nstopifnot(center == 1, identical(transformed, c(99, 101)))\nleaked_center <- mean(c(train, heldout))\nstopifnot(leaked_center == 51, leaked_center != center)\nprint(c(training_center = center, leaked_center = leaked_center))\n",
       "explanation": "The transformation parameters are part of the fitted procedure. Including held-out values changes the centering rule even without using labels.",
-      "expected": "Training center1; global center51; valid held-out transformed values 99/101."
+      "expected": "Training center 1; global center 51; valid held-out transformed values 99/101."
     }
   ],
   "exercises": [

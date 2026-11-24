@@ -259,11 +259,11 @@ else: raise AssertionError('wrong feature width accepted')""",
             "A variable batch length is allowed, but the declared feature width remains fixed. The model contract should name that distinction.",
         ),
     ],
-    "Keras Dense stores a kernel shaped(input_features, output_features), while PyTorch nn.Linear stores(output_features, input_features). Copying values without transposing changes or breaks the computation. Both expose tracked trainable state, but PyTorch distinguishes Parameter registration from an ordinary tensor attribute.",
+    "Keras Dense stores a kernel shaped (input_features, output_features), while PyTorch nn.Linear stores(output_features, input_features). Copying values without transposing changes or breaks the computation. Both expose tracked trainable state, but PyTorch distinguishes Parameter registration from an ordinary tensor attribute.",
     [
         (
             "Why does Linear store a transposed-looking weight?",
-            "Its public contract defines weight as(out, in) and applies the transpose during the batched row-vector computation. The important check is the documented layout, not which notation feels more natural.",
+            "Its public contract defines weight as (out, in) and applies the transpose during the batched row-vector computation. The important check is the documented layout, not which notation feels more natural.",
         ),
         (
             "Can a tensor have gradients but be absent from an optimizer?",
@@ -2617,7 +2617,7 @@ temporary.cleanup(); assert not folder.exists()""",
 lesson(
     33,
     "Inference is a bounded function with an input and output contract. A model may accept many tensors that are syntactically legal but semantically wrong: missing batch axes, wrong feature order, unexpected dtype, nonfinite values or an oversized request. Validate these conditions before forward computation. Batching should preserve each record's prediction for a stateless model in the declared evaluation mode.\n\nPyTorch inference_mode disables more autograd bookkeeping than no_grad and creates tensors with restrictions relevant to later gradient use. It is appropriate for a pure inference boundary, but should not be substituted blindly into training or gradient-based analysis. model.eval remains necessary for mode-dependent layers. This lesson uses a fixed linear model and no server, deployment or GPU so the contract can be tested locally.",
-    "The predict helper requires a CPU float32 tensor shaped(batch, 2), with batch size 1..4 and finite entries. It calls model.eval and uses inference_mode, then returns an owned clone suitable for caller inspection. The coefficient vector [2, -1] supplies an independent output oracle. Treat shape, dtype, device and value validation as different diagnostics rather than silently coercing every input.",
+    "The predict helper requires a CPU float32 tensor shaped (batch, 2), with batch size 1..4 and finite entries. It calls model.eval and uses inference_mode, then returns an owned clone suitable for caller inspection. The coefficient vector [2, -1] supplies an independent output oracle. Treat shape, dtype, device and value validation as different diagnostics rather than silently coercing every input.",
     [
         (
             "Inference mode",

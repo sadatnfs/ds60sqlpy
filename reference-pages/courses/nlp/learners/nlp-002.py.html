@@ -203,17 +203,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFC forms:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">repr</span><span class="syntax-punctuation">(</span>ud<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> composed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">repr</span><span class="syntax-punctuation">(</span>ud<span class="syntax-operator">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NFC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> decomposed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Inspect code-point counts, UTF-8 bytes and equality for both forms.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: raw inequality, lengths4/5 and byte lengths5/6.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: raw inequality, lengths 4/5 and byte lengths 5/6.</span></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Compare NFC/NFD and test normalization idempotence for four forms.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: common-form equality, NFC length4 and NFD length5.</span></span>
-<span class="source-line"><span class="syntax-comment"># Exercise 3: Group 1, circled1 and both accent forms by NFKC while retaining raw values.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: common-form equality, NFC length 4 and NFD length 5.</span></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3: Group 1, circled ① and both accent forms by NFKC while retaining raw values.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: two groups of two distinct raw representations.</span></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Compare case folding of Straße and the Latin/Cyrillic a pair.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: strasse length7; cross-script pair remains unequal under NFC.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: strasse length 7; cross-script pair remains unequal under NFC.</span></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Decode b&quot;caf\xff&quot; strictly and with replacement, preserving bytes.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: failure at byte3 and replacement U+FFFD.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: failure at byte 3 and replacement U+FFFD.</span></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Explain why raw code-point spans cannot be blindly copied after normalization.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: invalid old end5 for NFC word length4, plus a case-fold expansion counterexample.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: invalid old end 5 for NFC word length 4, plus a case-fold expansion counterexample.</span></span>
 <span class="source-line"><span class="syntax-comment"># Add your code, assertions, policy decisions and raw evidence below.</span></span>
 <span class="source-line"></span></code></pre></article>
   </main>

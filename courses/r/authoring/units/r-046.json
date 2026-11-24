@@ -31,7 +31,7 @@
       "title": "Units change an unscaled direction",
       "code": "x <- cbind(short = c(-2, -1, 1, 2), long = c(-20, -10, 10, 20))\nraw <- prcomp(x, center = TRUE, scale. = FALSE)\nstandardized <- prcomp(x, center = TRUE, scale. = TRUE)\nstopifnot(abs(abs(raw$rotation[\"long\", 1]) - 10 / sqrt(101)) < 1e-10)\nstopifnot(max(abs(abs(standardized$rotation[, 1]) - rep(1 / sqrt(2), 2))) < 1e-10)\nstopifnot(raw$sdev[2] < 1e-10)\nprint(abs(raw$rotation[, 1]))\nprint(abs(standardized$rotation[, 1]))\n",
       "explanation": "The two features are exactly proportional. Their scale difference dominates the unscaled loading, while standardization gives equal-magnitude coordinates. Absolute values avoid testing an arbitrary sign.",
-      "expected": "Raw large-unit loading magnitude10/sqrt101; standardized magnitudes1/sqrt2."
+      "expected": "Raw large-unit loading magnitude 10/sqrt(101); standardized magnitudes 1/sqrt(2)."
     },
     {
       "title": "Reconstruct with retained preprocessing",

@@ -6,11 +6,11 @@ Copy to .learning before editing. Six independent attempts belong below.
 
 # Exercise 1: Fingerprint authored sources
 # Add source=course-authored, permission=course-fixture and SHA256 to each local document.
-# Expected: 6 complete records; all hashes contain64 characters.
+# Expected: 6 complete records; all hashes contain 64 characters.
 
 # Exercise 2: Detect a changed definition
 # Create metric-v2 with changed text and compare content hashes to metric-v1.
-# Expected: hash differs; family remains metric; version is2.
+# Expected: hash differs; family remains metric; version is 2.
 
 # Exercise 3: Choose an active version explicitly
 # Select the highest version per family from metric-v1, metric-v2 and trial-v1.

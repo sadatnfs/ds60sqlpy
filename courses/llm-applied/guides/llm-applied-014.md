@@ -200,8 +200,8 @@ Before reading the code for *Preserve prompt context without prompt loss*, predi
    **Verify:** Save the assertion results for exercise 4, including ValueError because truncation removes every answer target.
 
 5. **Keep family splits disjoint.** Assign two formatting variants to family F and test that they cannot cross train/test.
-   **Expected:** family intersectionF is a leak.
-   **Verify:** Save the assertion results for exercise 5, including family intersectionF is a leak.
+   **Expected:** family intersection F is a leak.
+   **Verify:** Save the assertion results for exercise 5, including family intersection F is a leak.
 
 6. **Reject unsupported targets before training.** Mark a target answer as unsupported by its cited source and apply an admission gate.
    **Expected:** record excluded despite valid token arrays.

@@ -18,7 +18,7 @@ The reference asserts baseline totals, filtered totals, mark counts, reset behav
 
 Calculate from the source rows before running. The expected values should be independent of the render code. By hand: A1 3 + A2 5 + B1 4 + B2 8 = 20 hours, and A alone is 8. The reference expects "4 records; total 20 hours" and, after selecting A, "2 records; total 8 hours". Deriving these numbers by printing what render returns would make the test agree with any bug.
 
-**Expected:** All records total 20; groupA totals 8.
+**Expected:** All records total 20; group A totals 8.
 
 ## Exercise 2: Change one value and update the independent expectations.
 

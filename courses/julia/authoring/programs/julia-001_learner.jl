@@ -12,8 +12,8 @@ end
 
 worked_a()
 
-# Task 1: Use accepted20 and rejected3.
-# Task 2: Bind y to x=4, then rebind x to10.
+# Task 1: Use accepted 20 and rejected 3.
+# Task 2: Bind y to x=4, then rebind x to 10.
 # Task 3: Compare a bare arithmetic expression with println in a script.
 # Task 4: Compare typeof(2) and typeof(2.5).
 # Task 5: Misspell a variable in an owned copy of the program.

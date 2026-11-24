@@ -201,7 +201,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Frozen base:</strong> Parameters excluded from the adaptation optimizer.</p>
 <p><strong>Zero-delta initialization:</strong> An adapter starting with no change to the base function.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
-<p>Keep W as a tensor without requires_grad. Wrap A and B as Parameters and pass only those to SGD. The row-vector convention differs from frameworks that store Linear weights as(out, in), so record the orientation before transplanting equations. Compute delta=A@B and compare its shape with W. Snapshot the base bytes and assert exact preservation after the adapter update.</p>
+<p>Keep W as a tensor without requires_grad. Wrap A and B as Parameters and pass only those to SGD. The row-vector convention differs from frameworks that store Linear weights as (out, in), so record the orientation before transplanting equations. Compute delta=A@B and compare its shape with W. Snapshot the base bytes and assert exact preservation after the adapter update.</p>
 <h3 id="exercise-1-count-adapter-parameters">Exercise 1: Count adapter parameters<a class="heading-anchor" href="#exercise-1-count-adapter-parameters" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use W=I8, A=ones(8, 2)/8, B=zeros(2, 8).</p>
 <p>The parameter reduction comes from the factorization rank 2. Increasing rank increases trainable state and changes the set of possible updates.</p>

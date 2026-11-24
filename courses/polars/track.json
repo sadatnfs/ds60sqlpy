@@ -22,7 +22,7 @@
       ],
       "outcome": "Construct and verify a typed table with a stated row grain.",
       "lab": "Add a revenue expression to a three-row orders table and confirm that it keeps one row per order and a total of 30, then filter to an empty frame and check that its Int64 and String schema survives.",
-      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Revenue is [10, 8, 12], total 30; input shape remains 3 by 3 and output shape is 3 by 4. Worked case 2: The empty frame has 0 rows and the original Int64/String schema; selecting label,id produces that order."
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Revenue is [10, 8, 12], total 30; input shape remains 3 by 3 and output shape is 3 by 4. Worked case 2: The empty frame has 0 rows and the original Int64/String schema; selecting label, id produces that order."
     },
     {
       "id": "polars-002",

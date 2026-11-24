@@ -5,16 +5,16 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Apply a controlled synonym rewrite
-# Rewritebuy rate usingbuy->purchase while preserving the original question.
-# Expected: rewrittenpurchase rate; original unchanged.
+# Rewrite buy rate using buy->purchase while preserving the original question.
+# Expected: rewritten purchase rate; original unchanged.
 
 # Exercise 2: Retain a rewrite trace
 # Record the original, rewritten query and policy version.
 # Expected: trace includes all three fields.
 
 # Exercise 3: Follow two evidence hops
-# Use graphmetric->exclusions->test_accounts with a two-hop bound.
-# Expected: visitedmetric, exclusions, test_accounts.
+# Use graph metric->exclusions->test_accounts with a two-hop bound.
+# Expected: visited metric, exclusions, test_accounts.
 
 # Exercise 4: Stop at the declared depth
 # Run the same graph with a one-hop bound, then reject fractional, Boolean, NaN and
@@ -22,7 +22,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: test_accounts is absent; invalid budgets raise ValueError before traversal.
 
 # Exercise 5: Break a retrieval cycle
-# Addtest_accounts->metric and traverse with a larger bound.
+# Add test_accounts->metric and traverse with a larger bound.
 # Expected: each document appears once.
 
 # Exercise 6: Preserve authorization across hops

@@ -204,12 +204,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Expected: all initial base parameters equal.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Install an output-head adapter</span></span>
-<span class="source-line"><span class="syntax-comment"># Freeze the adapted model, replace its output layer withrank2LoRA, and compare initial</span></span>
+<span class="source-line"><span class="syntax-comment"># Freeze the adapted model, replace its output layer with rank 2 LoRA, and compare initial</span></span>
 <span class="source-line"><span class="syntax-comment"># logits.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: 96 trainable adapter entries; initial logits match base.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Train both candidates under fixed budgets</span></span>
-<span class="source-line"><span class="syntax-comment"># Run20 full-SFT updates at.01 and20 adapter updates at.03 on the same masked batch.</span></span>
+<span class="source-line"><span class="syntax-comment"># Run 20 full-SFT updates at 0.01 and 20 adapter updates at 0.03 on the same masked batch.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: both training losses decrease; all logged values finite.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Prove base preservation</span></span>
@@ -217,12 +217,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Expected: all frozen tensors exactly equal.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Compare a frozen held-out task</span></span>
-<span class="source-line"><span class="syntax-comment"># Evaluate prompt[7, 2] withanswer[5, 3] for both candidates using the same mask.</span></span>
+<span class="source-line"><span class="syntax-comment"># Evaluate prompt [7, 2] with answer [5, 3] for both candidates using the same mask.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: two finite held-out losses; no predetermined winner.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Record comparison limits</span></span>
 <span class="source-line"><span class="syntax-comment"># Build a report with trainable counts, update budgets, target module and task scope.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: adapter96 entries; 20 updates each; scope literal-token task.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: adapter 96 entries; 20 updates each; scope literal-token task.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Read the guide and implement the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>

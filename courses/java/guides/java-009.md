@@ -123,7 +123,7 @@ public class Main {
 }
 ```
 
-**Expected:** closeB before close A.
+**Expected:** closeB before closeA.
 
 ## Prediction before your attempt
 
@@ -136,7 +136,7 @@ Read the source from the entry point and name each value before executing it. Id
    **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `events.equals(List.of("body", "closeA"))` false. After restoring the line, the program completes without an `AssertionError` again.
 
 2. **Close in reverse order: debug a regression.** A regression changed one token in the code that Example B adds after Example A, so one line now reads `try (Probe a = new Probe("A!", events, false); Probe b = new Probe("B", events, false)) {`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
-   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `events.equals(List.of("body", "closeB", "closeA"))`; after it the line reads `try (Probe a = new Probe("A", events, false); Probe b = new Probe("B", events, false)) {` again and closeB before close A.
+   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `events.equals(List.of("body", "closeB", "closeA"))`; after it the line reads `try (Probe a = new Probe("A", events, false); Probe b = new Probe("B", events, false)) {` again and closeB before closeA.
    **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `events.equals(List.of("body", "closeB", "closeA"))` for this input.
 
 3. **Close after body failure.** Throw IllegalStateException in the body and inspect events after catching it.
@@ -166,7 +166,7 @@ Do not replace a precise exception with a catch-all that returns a plausible def
 Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
 
 - **Exercise 1:** First restate the expected observation: events body, close A. Then list the values read by `events.equals(List.of("body", "closeA"))` and trace each one from its declaration. Finally, compute the asserted value with `try (Probe resource = new Probe("A!", events, false)) {` in place before running.
-- **Exercise 2:** First restate the expected observation: closeB before close A. Then list the values read by `events.equals(List.of("body", "closeB", "closeA"))` and trace each one from its declaration. Finally, compare `try (Probe a = new Probe("A!", events, false); Probe b = new Probe("B", events, false)) {` with the same line in Example B and state the claim each version makes.
+- **Exercise 2:** First restate the expected observation: closeB before closeA. Then list the values read by `events.equals(List.of("body", "closeB", "closeA"))` and trace each one from its declaration. Finally, compare `try (Probe a = new Probe("A!", events, false); Probe b = new Probe("B", events, false)) {` with the same line in Example B and state the claim each version makes.
 - **Exercise 3:** First restate the expected observation: close A still recorded. Then list the values read by `bodyFailed && events.equals(List.of("closeA"))` and trace each one from its declaration. Finally, predict the effect of changing `bodyFailed = true;` to `bodyFailed = false;` before running anything.
 - **Exercise 4:** First restate the expected observation: primary message body; one suppressed exception close A. Then list the values read by `expected.getSuppressed()[0].getMessage().equals("closeA")` and trace each one from its declaration. Finally, predict the effect of changing `try (Probe a = new Probe("A", events, true)) {` to `try (Probe a = new Probe("A!", events, true)) {` before running anything.
 - **Exercise 5:** First restate the expected observation: IOException close A is primary. Then list the values read by `closeFailed` and trace each one from its declaration. Finally, predict the effect of changing `try (Probe a = new Probe("A", events, true)) {} catch (java.io.IOException expected) {` to `try (Probe a = new Probe("A", events, false)) {} catch (java.io.IOException expected) {` before running anything.

@@ -50,7 +50,7 @@ Changing the multiple-watermark policy to a faster-progress rule can cause the s
 
 The literal batch pair oracle is evaluated independently from the streaming implementation. It includes key equality and the half-open interval, then separately identifies unmatched business impressions. Administrative advancers are accounted for as source records but excluded from the business oracle by explicit identity. The complete input population is nine records across both sides after the advancers; each query reads that population independently.
 
-Every file is fully staged before atomic arrival, each query is awaited with a deadline and stopped in finally, and cleanup removes only the fresh owned root after all queries are inactive. No external broker, network producer orsleep-based event timing is required. The evidence establishes the stated finite match/finalization ledger and the tested state policy, not a general exactly-once orproduction-memory claim.
+Every file is fully staged before atomic arrival, each query is awaited with a deadline and stopped in finally, and cleanup removes only the fresh owned root after all queries are inactive. No external broker, network producer or sleep-based event timing is required. The evidence establishes the stated finite match/finalization ledger and the tested state policy, not a general exactly-once or production-memory claim.
 
 ## Supplied local fixture
 
@@ -163,15 +163,15 @@ Read the owned impression and click file directories with their explicit schemas
 
 **Expected result/shape:** Both relations are streaming; the minimum multiple-watermark policy is explicit and no query runs merely from construction.
 
-**Verify:** Assert both streaming flags, the declared timestamp fields and policymin before execution.
+**Verify:** Assert both streaming flags, the declared timestamp fields and policy min before execution.
 
 **Progressive hint:** Each side has its own event-time column and progress; do not watermark an unrelated timestamp.
 
 ### Exercise 2: Express key equality and the exact time range
 
-Build either an inner orleft_outer join using key equality, click_time>=impression_time and click_time<impression_time+10 minutes. Project impression_id, click_id and both timestamps.
+Build either an inner or left_outer join using key equality, click_time>=impression_time and click_time<impression_time+10 minutes. Project impression_id, click_id and both timestamps.
 
-**Expected result/shape:** A streaming relation with the four declared columns. The condition can matchi 1/c1 and i3/c2 but not boundaryclickc 3.
+**Expected result/shape:** A streaming relation with the four declared columns. The condition can match i1/c1 and i3/c2 but not boundary click c3.
 
 **Verify:** Assert output shape and reject an unsupported kind value; later exact pair checks validate both predicates.
 
@@ -193,7 +193,7 @@ Read either owned output as ordered (impression_id, click_id) pairs. After phase
 
 **Expected result/shape:** Both sinks contain `(i1, c1)`, `(i3, c2)`. i2/NULL is absent because its possible match interval is not yet finalized. c3 and c4 produce no pair.
 
-**Verify:** Assert exact pair lists and absence of prematurei 2/NULL; do not rely only on output count 2.
+**Verify:** Assert exact pair lists and absence of premature i2/NULL; do not rely only on output count 2.
 
 **Progressive hint:** An outer join preserves a future unmatched result only after its event-time eligibility is closed.
 

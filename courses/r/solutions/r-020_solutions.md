@@ -4,7 +4,7 @@ Use the [complete reference](r-020_reference.R) with the guide's declared inputs
 
 ## Why the implementation has this shape
 
-The independent expected amount is(10+60)/4. Scaling every weight by the same positive constant is a useful invariant that tests meaning rather than source text.
+The independent expected amount is (10+60)/4. Scaling every weight by the same positive constant is a useful invariant that tests meaning rather than source text.
 
 Resetting the same seed before each draw reproduces this generator stream in the same environment. The range assertion checks a separate distribution-support property.
 

@@ -203,17 +203,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">words <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">low</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">lower</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">}</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Compare the three segmentation policies and retain source spans.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: the guide&#x27;s three token lists; pay occupies[6,9).</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: the guide&#x27;s three token lists; pay occupies [6, 9).</span></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Count adjacent pairs using word frequencies.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected:l,o and o,w each4; w,&lt;/w&gt; count3.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: (l, o) and (o, w) each 4; (w, &lt;/w&gt;) count 3.</span></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Implement a left-to-right nonoverlapping merge.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected:a,a,a,&lt;/w&gt; becomes aa,a,&lt;/w&gt; and reconstructs aaa.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: a, a, a, &lt;/w&gt; becomes aa, a, &lt;/w&gt; and reconstructs aaa.</span></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Learn two deterministic merges, rebuilding counts each time.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected:(l,o), then(lo,w), independent of dictionary insertion order.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: (l, o), then (lo, w), independent of dictionary insertion order.</span></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Encode with frozen rules and an explicit unknown-symbol policy.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected:lower/row round-trip, slow raises for unknown s, no merges change.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: lower/row round-trip, slow raises for unknown s, no merges change.</span></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Write a tokenizer/model compatibility record.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected:algorithm,normalization,vocabulary IDs,merges,special tokens and evidence limits.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: algorithm, normalization, vocabulary IDs, merges, special tokens and evidence limits.</span></span>
 <span class="source-line"><span class="syntax-comment"># Add your code and observations below. Do not download a tokenizer or model.</span></span>
 <span class="source-line"></span></code></pre></article>
   </main>

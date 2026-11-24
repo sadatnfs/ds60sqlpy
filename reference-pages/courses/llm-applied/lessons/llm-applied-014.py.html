@@ -200,24 +200,24 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Align an answer-only record</span></span>
-<span class="source-line"><span class="syntax-comment"># Use promptIDs[1, 2] andanswerIDs[5, 6, 3].</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: inputs[1, 2, 5, 6]; labels[-100, 5, 6, 3]; 3 active targets.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use prompt IDs [1, 2] and answer IDs [5, 6, 3].</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: inputs [1, 2, 5, 6]; labels [-100, 5, 6, 3]; 3 active targets.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Preserve prompt context without prompt loss</span></span>
-<span class="source-line"><span class="syntax-comment"># Change promptIDs to[8, 9] while retaining the answer; inspect labels.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: prompt inputs change; answer labels remain5, 6, 3.</span></span>
+<span class="source-line"><span class="syntax-comment"># Change prompt IDs to [8, 9] while retaining the answer; inspect labels.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: prompt inputs change; answer labels remain 5, 6, 3.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Reject an empty answer</span></span>
-<span class="source-line"><span class="syntax-comment"># Prepare a record with prompt[1, 2] and no answer tokens.</span></span>
+<span class="source-line"><span class="syntax-comment"># Prepare a record with prompt [1, 2] and no answer tokens.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: ValueError for no answer targets.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Detect destructive truncation</span></span>
-<span class="source-line"><span class="syntax-comment"># Use a context limit2 for a prompt oflength2 and answerlength3.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use a context limit 2 for a prompt of length 2 and answer length 3.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: ValueError because truncation removes every answer target.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Keep family splits disjoint</span></span>
-<span class="source-line"><span class="syntax-comment"># Assign two formatting variants tofamilyF and test that they cannot cross train/test.</span></span>
-<span class="source-line"><span class="syntax-comment"># Expected: family intersectionF is a leak.</span></span>
+<span class="source-line"><span class="syntax-comment"># Assign two formatting variants to family F and test that they cannot cross train/test.</span></span>
+<span class="source-line"><span class="syntax-comment"># Expected: family intersection F is a leak.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 6: Reject unsupported targets before training</span></span>
 <span class="source-line"><span class="syntax-comment"># Mark a target answer as unsupported by its cited source and apply an admission gate.</span></span>

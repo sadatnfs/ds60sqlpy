@@ -14,7 +14,7 @@ Low-rank adaptation freezes a base matrix and learns an additive product of two 
 
 ## Reading the implementation
 
-Keep W as a tensor without requires_grad. Wrap A and B as Parameters and pass only those to SGD. The row-vector convention differs from frameworks that store Linear weights as(out, in), so record the orientation before transplanting equations. Compute delta=A@B and compare its shape with W. Snapshot the base bytes and assert exact preservation after the adapter update.
+Keep W as a tensor without requires_grad. Wrap A and B as Parameters and pass only those to SGD. The row-vector convention differs from frameworks that store Linear weights as (out, in), so record the orientation before transplanting equations. Compute delta=A@B and compare its shape with W. Snapshot the base bytes and assert exact preservation after the adapter update.
 
 ## Exercise 1: Count adapter parameters
 

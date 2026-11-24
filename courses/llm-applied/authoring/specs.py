@@ -240,7 +240,7 @@ assert digest(changed)!=before""",
         ex(
             "Keep evaluation examples isolated",
             "Place demonstration familyA in prompt selection and final familyB in assessment; inject a familyB example and detect the intersection.",
-            "clean family intersection is empty; injected intersection containsB.",
+            "clean family intersection is empty; injected intersection contains B.",
             """prompt_families={'A'}; test_families={'B'}
 assert not prompt_families&test_families
 assert (prompt_families|{'B'})&test_families=={'B'}""",
@@ -576,7 +576,7 @@ np.testing.assert_array_equal(word_vectors['buy'],word_vectors['purchase'])""",
         ),
         ex(
             "Reject incompatible spaces",
-            "Compare query metadata modelA with an index encoded by modelB, even when both have width3.",
+            "Compare query metadata model A with an index encoded by model B, even when both have width 3.",
             "metadata identity mismatch is detected; the caller must enforce the retrieval gate.",
             """query_meta={'model':'A','width':3,'normalization':'unit'}; index_meta={'model':'B','width':3,'normalization':'unit'}
 assert query_meta!=index_meta""",
@@ -1127,7 +1127,7 @@ else: raise AssertionError('answer removed by truncation')""",
         ex(
             "Keep family splits disjoint",
             "Assign two formatting variants tofamilyF and test that they cannot cross train/test.",
-            "family intersectionF is a leak.",
+            "family intersection F is a leak.",
             """train_families={'F'}; test_families={'F','G'}
 assert train_families&test_families=={'F'}""",
             "A model can memorize a template or answer pattern. Grouped evaluation measures transfer beyond the exact family used to construct training examples.",
@@ -1172,8 +1172,8 @@ This chapter performs real CPU gradient updates on the course's small causal dec
     [
         ex(
             "Build an explicit SFT batch",
-            "Use sequences[1,2,5,3] and[1,4,6,3],masking the first shifted target.",
-            "inputs shape(2,3);labels[[-100,5,3],[-100,6,3]];4 active targets.",
+            "Use sequences [1,2,5,3] and [1,4,6,3], masking the first shifted target.",
+            "inputs shape (2,3); labels [[-100,5,3],[-100,6,3]]; 4 active targets.",
             """torch.manual_seed(23); model=TinyDecoder(); sequences=torch.tensor([[1,2,5,3],[1,4,6,3]])
 inputs=sequences[:,:-1]; labels=sequences[:,1:].clone(); labels[:,0]=-100
 assert tuple(inputs.shape)==(2,3) and labels.tolist()==[[-100,5,3],[-100,6,3]] and int((labels!=-100).sum())==4""",
@@ -1507,7 +1507,7 @@ add(
     [
         ex(
             "Calculate the equal-margin loss",
-            "Set policy difference 0,reference difference 0,beta.5.",
+            "Set policy difference 0, reference difference 0, beta 0.5.",
             "loss log 2.",
             """difference=nn.Parameter(torch.tensor(0.,dtype=torch.float64)); reference=0.; beta=.5
 loss=F.softplus(-beta*(difference-reference))
@@ -1576,7 +1576,7 @@ This chapter performs actual CPU updates on a small linear query projection and 
         ex(
             "Construct paired retrieval features",
             "Use queries and documents equal to the 2-by-2 identity matrix,with positive labels 0,1.",
-            "score shape(2,2);one positive per query.",
+            "score shape (2,2); one positive per query.",
             """queries=torch.eye(2); documents=torch.eye(2); labels=torch.tensor([0,1]); projection=nn.Parameter(torch.zeros((2,2)))
 scores=(queries@projection)@documents.T
 assert tuple(scores.shape)==(2,2) and labels.tolist()==[0,1]""",

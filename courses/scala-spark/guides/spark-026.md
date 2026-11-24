@@ -46,7 +46,7 @@ The physical plan shows where the Python evaluation is inserted. The Python refe
 
 A UDF must be pure for this example: it does not write files, call a service, mutate shared counters or depend on invocation order. Spark can reevaluate expressions or retry tasks, so an application should not encode exactly-once external effects in a scalar UDF. Marking a function nondeterministic changes optimizer assumptions but does not turn it into a transactional side-effect mechanism. The result contract concerns returned values rather than the number of Python or JVM calls.
 
-The final counterexample deliberately uses a broader lowercase-and-trim implementation. It changesnon-ASCII capitals and fails to collapse interior whitespace correctly. Python's default strip also removes the nonbreaking spaces that this contract preserves, while the JVMtrim behavior differs. The validators must reject the wrong implementation even if its output looks reasonable to a human. This teaches why a business rule needs examples at semantic boundaries rather than only a happy-path word.
+The final counterexample deliberately uses a broader lowercase-and-trim implementation. It changes non-ASCII capitals and fails to collapse interior whitespace correctly. Python's default strip also removes the nonbreaking spaces that this contract preserves, while the JVM trim behavior differs. The validators must reject the wrong implementation even if its output looks reasonable to a human. This teaches why a business rule needs examples at semantic boundaries rather than only a happy-path word.
 
 Arrow and pandas UDFs are an optional extension, not imported or executed by the default sources. Spark 4.3.0 documents pandas 2.0.0 and PyArrow 11.0.0 as minimum supported versions for this SQL integration. A dedicated profile must still record exact compatible package pins, then rerun the golden fixture and inspect the resulting plan; minimum versions alone do not qualify an environment. Arrow changes the transfer representation and batching boundary; it does not eliminate data conversion or guarantee speed. No optional dependency is assumed installed, and no lesson code downloads one.
 
@@ -191,7 +191,7 @@ NULL is absence of a known value, not a special spelling stored in every string 
 
 Return NULL/None unchanged; collapse only space, tab, newline and carriage return runs, trim ordinary spaces, and translate ASCII A-Z to a-z. Preserve other Unicode code points.
 
-**Expected result/shape:** All 12 golden outputs, includingcafÉ,İi, nonbreaking-space-wrapped a and unchanged decomposed e-plus-accent.
+**Expected result/shape:** All 12 golden outputs, including cafÉ, İi, nonbreaking-space-wrapped a and unchanged decomposed e-plus-accent.
 
 **Verify:** Apply the scalar function to every raw fixture value and compare with all golden pairs.
 

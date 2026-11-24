@@ -122,7 +122,7 @@ for bad in [np.array([0.0, 0.0]), np.array([1.0, np.nan])]:
 
 ## Exercise 5: Reject incompatible spaces
 
-The question is: Compare query metadata modelA with an index encoded by modelB, even when both have width 3.
+The question is: Compare query metadata model A with an index encoded by model B, even when both have width 3.
 
 Vector dimensions are only a shape contract. Two models can use unrelated coordinate systems with the same width, so their dot products are not meaningful cross-model similarities.
 
