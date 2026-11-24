@@ -29,7 +29,7 @@ class PreparationChecks(unittest.TestCase):
         for arch in ("arm64", "amd64"):
             cpu = locks.read_lock(locks.selected_lock("cpu", arch))
             science = locks.read_lock(locks.selected_lock("scientific", arch))
-            self.assertEqual(cpu["torch"], "2.9.1+cpu")
+            self.assertEqual(cpu["torch"], "2.15.0+cpu")
             self.assertEqual(cpu["numpy"], "2.2.6")
             self.assertEqual(science["scipy"], "1.15.3")
             self.assertEqual(science["lightning"], "2.6.1")
@@ -55,7 +55,7 @@ class PreparationChecks(unittest.TestCase):
         expected = locks.read_lock(locks.selected_lock("cpu", "arm64"))
         with patch.object(locks.importlib.metadata, "version", side_effect=expected.__getitem__):
             self.assertEqual(locks.check_versions(locks.selected_lock("cpu", "arm64")), expected)
-        changed = dict(expected, torch="2.9.1")
+        changed = dict(expected, torch="2.15.0")
         with (
             patch.object(locks.importlib.metadata, "version", side_effect=changed.__getitem__),
             self.assertRaisesRegex(ValueError, "Prepared dependency differs"),

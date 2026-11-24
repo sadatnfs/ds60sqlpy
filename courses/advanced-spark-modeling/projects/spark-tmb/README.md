@@ -42,7 +42,7 @@ DS60_TMB_BASE=ds60-tmb-local:dev-1.9.25 \
   courses/advanced-spark-modeling/projects/spark-tmb/workshop build
 ```
 
-The build combines native Java 21, Spark 4.0.1 and Python 3.12 with the exact R/TMB environment. It installs hash-pinned Python packages and builds/installs the reusable pure wheel offline with prepared setuptools. It checks the shared R library, compiles the original TMB examples, runs their R acceptance and performs a real pandas/rpy2/TMB regression fit. It then compiles the project-owned four-model registry and records source, library, registry and ABI identities. SciPy 1.15.3 supplies the shared Python driver optimizer; fitting never installs it. Build failure stops preparation. Do not copy `.so` files from another architecture or R/TMB environment.
+The build combines native Java 21, Spark 4.3.0 and Python 3.12 with the exact R/TMB environment. It installs hash-pinned Python packages and builds/installs the reusable pure wheel offline with prepared setuptools. It checks the shared R library, compiles the original TMB examples, runs their R acceptance and performs a real pandas/rpy2/TMB regression fit. It then compiles the project-owned four-model registry and records source, library, registry and ABI identities. SciPy 1.15.3 supplies the shared Python driver optimizer; fitting never installs it. Build failure stops preparation. Do not copy `.so` files from another architecture or R/TMB environment.
 
 Run one case without rebuilding:
 
@@ -85,7 +85,7 @@ Read [REGISTERING-MODELS.md](REGISTERING-MODELS.md) before adding a model. The s
 
 The Normal-mean and random-intercept templates mirror original TMB curriculum models. The Normal-location and linear-regression templates add explicit native prediction-only branches. They use the TMB API under its own package license; no external application or historical forecasting repository source was copied here. The PyTorch likelihood course supplies complementary local mathematical investigations.
 
-Primary references: [Spark partition evaluation](https://spark.apache.org/docs/4.0.1/api/python/reference/api/pyspark.RDD.mapPartitionsWithIndex.html), [TMB model construction](https://kaskr.github.io/adcomp/Introduction.html), and [scoped pandas/rpy2 conversion](https://rpy2.github.io/doc/latest/html/pandas.html). The TMB overview page identifies an older documentation build; the installed package and compiler acceptance, not that page's header, determine this project's exact 1.9.25 behavior.
+Primary references: [Spark partition evaluation](https://spark.apache.org/docs/4.3.0/api/python/reference/api/pyspark.RDD.mapPartitionsWithIndex.html), [TMB model construction](https://kaskr.github.io/adcomp/Introduction.html), and [scoped pandas/rpy2 conversion](https://rpy2.github.io/doc/latest/html/pandas.html). The TMB overview page identifies an older documentation build; the installed package and compiler acceptance, not that page's header, determine this project's exact 1.9.25 behavior.
 
 ## DataFrames, ML pipelines and JVM callers
 

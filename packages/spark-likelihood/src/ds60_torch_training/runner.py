@@ -37,15 +37,16 @@ from .contracts import (
 from .program import TrainingProgram, ledger
 from .program import schedule as make_schedule
 
+REVIEWED_DISTRIBUTORS = {
+    "4.0.1": "fa54028c2ec3489702a172ade895fac9c53e58db45e08d7bf34b8e7d67737ba3",
+    "4.3.0": "4136a0ac4fdfe26907e7841b45e0c63ee8104623102434679d7e023668e0b8a9",
+}
 PINNED_SOURCES = {
-    "pyspark.ml.torch.distributor": (
-        "fa54028c2ec3489702a172ade895fac9c53e58db45e08d7bf34b8e7d67737ba3"
-    ),
     "torch.nn.parallel.distributed": (
-        "f0ce8e5582fcf33157efbc8c596bff473329d83f9592c90ffb8c5797a9fffe5b"
+        "ff36d22a7d8d76713c99b37393e6cb9876de01043a3d7255527e58a6bb89f30f"
     ),
-    "torch.optim.optimizer": "71c46defba9abbc4831b328ddcc7db8e7771cc28da7a550c01820da70f7c5dad",
-    "torch.random": "eb448c131beccaf865b52927bdb620bafccaf765f65912e1f46f7f30cc433ceb",
+    "torch.optim.optimizer": "4b0ecf48fa034f60e6ac1e5055846bbc907ec63c2f174b1bb81472354593075b",
+    "torch.random": "0b2bd65c8fdf324e00ed2c64e7b06ca5d5ff96053001055c86352c0b3668d0be",
 }
 RUNTIME_MODULES = (
     "ds60_torch_training.contracts",
@@ -101,13 +102,19 @@ def runtime_identity() -> dict:
         "amd64",
     }:
         raise TrainingError("Only little-endian native CPU architecture is supported")
-    if not str(torch.__version__).startswith("2.9.1+cpu") or str(pyspark.__version__) != "4.0.1":
-        raise TrainingError("Expected prepared Torch 2.9.1+cpu and Spark 4.0.1")
+    spark_version = str(pyspark.__version__)
+    if (
+        not str(torch.__version__).startswith("2.15.0+cpu")
+        or spark_version not in REVIEWED_DISTRIBUTORS
+    ):
+        raise TrainingError("Expected prepared Torch 2.15.0+cpu and reviewed Spark 4.0.1 or 4.3.0")
     wrapper = require_prepared_wrapper()
-    if wrapper["status"] != "prepared":
+    if wrapper["status"] != "prepared" or wrapper.get("spark_version") != spark_version:
         raise TrainingError("Prepared Spark torchrun wrapper is required")
     sources = {name: _source_digest(name) for name in RUNTIME_MODULES}
-    if any(sources[name] != expected for name, expected in PINNED_SOURCES.items()):
+    pinned = dict(PINNED_SOURCES)
+    pinned["pyspark.ml.torch.distributor"] = REVIEWED_DISTRIBUTORS[spark_version]
+    if any(sources[name] != expected for name, expected in pinned.items()):
         raise TrainingError("Installed Spark or Torch source differs from reviewed CPU runtime")
     result = {
         "kind": "ds60-torch-cpu-runtime-v1",

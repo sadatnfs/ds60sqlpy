@@ -1,4 +1,4 @@
-"""Integrity tests for the narrow Spark 4.0.1 child-exit correction."""
+"""Integrity tests for the narrow reviewed Spark 4.x child-exit correction."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ def test_checked_patch_preserves_archive_members_and_is_idempotent(
 ) -> None:
     patch = module()
     original = b"if __name__ == '__main__':\n    task = None\n"
-    monkeypatch.setattr(patch, "ORIGINAL_SHA256", hashlib.sha256(original).hexdigest())
+    monkeypatch.setitem(patch.REVIEWED_WRAPPERS, hashlib.sha256(original).hexdigest(), "4.3.0")
     archive = tmp_path / "spark.zip"
     with ZipFile(archive, "w") as z:
         z.writestr(patch.MEMBER, original)
@@ -32,6 +32,8 @@ def test_checked_patch_preserves_archive_members_and_is_idempotent(
     first = patch.patch_archive(archive)
     second = patch.patch_archive(archive)
     assert first == second
+    assert first["spark_version"] == "4.3.0"
+    assert first["upstream"].startswith("https://github.com/apache/spark/blob/v4.3.0/")
     with ZipFile(archive) as z:
         assert z.read("unrelated.py") == b"preserve me\n"
         updated = z.read(patch.MEMBER)

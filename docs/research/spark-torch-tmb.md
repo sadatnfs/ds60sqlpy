@@ -66,8 +66,8 @@ The implementation uses Spark's public partition and aggregation mechanisms;
 these distribute a supplied calculation rather than deriving its statistical
 validity. Spark also offers a built-in logistic estimator, useful as a reference
 for supported models but not as an interface for every arbitrary likelihood.
-See the [Spark 4.0.1 programming guide](https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html)
-and [LogisticRegression API](https://spark.apache.org/docs/4.0.1/api/scala/org/apache/spark/ml/classification/LogisticRegression.html).
+See the [Spark 4.3.0 programming guide](https://spark.apache.org/docs/4.3.0/rdd-programming-guide.html)
+and [LogisticRegression API](https://spark.apache.org/docs/4.3.0/api/scala/org/apache/spark/ml/classification/LogisticRegression.html).
 
 The first complete examples deliberately have strong oracles:
 
@@ -92,13 +92,13 @@ conversion, arithmetic and reduction separately. A cache is not a transactional
 snapshot: lost partitions can be recomputed from lineage. Pure task evaluation
 also avoids counting retried side effects as extra observations.
 
-For group fits, Spark 4.0.1's `applyInPandas` performs a shuffle and loads complete
+For group fits, Spark 4.3.0's `applyInPandas` performs a shuffle and loads complete
 groups. A check inside the pandas function cannot prevent memory exhaustion
 that occurred while materializing a giant group. `mapInPandas` instead provides
 an iterator of transport batches; a transport batch is not a statistical group.
 These boundaries are documented in the versioned
-[grouped pandas API](https://spark.apache.org/docs/4.0.1/api/python/reference/pyspark.sql/api/pyspark.sql.GroupedData.applyInPandas.html)
-and [mapInPandas API](https://spark.apache.org/docs/4.0.1/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrame.mapInPandas.html).
+[grouped pandas API](https://spark.apache.org/docs/4.3.0/api/python/reference/pyspark.sql/api/pyspark.sql.GroupedData.applyInPandas.html)
+and [mapInPandas API](https://spark.apache.org/docs/4.3.0/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrame.mapInPandas.html).
 
 Implemented teaching: [asm-001](../../courses/advanced-spark-modeling/guides/asm-001.md)
 through [asm-012](../../courses/advanced-spark-modeling/guides/asm-012.md),
@@ -116,7 +116,7 @@ There are three distinct claims:
    The prepared Torch and TMB projects perform genuine local AD inside their
    respective numerical processes.
 3. **Spark automatically differentiates an arbitrary DataFrame program through
-   joins, shuffles, UDFs and materialization.** The inspected Spark 4.0.1 public
+   joins, shuffles, UDFs and materialization.** The inspected Spark 4.3.0 public
    APIs do not provide that general facility. Our implementation does not claim
    to add it.
 
@@ -133,7 +133,7 @@ for its supported operations. It does not differentiate a Spark scheduler,
 discrete top-k selection or arbitrary third-party function. PyTorch's own
 [autograd mechanics](https://docs.pytorch.org/docs/2.9/notes/autograd.html)
 explains its graph-based local derivative mechanism; Spark's
-[expression source](https://github.com/apache/spark/blob/v4.0.1/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala)
+[expression source](https://github.com/apache/spark/blob/v4.3.0/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala)
 describes a query-expression execution interface, a different abstraction.
 
 Implemented teaching: [asm-024](../../courses/advanced-spark-modeling/guides/asm-024.md)
@@ -241,7 +241,7 @@ model, while upstream Spark Pipeline metadata can import stage classes and must
 come from a trusted source.
 
 The [combined project](../../courses/advanced-spark-modeling/projects/spark-torch/README.md)
-prepares Spark 4.0.1, Torch 2.9.1 CPU, Lightning 2.6.1 and the required conversion
+prepares Spark 4.3.0, Torch 2.15.0 CPU, Lightning 2.6.1 and the required conversion
 libraries together. The ordinary Spark and Torch pads remain separate images.
 Its fixed cases cover global logistic and nonlinear fits, independent group
 fits, actual Arrow batches, TorchDistributor, Lightning and sampler coverage.
@@ -253,7 +253,7 @@ This is local CPU evidence; the final new-version hosted native jobs remain a
 separate release gate.
 
 TorchDistributor has a different job. Inspection of Spark's exact
-[v4.0.1 source](https://github.com/apache/spark/blob/v4.0.1/python/pyspark/ml/torch/distributor.py)
+[v4.3.0 source](https://github.com/apache/spark/blob/v4.3.0/python/pyspark/ml/torch/distributor.py)
 confirmed public `run` and private `_train_on_dataframe`; the latter is not a
 public interface taught here. `run` launches the training function. That function
 still owns its model, data loader, optimizer and result contract.
@@ -285,9 +285,9 @@ and the project's pinned implementation rather than assuming that a moving
 
 A later sealed-image acceptance found a separate failure after the Lightning
 numerical result was written: both ranks aborted during interpreter shutdown.
-Inspection of Spark 4.0.1's
-[`torch_run_process_wrapper.py`](https://github.com/apache/spark/blob/v4.0.1/python/pyspark/ml/torch/torch_run_process_wrapper.py)
-confirmed that this version waits for its child but does not propagate the
+Inspection of the Spark 4.0.1 and 4.3.0
+[`torch_run_process_wrapper.py`](https://github.com/apache/spark/blob/v4.3.0/python/pyspark/ml/torch/torch_run_process_wrapper.py)
+source confirmed that both versions wait for their child but do not propagate the
 child's return code on normal wrapper completion. A serialized result plus a
 zero wrapper exit therefore did not establish successful rank shutdown in this
 case. The integration repair adds explicit process-group teardown and a narrowly
@@ -490,16 +490,16 @@ We implemented public APIs before introducing engine internals:
 | Restricted optimizer rule | asm-023 | Typed two-node-to-one-node rewrite plus boundary/null output checks |
 | Bounded JVM forward AD | asm-024, asm-025 | Original dual-number implementation and explicit global-tape boundary |
 
-The [UDAF API](https://spark.apache.org/docs/4.0.1/sql-ref-functions-udf-aggregate.html)
-and [ML pipeline contract](https://spark.apache.org/docs/4.0.1/ml-pipeline.html)
+The [UDAF API](https://spark.apache.org/docs/4.3.0/sql-ref-functions-udf-aggregate.html)
+and [ML pipeline contract](https://spark.apache.org/docs/4.3.0/ml-pipeline.html)
 provide reusable public structures. They do not guarantee that a custom merge
 law, schema policy or saved artifact is correct; the examples test those
 behaviors directly.
 
 The [Catalyst project](../../courses/advanced-spark-modeling/projects/catalyst/README.md)
-is intentionally pinned to Spark 4.0.1, Scala 2.13 and JDK 17.
+is intentionally pinned to Spark 4.3.0, Scala 2.13 and JDK 17.
 `SparkSessionExtensions` explicitly disclaims source and binary stability in its
-[versioned API](https://spark.apache.org/docs/4.0.1/api/scala/org/apache/spark/sql/SparkSessionExtensions.html).
+[versioned API](https://spark.apache.org/docs/4.3.0/api/scala/org/apache/spark/sql/SparkSessionExtensions.html).
 The stable-softplus expression has separate evaluated and generated paths. The
 optimizer rule removes a duplicate nonnegative BIGINT clamp, whose idempotence
 is proved over the actual supported domain. It does not apply speculative
@@ -636,6 +636,15 @@ reference and Scala bridge, and standalone TMB public API/C++ probes. The
 [validation guide](../validation.md#standalone-modeling-and-native-scientific-publication)
 describes exact receipt and promotion boundaries. Local compiled/library execution
 does not mean those hosted jobs or the final release have already completed.
+
+The 2.0.0 base moves surfaced two layout drifts in the Spark/TMB image that the
+local gates could not see. The Spark Python layer now comes from Debian 13, so its
+`ssl` and `hashlib` modules need OpenSSL 3.5 while the Ubuntu 24.04 R worker
+ships 3.0. The image therefore carries the Debian `libssl.so.3` and
+`libcrypto.so.3` in `/usr/local/lib`, first on `LD_LIBRARY_PATH`; R's `openssl`
+and `curl` packages load the same 3.5 runtime in the shared rpy2 process. The R
+worker also moved to `rocker/r-ver`, which installs R under `/usr/local/lib/R`
+rather than `/usr/lib/R`. The image build checks both before any project step.
 
 The [Brad Bell and native automatic-differentiation report](brad-bell-autodiff.md)
 separately examines CppAD, TMBad and the R-free native experiment. A native AD proof

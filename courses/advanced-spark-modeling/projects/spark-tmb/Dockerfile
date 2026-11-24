@@ -7,15 +7,19 @@ FROM ${JAVA_IMAGE} AS java
 FROM ${TMB_IMAGE} AS prepared
 USER root
 COPY --from=spark /usr/local/ /usr/local/
+# The Spark Python layer is built on Debian 13 and its ssl and hashlib modules
+# need that OpenSSL 3.5 runtime, newer than the Ubuntu one in the R image.
+# /usr/local/lib is first on LD_LIBRARY_PATH; OpenSSL 3 keeps ABI within 3.x.
+COPY --from=spark /usr/lib/*-linux-gnu/libssl.so.3 /usr/lib/*-linux-gnu/libcrypto.so.3 /usr/local/lib/
 COPY --from=spark /opt/spark/ /opt/spark/
 COPY --from=java /opt/java/openjdk/ /opt/java/openjdk/
 ENV JAVA_HOME=/opt/java/openjdk PATH="/opt/java/openjdk/bin:/usr/local/bin:$PATH" \
-    LD_LIBRARY_PATH=/usr/local/lib:/usr/lib/R/lib SPARK_HOME=/opt/spark \
+    LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib/R/lib SPARK_HOME=/opt/spark \
     PYSPARK_PYTHON=/usr/local/bin/python PYSPARK_DRIVER_PYTHON=/usr/local/bin/python \
     SPARK_LOCAL_IP=127.0.0.1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MAKEFLAGS=-j1 \
     PYTHONDONTWRITEBYTECODE=1 HOME=/tmp TMB_PROJECT_ROOT=/opt/tmb-project \
     TMB_BUILD_DIR=/opt/tmb-models
-RUN python -c 'import ctypes,ssl,sys; assert sys.version_info[:2] == (3,12); ctypes.CDLL("/usr/lib/R/lib/libR.so")' \
+RUN python -c 'import ctypes,hashlib,ssl,sys; assert sys.version_info[:2] == (3,12); ctypes.CDLL("/usr/local/lib/R/lib/libR.so")' \
     && java -version && Rscript --vanilla -e 'stopifnot(as.character(getRversion()) == "4.6.1", as.character(packageVersion("TMB")) == "1.9.25")'
 COPY courses/advanced-spark-modeling/projects/spark-tmb/bootstrap.lock /tmp/bootstrap.lock
 COPY courses/advanced-spark-modeling/projects/spark-tmb/requirements.lock /tmp/requirements.lock

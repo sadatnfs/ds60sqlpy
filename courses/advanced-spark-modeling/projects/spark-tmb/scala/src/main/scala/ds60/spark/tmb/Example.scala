@@ -82,7 +82,7 @@ object Example {
       .config("spark.task.maxFailures", "1")
       .config("spark.sql.ansi.enabled", "true")
       .getOrCreate()
-    require(spark.version == "4.0.1")
+    require(spark.version == "4.3.0")
     spark.sparkContext.setLogLevel("ERROR")
     try {
       val values = (0 until 12).map(i => (i % 4).toDouble + 0.5).toVector

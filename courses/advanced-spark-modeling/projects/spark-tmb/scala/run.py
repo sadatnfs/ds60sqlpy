@@ -19,8 +19,8 @@ def main() -> None:
     parser.add_argument("--compile-only", action="store_true")
     args = parser.parse_args()
     home = Path(os.environ.get("SPARK_HOME", "/opt/spark"))
-    if not (home / "jars/spark-sql_2.13-4.0.1.jar").is_file():
-        raise SystemExit("Prepare the exact Spark 4.0.1 / Scala 2.13 environment first")
+    if not (home / "jars/spark-sql_2.13-4.3.0.jar").is_file():
+        raise SystemExit("Prepare the exact Spark 4.3.0 / Scala 2.13 environment first")
     version = subprocess.run(
         ["java", "-version"], capture_output=True, text=True, check=True, timeout=15
     )

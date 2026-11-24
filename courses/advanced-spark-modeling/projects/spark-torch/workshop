@@ -2,7 +2,7 @@
 set -euo pipefail
 here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 repo=$(cd "$here/../../../.." && pwd)
-image=${DS60_SPARK_TORCH_IMAGE:-ds60-spark-torch:4.0.1-torch2.9.1}
+image=${DS60_SPARK_TORCH_IMAGE:-ds60-spark-torch:4.3.0-torch2.15.0}
 command=${1:-help}
 case "$command" in
   build)
@@ -53,7 +53,7 @@ case "$command" in
     ;;
   help)
     cat <<'HELP'
-Optional Spark 4.0.1 and Torch 2.9.1 CPU project
+Optional Spark 4.3.0 and Torch 2.15.0 CPU project
   ./workshop build       Prepare packages and source into a separate image
   ./workshop check       Run all bounded numerical and process checks offline
   ./workshop run CASE    Run one complete worked case

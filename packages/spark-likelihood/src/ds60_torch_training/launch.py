@@ -80,8 +80,8 @@ def _spark_admission(spark, mode, world):
         or master.startswith(("local[", "local-cluster["))
     ):
         raise TrainingError("Executor training refuses local masters")
-    if str(spark.version) != "4.0.1" or str(context.version) != "4.0.1":
-        raise TrainingError("Only prepared Spark 4.0.1 is admitted")
+    if str(spark.version) not in {"4.0.1", "4.3.0"} or str(context.version) != str(spark.version):
+        raise TrainingError("Only prepared Spark 4.0.1 or 4.3.0 is admitted")
     conf = context.getConf()
     requirements = {
         "spark.task.maxFailures": (None, "1"),

@@ -10,7 +10,7 @@ Scala.
 Read [the prepared-model registry guide](../REGISTERING-MODELS.md) first. The
 Scala adapter consumes the [same versioned JSON CLI](../CLI-CONTRACT.md) and does
 not maintain a second model schema, native-artifact loader or ABI verifier.
-The declared environment is Spark 4.0.1, Scala 2.13, JDK 21, Python 3.12 and the
+The declared environment is Spark 4.3.0, Scala 2.13, JDK 21, Python 3.12 and the
 parent project's pinned R/TMB stack. Native model preparation remains explicit.
 
 ## Prepare and run
@@ -30,7 +30,7 @@ docker run --rm --init --pull never --network none \
   --user 65534:65534 --memory 3g --cpus 2 --pids-limit 512 \
   --read-only --tmpfs /tmp:rw,exec,nosuid,size=1073741824 \
   --env 'JAVA_TOOL_OPTIONS=-Duser.home=/tmp -Divy.home=/tmp/ivy -XX:ActiveProcessorCount=2' \
-  --entrypoint python ds60-spark-tmb:4.0.1-tmb1.9.25 \
+  --entrypoint python ds60-spark-tmb:4.3.0-tmb1.9.25 \
   /opt/spark-tmb/scala/run.py
 ```
 

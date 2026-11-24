@@ -1,17 +1,18 @@
 # Scala adapter qualification
 
 The [source-bound receipt](qualification.json) records actual native Linux ARM64
-compilation and execution on 2026-10-29. The two original Scala sources compiled
-with Spark 4.0.1 / Scala 2.13 jars and JDK 21.0.12.1. The executed DataFrame
+compilation and execution on 2026-11-24. The two original Scala sources compiled
+with Spark 4.3.0 / Scala 2.13 jars and JDK 21.0.13. The executed DataFrame
 adapter called the real shared Python JSON CLI, fresh R processes and the
 prepared normal C++/TMB model. No numerical result was mocked.
 
-The probe ran in the existing parent image
-`sha256:73f68961fbf3e6f1f524a92eafb140a6463af3072e3387b23f653bf41730a5e8`
-with read-only current project source, no network, temporary scratch, two CPUs
-and 3 GiB RAM. It used no learner volume. The image contains the prepared native
-model; mounted current source contains the new CLI and Scala adapter. This is
-not yet evidence that an older sealed image already includes the adapter.
+The probe ran the documented command in the sealed project image
+`sha256:3b498bd5ed45619e68a7977fb16585ec55acaa60389c6a391f1b872f416c2dab`,
+built from the current source on the Debian 13 Spark Python layer and the R
+4.6.1 worker. It used no network, no source mount, temporary scratch, two CPUs
+and 3 GiB RAM, and no learner volume. Every Scala, runner, CLI, registry, R and
+C++ hash in the receipt equals the repository tree. The earlier Spark 4.0.1
+receipts are kept in [qualification-history](qualification-history/).
 
 ## Observed results
 
@@ -42,7 +43,7 @@ independent-row objectives only. It does not partition coupled latent models
 or qualify arbitrary registered scientific assumptions.
 
 Host tests check preparation guards, the shared protocol/model ownership and
-this source-bound runtime receipt. A compiler-only pass, host test or current
-source mount is not a sealed-image, remote-cluster or native AMD64 acceptance.
+this source-bound runtime receipt. A compiler-only pass or host test is not a
+remote-cluster or native AMD64 acceptance; CI qualifies both architectures.
 The parent integration owner controls its next image rebuild and workshop
 entrypoint. No forced parent-crash or remote recovery test was executed here.

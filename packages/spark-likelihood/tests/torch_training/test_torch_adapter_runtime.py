@@ -1,4 +1,4 @@
-"""Prepared Torch 2.9.1+cpu continuation on native Linux ARM64 or AMD64.
+"""Prepared Torch 2.15.0+cpu continuation on native Linux ARM64 or AMD64.
 
 This tests model, optimizer and RNG restoration. Spark placement and actual
 worker-loss recovery have separate integration gates.
@@ -64,7 +64,7 @@ def _steps(model, optimizer, loss, count):
 
 
 def _check_real_torch_checkpoint_resume_matches_uninterrupted_cpu(tmp_path, kind):
-    assert torch.__version__.startswith("2.9.1")
+    assert torch.__version__.startswith("2.15.0")
     assert torch.device("cpu").type == "cpu"
     torch.set_num_threads(1)
     random.seed(1729)
@@ -148,8 +148,8 @@ def _check_real_torch_checkpoint_resume_matches_uninterrupted_cpu(tmp_path, kind
 
 
 @unittest.skipUnless(
-    str(torch.__version__).startswith("2.9.1+cpu"),
-    "requires the prepared Torch 2.9.1+cpu runtime",
+    str(torch.__version__).startswith("2.15.0+cpu"),
+    "requires the prepared Torch 2.15.0+cpu runtime",
 )
 class RuntimeCheckpointTests(unittest.TestCase):
     def test_real_torch_checkpoint_resume(self):

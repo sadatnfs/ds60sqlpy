@@ -9,7 +9,9 @@ from ds60_spark_likelihood.integrations import prepare_spark
 
 def test_read_only_status_and_explicit_patch_are_source_bound(tmp_path, monkeypatch):
     original = b"if __name__ == '__main__':\n    task = None\n"
-    monkeypatch.setattr(prepare_spark, "ORIGINAL_SHA256", hashlib.sha256(original).hexdigest())
+    monkeypatch.setitem(
+        prepare_spark.REVIEWED_WRAPPERS, hashlib.sha256(original).hexdigest(), "4.0.1"
+    )
     archive = tmp_path / "pyspark.zip"
     with ZipFile(archive, "w") as output:
         output.writestr(prepare_spark.MEMBER, original)

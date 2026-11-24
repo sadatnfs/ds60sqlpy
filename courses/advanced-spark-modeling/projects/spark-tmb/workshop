@@ -2,7 +2,7 @@
 set -euo pipefail
 here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 repo=$(cd "$here/../../../.." && pwd)
-image=${DS60_SPARK_TMB_IMAGE:-ds60-spark-tmb:4.0.1-tmb1.9.25}
+image=${DS60_SPARK_TMB_IMAGE:-ds60-spark-tmb:4.3.0-tmb1.9.25}
 command=${1:-help}
 case "$command" in
   build)
@@ -54,7 +54,7 @@ case "$command" in
     ;;
   help)
     cat <<'HELP'
-Optional native Spark 4.0.1, Java 21 and R/TMB 1.9.25 project
+Optional native Spark 4.3.0, Java 21 and R/TMB 1.9.25 project
   ./workshop build       Prepare packages and compile fixed original C++ models
   ./workshop check       Run all bounded cases offline
   ./workshop run CASE    Run one named case

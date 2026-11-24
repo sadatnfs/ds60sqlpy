@@ -26,6 +26,15 @@ or an earlier successful run does not establish those gates.
 
 ## Published release and its evidence
 
+The [1.4.3 publisher](https://github.com/sadatnfs/ds60sqlpy/actions/runs/44798675803)
+completed on November 20, 2026 (UTC) from
+[source `c46e6ad4`](https://github.com/sadatnfs/ds60sqlpy/tree/c46e6ad47105b8b110da11054b00da436935b3bc),
+with its [PyTorch package verification](https://github.com/sadatnfs/ds60sqlpy/actions/runs/44798676930)
+dispatched with the push. Both runs passed on their first attempt. The
+publisher promoted 26 combined AMD64/ARM64 version indexes and 26 latest
+aliases in `sadatnfs/ds60sqlpy`. Its native AMD64 and ARM64 pull jobs then
+inspected every published index and ran a fresh Core starter.
+
 The [1.4.2 publisher](https://github.com/sadatnfs/ds60sqlpy/actions/runs/44664370538)
 completed on November 20, 2026 (UTC) from
 [source `b395e350`](https://github.com/sadatnfs/ds60sqlpy/tree/b395e35080b9f0953cdce44b15937e69691f627f),

@@ -1,6 +1,6 @@
 # Custom likelihoods with Spark and PyTorch
 
-This optional project runs Spark 4.0.1, PyTorch 2.9.1 CPU and Lightning 2.6.1
+This optional project runs Spark 4.3.0, PyTorch 2.15.0 CPU and Lightning 2.6.1
 together. The ordinary Spark and Torch coding pads remain separate environments.
 The project is a complete local Docker workflow, with prepared dependencies and
 offline execution. It uses the same source package as the worked chapters.
@@ -33,7 +33,7 @@ After editing source, run build explicitly to package the revision.
 
 When using already-prepared compatible bases with other local image names,
 set `DS60_SPARK_BASE` and `DS60_TORCH_BASE` for build.
-These must retain Spark 4.0.1, JDK 17, Python 3.12 and Torch 2.9.1 CPU.
+These must retain Spark 4.3.0, JDK 17, Python 3.12 and Torch 2.15.0 CPU.
 `DS60_SPARK_TORCH_IMAGE` selects the project image name for build
 and run. It is not a claim that an arbitrary image is compatible.
 
@@ -116,8 +116,8 @@ held-out data.
 
 ## Pinned launcher correction
 
-Spark 4.0.1's bundled Torch process wrapper waits for torchrun but does not
-propagate its return code. A rank can serialize its result and then fail during
+Spark's bundled Torch process wrapper (reviewed for 4.0.1 and 4.3.0) waits for
+torchrun but does not propagate its return code. A rank can serialize its result and then fail during
 shutdown, leaving an apparently successful outer launch. This project applies
 one preparation-time correction in `patch_spark.py`: it verifies the exact
 upstream file SHA256, retains the original Apache license header, and propagates
@@ -128,7 +128,7 @@ The launch must still fail. Successful numerical outputs alone do not satisfy
 this acceptance gate. Lightning's example also explicitly synchronizes and
 destroys its process group before the workers exit.
 
-See the [pinned upstream wrapper](https://github.com/apache/spark/blob/v4.0.1/python/pyspark/ml/torch/torch_run_process_wrapper.py).
+See the [pinned upstream wrapper](https://github.com/apache/spark/blob/v4.3.0/python/pyspark/ml/torch/torch_run_process_wrapper.py).
 The correction is local to this prepared workshop image; it does not silently
 modify another Spark installation.
 
@@ -153,8 +153,8 @@ multi-node claim follows from these small numerical examples.
 
 ## Primary references
 
-- [Spark 4.0.1 Arrow and Pandas integration](https://spark.apache.org/docs/4.0.1/api/python/tutorial/sql/arrow_pandas.html)
-- [Spark 4.0.1 TorchDistributor source](https://github.com/apache/spark/blob/v4.0.1/python/pyspark/ml/torch/distributor.py)
+- [Spark 4.3.0 Arrow and Pandas integration](https://spark.apache.org/docs/4.3.0/api/python/tutorial/sql/arrow_pandas.html)
+- [Spark 4.3.0 TorchDistributor source](https://github.com/apache/spark/blob/v4.3.0/python/pyspark/ml/torch/distributor.py)
 - [PyTorch 2.9 autograd gradients](https://docs.pytorch.org/docs/2.9/generated/torch.autograd.grad.html)
 - [PyTorch distributed data parallel](https://docs.pytorch.org/docs/2.9/generated/torch.nn.parallel.DistributedDataParallel.html)
 - [Lightning 2.6.1 release](https://pypi.org/project/lightning/2.6.1/)

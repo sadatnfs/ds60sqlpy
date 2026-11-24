@@ -12,7 +12,7 @@ templates, typed parameter layout, response-free prediction declarations and
 pinned SciPy environment. The examples save beneath `/models`, which must be a
 dedicated writable mount. For a disposable first run, replace that prefix with
 `/tmp/tmb-models`; temporary output does not survive container removal.
-Run them with Spark4.0.1 inside that prepared Linux
+Run them with Spark 4.3.0 inside that prepared Linux
 image; Windows uses Docker through WSL 2. Importing the core companion alone does
 not start Spark or R. Import `spark_tmb.ml` when using these optional ML stages.
 

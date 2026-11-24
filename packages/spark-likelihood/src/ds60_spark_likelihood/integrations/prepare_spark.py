@@ -1,4 +1,4 @@
-"""Apply one checked exit-status correction to the pinned Spark 4.0.1 wrapper.
+"""Apply one checked exit-status correction to a reviewed Spark 4.x wrapper.
 
 The original Apache-licensed file and license header remain intact. This patch
 does not change scheduling or TorchDistributor's public interface. Refuse a new
@@ -16,29 +16,45 @@ from pathlib import Path
 from zipfile import ZipFile
 
 MEMBER = "pyspark/ml/torch/torch_run_process_wrapper.py"
-ORIGINAL_SHA256 = "d04cf01e605ee98d60f8b113ea4bf74316caa16031db671201cafd4d22dc6b61"
+# Each reviewed upstream wrapper waits for torchrun and then falls off the end of
+# its main block, so the process exits zero even when a rank failed. Spark 4.3.0
+# only changed the line decoding to an explicit UTF-8 codec.
+REVIEWED_WRAPPERS = {
+    "d04cf01e605ee98d60f8b113ea4bf74316caa16031db671201cafd4d22dc6b61": "4.0.1",
+    "d9a4219524fef849f22a7ff4accc9fbcee353e8fd8768943a8b0365217da44c4": "4.3.0",
+}
 ADDITION = b"""
     # DS60: propagate torchrun failure even if a training result was serialized.
-    # Upstream Spark 4.0.1 otherwise exits zero after task.wait().
+    # Upstream Spark 4.0.1 and 4.3.0 otherwise exit zero after task.wait().
     sys.exit(task.returncode if task.returncode >= 0 else 128 - task.returncode)
 """
-UPSTREAM = (
-    "https://github.com/apache/spark/blob/v4.0.1/"
-    "python/pyspark/ml/torch/torch_run_process_wrapper.py"
-)
+
+
+def upstream(version: str) -> str:
+    return (
+        f"https://github.com/apache/spark/blob/v{version}/"
+        "python/pyspark/ml/torch/torch_run_process_wrapper.py"
+    )
+
+
+def reviewed(digest: str) -> dict[str, str] | None:
+    version = REVIEWED_WRAPPERS.get(digest)
+    if version is None:
+        return None
+    return {"spark_version": version, "original_sha256": digest, "upstream": upstream(version)}
 
 
 def patch_archive(path: Path) -> dict[str, str]:
     with ZipFile(path) as source:
         original = source.read(MEMBER)
-        digest = hashlib.sha256(original).hexdigest()
+        review = reviewed(hashlib.sha256(original).hexdigest())
         if original.endswith(ADDITION):
-            base = original[: -len(ADDITION)]
-            if hashlib.sha256(base).hexdigest() != ORIGINAL_SHA256:
+            review = reviewed(hashlib.sha256(original[: -len(ADDITION)]).hexdigest())
+            if review is None:
                 raise ValueError("the existing wrapper patch does not match the reviewed source")
             patched = original
         else:
-            if digest != ORIGINAL_SHA256:
+            if review is None:
                 raise ValueError(
                     "unreviewed Spark wrapper; inspect source before applying this patch"
                 )
@@ -54,8 +70,7 @@ def patch_archive(path: Path) -> dict[str, str]:
         temporary.unlink(missing_ok=True)
     return {
         "patch": "propagate-torchrun-exit-status",
-        "upstream": UPSTREAM,
-        "original_sha256": ORIGINAL_SHA256,
+        **review,
         "patched_sha256": hashlib.sha256(patched).hexdigest(),
     }
 
@@ -66,22 +81,17 @@ def wrapper_status(path: Path, *, archive: bool = True) -> dict[str, str]:
             data = source.read(MEMBER)
     else:
         data = path.read_bytes()
-    if (
-        data.endswith(ADDITION)
-        and hashlib.sha256(data[: -len(ADDITION)]).hexdigest() == ORIGINAL_SHA256
-    ):
-        return {
-            "status": "prepared",
-            "original_sha256": ORIGINAL_SHA256,
-            "patched_sha256": hashlib.sha256(data).hexdigest(),
-            "upstream": UPSTREAM,
-        }
-    if hashlib.sha256(data).hexdigest() == ORIGINAL_SHA256:
-        return {
-            "status": "needs-explicit-preparation",
-            "original_sha256": ORIGINAL_SHA256,
-            "upstream": UPSTREAM,
-        }
+    if data.endswith(ADDITION):
+        review = reviewed(hashlib.sha256(data[: -len(ADDITION)]).hexdigest())
+        if review is not None:
+            return {
+                "status": "prepared",
+                **review,
+                "patched_sha256": hashlib.sha256(data).hexdigest(),
+            }
+    review = reviewed(hashlib.sha256(data).hexdigest())
+    if review is not None:
+        return {"status": "needs-explicit-preparation", **review}
     raise ValueError("unreviewed Spark wrapper: refuse to guess or silently patch")
 
 
@@ -113,7 +123,7 @@ def require_prepared_wrapper() -> dict[str, str]:
         status = wrapper_status(Path(source_file), archive=False)
     if status["status"] != "prepared":
         raise RuntimeError(
-            "Prepare the reviewed Spark4.0.1 exit-status correction explicitly before training"
+            "Prepare the reviewed Spark exit-status correction explicitly before training"
         )
     return status
 

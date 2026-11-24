@@ -44,7 +44,7 @@ def test_compiler_rejects_missing_exact_spark_before_starting_any_process(
         raise AssertionError("No toolchain/download should start without the declared Spark jars")
 
     monkeypatch.setattr(subprocess, "run", forbidden)
-    with pytest.raises(SystemExit, match="exact Spark 4.0.1"):
+    with pytest.raises(SystemExit, match="exact Spark 4.3.0"):
         namespace["main"]()
 
 
@@ -54,7 +54,7 @@ def test_compiler_rejects_wrong_jdk_before_compilation(
     namespace = runner()
     jars = tmp_path / "jars"
     jars.mkdir()
-    (jars / "spark-sql_2.13-4.0.1.jar").write_bytes(b"guard fixture, never loaded")
+    (jars / "spark-sql_2.13-4.3.0.jar").write_bytes(b"guard fixture, never loaded")
     monkeypatch.setenv("SPARK_HOME", str(tmp_path))
     monkeypatch.setattr(sys, "argv", ["run.py", "--compile-only"])
     calls: list[list[str]] = []
@@ -92,7 +92,7 @@ def test_native_scala_receipt_binds_complete_sources_and_numerical_oracles() -> 
     assert receipt["compilation"]["executed"] is True
     evidence = receipt["result"]
     assert evidence["passed"] is True
-    assert evidence["spark"] == "4.0.1"
+    assert evidence["spark"] == "4.3.0"
     assert evidence["java"].startswith("21.")
     assert evidence["raw_observations_collected"] is False
     assert evidence["caller_cache_preserved"] is True

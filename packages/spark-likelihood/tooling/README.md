@@ -5,7 +5,7 @@ likelihood evaluation, fitting and prediction never invoke them or download
 dependencies. All new preparation code is Apache-2.0; dependencies retain their
 own licenses, and Spark's existing Apache license headers remain intact.
 
-`locks/torch.arm64.lock` and `locks/torch.amd64.lock` own CPU Torch 2.9.1+cpu,
+`locks/torch.arm64.lock` and `locks/torch.amd64.lock` own CPU Torch 2.15.0+cpu,
 NumPy 2.2.6 and their pinned dependencies. `locks/scientific.lock` owns the
 additional SciPy 1.15.3, pandas 2.2.3, PyArrow 19.0.1 and Lightning 2.6.1 stack.
 These locks target native Linux and Python 3.12. `locks/build.lock` pins the

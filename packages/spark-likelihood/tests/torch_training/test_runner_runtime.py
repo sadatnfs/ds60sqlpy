@@ -10,8 +10,8 @@ from ds60_torch_training.runner import _batch_loss, _construct
 from ds60_torch_training.training_examples import linear_sgd_oracle, mlp_adam_example
 
 torch = pytest.importorskip("torch")
-if not str(torch.__version__).startswith("2.9.1+cpu"):
-    pytest.skip("requires the prepared Torch 2.9.1+cpu runtime", allow_module_level=True)
+if not str(torch.__version__).startswith("2.15.0+cpu"):
+    pytest.skip("requires the prepared Torch 2.15.0+cpu runtime", allow_module_level=True)
 
 
 def _rows(labels, weights):

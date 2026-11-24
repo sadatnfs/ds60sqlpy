@@ -30,7 +30,7 @@ class Conf:
         return list(self.values.items())
 
 
-def context(**updates):
+def context(version="4.0.1", **updates):
     values = {
         "spark.task.maxFailures": "1",
         "spark.executor.cores": "1",
@@ -38,9 +38,20 @@ def context(**updates):
         "spark.speculation": "false",
         "spark.dynamicAllocation.enabled": "false",
     } | updates
-    sc = SimpleNamespace(_jsc=object(), master="spark://master:7077", version="4.0.1")
+    sc = SimpleNamespace(_jsc=object(), master="spark://master:7077", version=version)
     sc.getConf = lambda: Conf(values)
-    return SimpleNamespace(_jsparkSession=object(), sparkContext=sc, version="4.0.1")
+    return SimpleNamespace(_jsparkSession=object(), sparkContext=sc, version=version)
+
+
+def test_spark_admission_accepts_only_reviewed_spark_releases():
+    spark = context("4.3.0")
+    assert launch._spark_admission(spark, "executor_single", 1) is spark.sparkContext
+    with pytest.raises(TrainingError, match="4.0.1 or 4.3.0"):
+        launch._spark_admission(context("4.2.0"), "executor_single", 1)
+    mixed = context("4.3.0")
+    mixed.sparkContext.version = "4.0.1"
+    with pytest.raises(TrainingError, match="4.0.1 or 4.3.0"):
+        launch._spark_admission(mixed, "executor_single", 1)
 
 
 def test_spark_admission_requires_executor_cpu_and_single_attempt():

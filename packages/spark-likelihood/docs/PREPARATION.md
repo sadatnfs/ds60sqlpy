@@ -16,7 +16,9 @@ Core imports use the standard library. Optional extras in `pyproject.toml`
 describe compatible interfaces; they are not an architecture-specific CPU lock.
 Choose the appropriate framework distribution deliberately. The reproducible CPU
 image below uses exact package-local locks, native Linux ARM64 or AMD64, Python
-3.12, Spark 4.0.1/Scala 2.13 and Java 17. GPU support is not implied.
+3.12, Spark 4.0.1/Scala 2.13 and Java 17. The package also admits a prepared
+Spark 4.3.0 environment, whose wrapper source was reviewed separately; the DS60
+classroom image uses 4.3.0. GPU support is not implied.
 
 ## Build the neutral default image
 
@@ -48,7 +50,7 @@ build. Resolve approved immutable base digests for a retained release build.
 
 ## Keep Spark launcher preparation explicit
 
-Spark 4.0.1's reviewed Torch launcher can otherwise report success after a rank
+The reviewed Spark 4.0.1 and 4.3.0 Torch launchers can otherwise report success after a rank
 fails. During image preparation, `tooling/prepare_environment.py --apply` invokes
 the installed package's existing exact-source correction. The original and
 patched wrapper hashes are retained in `/opt/spark-likelihood/preparation.json`.

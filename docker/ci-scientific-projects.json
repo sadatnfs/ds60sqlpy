@@ -193,8 +193,8 @@
         "model_initialization": "zeros"
       },
       "runtime": {
-        "spark": "4.0.1",
-        "torch": "2.9.1+cpu",
+        "spark": "4.3.0",
+        "torch": "2.15.0+cpu",
         "lightning": "2.6.1",
         "java_major": "17",
         "scipy": "1.15.3",
@@ -310,7 +310,7 @@
             "case": "partition-normal"
           },
           "required": {
-            "spark_version": "4.0.1"
+            "spark_version": "4.3.0"
           }
         },
         {
@@ -319,7 +319,7 @@
             "case": "group-laplace"
           },
           "required": {
-            "spark_version": "4.0.1"
+            "spark_version": "4.3.0"
           }
         },
         {
@@ -328,7 +328,7 @@
             "case": "global-normal-fit"
           },
           "required": {
-            "spark_version": "4.0.1"
+            "spark_version": "4.3.0"
           }
         },
         {
@@ -356,7 +356,7 @@
             "case": "registered-models"
           },
           "required": {
-            "spark": "4.0.1",
+            "spark": "4.3.0",
             "shared_rows": 12
           }
         },
@@ -378,7 +378,7 @@
           },
           "required": {
             "passed": true,
-            "spark_version": "4.0.1",
+            "spark_version": "4.3.0",
             "global_row_order_promised": false,
             "remote_cluster_executed": false
           }
@@ -390,7 +390,7 @@
           },
           "required": {
             "passed": true,
-            "spark": "4.0.1",
+            "spark": "4.3.0",
             "raw_observations_collected": false,
             "caller_cache_preserved": true,
             "empty_partitions_checked": true
@@ -414,7 +414,7 @@
         "scala_rows": 12
       },
       "runtime": {
-        "spark": "4.0.1",
+        "spark": "4.3.0",
         "R": "4.6.1",
         "TMB": "1.9.25",
         "Matrix": "1.7.6",

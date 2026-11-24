@@ -235,8 +235,8 @@ def package_fixture(spec: dict[str, Any], architecture: str, root: Path) -> dict
         r_required=False,
         remote_cluster_executed=False,
         runtime={
-            "spark": "4.0.1",
-            "torch": "2.9.1+cpu",
+            "spark": "4.3.0",
+            "torch": "2.15.0+cpu",
             "scipy": "1.15.3",
             "package": "0.2.0",
             "architecture": architecture,
@@ -261,7 +261,7 @@ def package_fixture(spec: dict[str, Any], architecture: str, root: Path) -> dict
         "executor_imports": {
             "kind": "package-executor-isolation",
             "passed": True,
-            "spark": "4.0.1",
+            "spark": "4.3.0",
             "records": [{"partition": n, "fixture_rows": 1, **identity} for n in (0, 1)],
         },
     }

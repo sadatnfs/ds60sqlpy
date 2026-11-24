@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
-  "date": "2026-10-29",
+  "date": "2026-11-24",
   "platform": "linux/arm64",
-  "image_id": "sha256:38671d098bbc1b0fb9e2ab46debb2134caa4088fc057fa57f6886c56b0fe7265",
+  "image_id": "sha256:3b498bd5ed45619e68a7977fb16585ec55acaa60389c6a391f1b872f416c2dab",
   "returncode": 0,
   "network": "none",
-  "source_mount": "readonly",
+  "source_mount": "none",
   "memory_limit_bytes": 3221225472,
   "cpus": 2,
   "owned_source_sha256": {
-    "run.py": "a9ea688115934cee9a3d0588812daf44b482cf4e5b085251ae0fb49504eab617",
-    "src/main/scala/ds60/spark/tmb/Example.scala": "d0743f7ceeab474e7582489741f1c32ed8262e576df5fd9e4c839444b5fc167c",
+    "run.py": "8c6da75832a50a8e4e5df17e00e8653abf11baa01d5b95e1904270a5211947d8",
+    "src/main/scala/ds60/spark/tmb/Example.scala": "7ae4b357bb5c82c3bd71271fad870aa66bad3dd980e199432224ea8b62c2f4e2",
     "src/main/scala/ds60/spark/tmb/TMBDataFrame.scala": "d52d35d67cbab03d0273e850a05b3757f3e2b626dafacf750dfbef6fa3b6f1d7"
   },
   "compilation": {
@@ -32,21 +32,21 @@
     "executed": true,
     "kind": "scala-tmb-compilation-and-execution",
     "owned_source_sha256": {
-      "run.py": "a9ea688115934cee9a3d0588812daf44b482cf4e5b085251ae0fb49504eab617",
-      "src/main/scala/ds60/spark/tmb/Example.scala": "d0743f7ceeab474e7582489741f1c32ed8262e576df5fd9e4c839444b5fc167c",
+      "run.py": "8c6da75832a50a8e4e5df17e00e8653abf11baa01d5b95e1904270a5211947d8",
+      "src/main/scala/ds60/spark/tmb/Example.scala": "7ae4b357bb5c82c3bd71271fad870aa66bad3dd980e199432224ea8b62c2f4e2",
       "src/main/scala/ds60/spark/tmb/TMBDataFrame.scala": "d52d35d67cbab03d0273e850a05b3757f3e2b626dafacf750dfbef6fa3b6f1d7"
     },
     "scope": "native single-host CPU; no remote cluster or performance claim",
     "sources": {
-      "src/main/scala/ds60/spark/tmb/Example.scala": "d0743f7ceeab474e7582489741f1c32ed8262e576df5fd9e4c839444b5fc167c",
+      "src/main/scala/ds60/spark/tmb/Example.scala": "7ae4b357bb5c82c3bd71271fad870aa66bad3dd980e199432224ea8b62c2f4e2",
       "src/main/scala/ds60/spark/tmb/TMBDataFrame.scala": "d52d35d67cbab03d0273e850a05b3757f3e2b626dafacf750dfbef6fa3b6f1d7"
     }
   },
   "result": {
     "schema_version": 1,
     "kind": "scala-dataframe-prepared-tmb",
-    "spark": "4.0.1",
-    "java": "21.0.12.1",
+    "spark": "4.3.0",
+    "java": "21.0.13",
     "remote_cluster": false,
     "gpu": false,
     "raw_observations_collected": false,
@@ -100,7 +100,7 @@
       "converged": true
     },
     "model_source_sha256": "d3882d4d6d4bd2b25b08bc8575020f520fd21adb749676b2a132168359961e6e",
-    "model_library_sha256": "5d2365478559d9c012a095ee8cf39259222f29c60039324e707e4033defc48b4",
+    "model_library_sha256": "bbc973d27dff0f301058e7e78e2acffa1284cc2b248d4c33d103d87125acfaf7",
     "registry_sha256": "03a5cb32c508267628c4dbc8a94c2c9f71f759c243214e1e681fa892d50e7c93",
     "abi": {
       "Matrix": "1.7.6",
@@ -129,7 +129,7 @@
       "null numeric data"
     ]
   },
-  "log_sha256": "766d1c5c9cbed7c33e717e28af932c3771c74becbd3bfdae383d82d8feed4511",
-  "scope": "actual Scala compilation, Spark and prepared R/TMB with readonly current source; installed-wheel and sealed-image acceptance are a separate subsequent gate",
-  "package_source_mode": "readonly canonical package source, no installed-wheel claim"
+  "log_sha256": "63aa28d68579a0647a63a16ba655e8c24458066aee510da4fe94b4586d4f28d4",
+  "scope": "actual Scala compilation, Spark 4.3.0 and prepared R/TMB inside a sealed image built from the current source; native ARM64 only, no remote cluster or AMD64 claim",
+  "package_source_mode": "sealed image source, hashes verified equal to the repository tree"
 }

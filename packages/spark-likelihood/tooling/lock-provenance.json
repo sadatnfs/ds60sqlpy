@@ -4,19 +4,19 @@
   "locks": {
     "locks/torch.arm64.lock": {
       "upstream_repository_path": "docker/workers/requirements-torch.arm64.lock",
-      "upstream_source_sha256": "98bdc10b06fba4b26b1629d8da8179980714fb325f212a03ad66625624ffe401",
-      "copied_lock_sha256": "3055baae8227625d96a975794a8dc59e4dc48bfde1797bb23457f7a9d899633b",
+      "upstream_source_sha256": "47fd35396d9ad931c36e8181f6ce1f2626f54255aec0d23117881afa84126007",
+      "copied_lock_sha256": "b7d42e12ffd961c0ae9e94e5e0db4817a29e85b7d7ec8a441206477379a73cb1",
       "change": "Comment-only path/provenance normalization; requirement pins and hashes retained."
     },
     "locks/torch.amd64.lock": {
       "upstream_repository_path": "docker/workers/requirements-torch.amd64.lock",
-      "upstream_source_sha256": "1d257c17f2119a2cd55dcc6464545e577788dfc336b4ddcb080ad35cc0a78502",
-      "copied_lock_sha256": "faf4f63ae8fbc8507a19e527a9712f013d9871f54987c8eac13fb6952f0e5917",
+      "upstream_source_sha256": "47fd35396d9ad931c36e8181f6ce1f2626f54255aec0d23117881afa84126007",
+      "copied_lock_sha256": "b7d42e12ffd961c0ae9e94e5e0db4817a29e85b7d7ec8a441206477379a73cb1",
       "change": "Comment-only path/provenance normalization; requirement pins and hashes retained."
     },
     "locks/scientific.lock": {
       "upstream_repository_path": "courses/advanced-spark-modeling/projects/spark-torch/requirements.lock",
-      "upstream_source_sha256": "febd81b5459b16e5f6d13d624e4675468849936cd296dfa46cf743de6e3e575a",
+      "upstream_source_sha256": "ac43ad0f8e74b725abef3503a9f0e63105753298f00b2c1b7dcf59768902170c",
       "copied_lock_sha256": "0ef1ded78805fd4216ff06bd6190972bf450395e80cfb75fc6993183db3d930b",
       "change": "Comment-only path/provenance normalization; requirement pins and hashes retained."
     },

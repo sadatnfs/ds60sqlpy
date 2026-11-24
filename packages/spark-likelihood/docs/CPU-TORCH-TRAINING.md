@@ -3,7 +3,7 @@
 The current examples use named, importable factories in
 `ds60_torch_training.training_examples`. Importing their descriptors does not load
 Torch. Actual training uses `run_training` on an existing Spark Classic 4.0.1
-session, a prepared torchrun exit-status wrapper, an immutable shard manifest,
+or 4.3.0 session, a prepared torchrun exit-status wrapper, an immutable shard manifest,
 and an independent Spark task observer. Both admitted modes set
 `local_mode=False` and `use_gpu=False` in the public `TorchDistributor.run` API.
 

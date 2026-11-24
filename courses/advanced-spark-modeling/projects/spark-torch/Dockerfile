@@ -11,7 +11,7 @@ COPY courses/advanced-spark-modeling/projects/spark-torch/requirements.lock /tmp
 RUN python -m ensurepip --default-pip \
     && python -m pip install --no-cache-dir --require-hashes --only-binary=:all: -r /tmp/requirements.lock \
     && python -m pip check && rm /tmp/requirements.lock
-RUN python -c 'import torch,pandas,pyarrow,scipy,lightning; assert torch.__version__ == "2.9.1+cpu"; assert lightning.__version__ == "2.6.1"'
+RUN python -c 'import torch,pandas,pyarrow,scipy,lightning; assert torch.__version__ == "2.15.0+cpu"; assert lightning.__version__ == "2.6.1"'
 COPY packages/spark-likelihood/ /opt/ds60-package-source/
 RUN cp -a /opt/ds60-package-source /tmp/likelihood-build \
     && SOURCE_DATE_EPOCH=315532800 python -m pip wheel --no-index --no-deps --no-build-isolation \

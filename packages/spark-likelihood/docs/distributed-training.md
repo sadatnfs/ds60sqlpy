@@ -6,7 +6,7 @@ The package retains separate, original integration examples using Spark's actual
 
 ## Prepare explicitly before running
 
-Prepare optional Torch/Spark/Lightning dependencies before execution. Never install them inside a loss, fit or worker callback. The reviewed Spark 4.0.1 torchrun wrapper can otherwise return success after a rank fails, even when a result was already serialized. The narrow correction is source-hash checked and preserves the original Apache license header. Unknown upstream bytes are rejected.
+Prepare optional Torch/Spark/Lightning dependencies before execution. Never install them inside a loss, fit or worker callback. The reviewed Spark 4.0.1 and 4.3.0 torchrun wrappers can otherwise return success after a rank fails, even when a result was already serialized. The narrow correction is source-hash checked and preserves the original Apache license header. Unknown upstream bytes are rejected.
 
 Read-only check of the Spark distribution archive:
 

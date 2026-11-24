@@ -1,5 +1,5 @@
 # Additional packages for Python3.12 on native Linux AMD64/ARM64.
-# Torch2.9.1+cpu and NumPy2.2.6 come from the separately pinned Torch image.
+# Torch2.15.0+cpu and NumPy2.2.6 come from the separately pinned Torch image.
 # Public PyPI wheel hashes; native execution remains separately qualified.
 aiohappyeyeballs==2.7.1 \
     --hash=sha256:9243213661e29250eb41368e5daa826fc017156c3b8a11440826b2e3ed376472
