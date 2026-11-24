@@ -23,6 +23,7 @@ from ds60sqlpy.classroom_http import CourseHTTPServer, CourseRequestHandler, Req
 from ds60sqlpy.coaching import CoachingService
 from ds60sqlpy.curriculum_framework import RUNNERS
 from ds60sqlpy.execution import ALLOWED_TIMEOUT_SECONDS, MAX_CODE_BYTES, PadRunner
+from ds60sqlpy.exercises import exercise_number, sql_solution_context, trusted_solution_code
 from ds60sqlpy.lesson_reader import render_artifact, rendered_targets
 from ds60sqlpy.module_service import ModuleService
 from ds60sqlpy.run_explain import explain_pad_run
@@ -388,12 +389,18 @@ class LabServer(CourseHTTPServer):
         cursor = payload.get("cursor_offset")
         if cursor is not None and (type(cursor) is not int or cursor < 0):
             raise ValueError("Choose a cursor position inside the code.")
+        solution = purpose == "solution"
+        trusted_setup: str | None = None
         if language == "sql":
             # Parse first: a statement the walkthrough cannot trace never reaches
             # course preparation, the SQL worker or a saved-pad path.
-            rejected = stepping.sql_unsupported_response(stepping.plan_sql(code, cursor))
+            rejected = stepping.sql_unsupported_response(
+                stepping.plan_sql(code, cursor), solution=solution
+            )
             if rejected is not None:
                 return rejected
+            if solution:
+                trusted_setup = self._solution_setup(lesson, payload.get("exercise"), code)
         if not self.execution_lock.acquire(blocking=False):
             raise ValueError("A pad is already running. Wait for its result before running again.")
         try:
@@ -408,12 +415,26 @@ class LabServer(CourseHTTPServer):
                 code,
                 cursor_offset=cursor if language == "sql" else None,
                 timeout_seconds=timeout,
+                trusted_setup=trusted_setup,
             )
             if preparation:
                 response["database_preparation"] = preparation
             return response
         finally:
             self.execution_lock.release()
+
+    def _solution_setup(self, lesson: Lesson, exercise: object, code: str) -> str | None:
+        """Return a worked answer's setup SQL, only when the pad holds that exact answer."""
+
+        try:
+            number = exercise_number(exercise)
+        except ValueError:
+            return None
+        solutions = [self.catalog.resolve(path) for path in lesson.solution_paths]
+        trusted = trusted_solution_code(solutions, number, "sql")
+        if not trusted.strip() or code.replace("\r\n", "\n").strip() != trusted.strip():
+            return None
+        return sql_solution_context(solutions, number)
 
 
 class LabRequestHandler(CourseRequestHandler):

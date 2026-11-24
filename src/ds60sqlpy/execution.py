@@ -683,8 +683,13 @@ class PadRunner:
         *,
         cursor_offset: int | None = None,
         timeout_seconds: int | None = None,
+        trusted_setup: str | None = None,
     ) -> dict[str, Any]:
-        """Trace Python line by line, or walk one SELECT clause by clause, without saving."""
+        """Trace Python line by line, or walk one SELECT clause by clause, without saving.
+
+        ``trusted_setup`` marks a worked SQL solution: that setup and the code before the
+        walked statement replay first, in a transaction that is always rolled back.
+        """
 
         definition = RUNNERS.get(language)
         if definition is None or definition.executor not in {"python", "sql"}:
@@ -711,11 +716,16 @@ class PadRunner:
             path.parent.mkdir(parents=True, exist_ok=True)
             return self._step_through_python(path.parent, code, timeout_seconds)
         plan = stepping.plan_sql(code, cursor_offset)
-        rejected = stepping.sql_unsupported_response(plan)
+        rejected = stepping.sql_unsupported_response(plan, solution=trusted_setup is not None)
         if rejected is not None:
             return rejected
+        context = (
+            stepping.sanitize_sql_context(trusted_setup + "\n;\n" + code[: plan.statement_offset])
+            if trusted_setup is not None
+            else []
+        )
         path.parent.mkdir(parents=True, exist_ok=True)
-        return self._step_through_sql(path.parent, lesson_id, plan, timeout_seconds)
+        return self._step_through_sql(path.parent, lesson_id, plan, timeout_seconds, context)
 
     def _step_environment(self) -> dict[str, str]:
         environment = dict(os.environ)
@@ -760,13 +770,16 @@ class PadRunner:
         lesson_id: str,
         plan: stepping.SqlPlan,
         timeout: int | None,
+        context: list[dict[str, Any]],
     ) -> dict[str, Any]:
         assert self.python is not None
         environment = self._step_environment()
         self._course_database_environment(environment, lesson_search_path(self.catalog, lesson_id))
         with tempfile.TemporaryDirectory(prefix=".step-", dir=folder) as scratch:
             steps_file = Path(scratch) / "steps.json"
-            steps_file.write_text(json.dumps([step.sql for step in plan.steps]), encoding="utf-8")
+            steps = [step.sql for step in plan.steps]
+            payload: object = {"context": context, "steps": steps} if context else steps
+            steps_file.write_text(json.dumps(payload), encoding="utf-8")
             results = Path(scratch) / "results.jsonl"
             command = [
                 self.python,

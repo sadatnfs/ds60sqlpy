@@ -944,6 +944,44 @@ SQUARES_CLAUSES = [
 ]
 
 
+GROUPED_SOURCE = (
+    "SELECT a.k, count(*) AS n\n"
+    "FROM (VALUES (1, 'x'), (2, 'y'), (3, 'z')) AS a(k, tag)\n"
+    "JOIN (VALUES (1, 10), (1, 11), (2, 20), (2, 21), (3, 30), (3, -1)) AS b(k, v)"
+    " ON b.k = a.k\n"
+    "WHERE b.v > 0\n"
+    "GROUP BY a.k\n"
+    "HAVING count(*) > 1\n"
+    "ORDER BY a.k DESC"
+)
+GROUPED_CLAUSES = [
+    ("from", "FROM (VALUES (1, 'x'), (2, 'y'), (3, 'z')) AS a(k, tag)"),
+    (
+        "join",
+        "JOIN (VALUES (1, 10), (1, 11), (2, 20), (2, 21), (3, 30), (3, -1)) AS b(k, v)"
+        " ON b.k = a.k",
+    ),
+    ("where", "WHERE b.v > 0"),
+    ("group", "GROUP BY a.k"),
+    ("having", "HAVING count(*) > 1"),
+    ("select", "SELECT a.k, count(*) AS n"),
+    ("order", "ORDER BY a.k DESC"),
+]
+CTE_SOURCE = (
+    "WITH big AS (\n"
+    "  SELECT n FROM generate_series(1, 5) AS g(n) WHERE n > 2\n"
+    ")\n"
+    "SELECT n * 10 AS tens\n"
+    "FROM big\n"
+    "ORDER BY n DESC"
+)
+CTE_CLAUSES = [
+    ("cte", "big AS (\n  SELECT n FROM generate_series(1, 5) AS g(n) WHERE n > 2\n)"),
+    ("select", "SELECT n * 10 AS tens"),
+    ("order", "ORDER BY n DESC"),
+]
+
+
 def _source_clauses(source: str, offset: int, steps: Any) -> list[tuple[str, str]]:
     clauses = []
     for step in steps:
@@ -974,6 +1012,12 @@ def test_step_through_sql_offsets_match_original_source() -> None:
     where = next(step for step in plan.steps if step.clause == "where")
     begin, end = where.highlight
     assert wide[plan.statement_offset + begin : plan.statement_offset + end] == "WHERE n = 1"
+
+    for query, clauses in ((GROUPED_SOURCE, GROUPED_CLAUSES), (CTE_SOURCE, CTE_CLAUSES)):
+        plan = stepping.plan_sql(query)
+        assert (plan.unsupported, plan.statement_offset) == (None, 0)
+        assert _source_clauses(query, 0, plan.steps) == clauses
+        assert plan.steps[-1].sql == query
 
 
 def test_live_step_through_sql_results_and_rejection_preserve_database_state(
@@ -1036,5 +1080,183 @@ def test_live_step_through_sql_results_and_rejection_preserve_database_state(
     )
     assert writer["steps"] and all(step["error"] for step in writer["steps"]), writer
     assert all(step["rows"] == [] for step in writer["steps"])
-    assert "read-only" in writer["steps"][-1]["error"]
+    assert writer["steps"][-1]["error"] == stepping.READ_ONLY_STEP
     assert snapshot() == before
+
+
+def test_live_step_through_sql_join_group_having_and_cte_rows(
+    course: Catalog, live_database: LiveDatabase
+) -> None:
+    runner = PadRunner(course)
+
+    def walk(source: str) -> list[tuple[str, list[str], list[list[Any]], bool]]:
+        result = runner.step_through("python-01", "sql", source, timeout_seconds=60)
+        assert result["unsupported"] is None and result["error"] is None, result
+        assert _source_clauses(source, result["statement_offset"], result["steps"]) == (
+            GROUPED_CLAUSES if source == GROUPED_SOURCE else CTE_CLAUSES
+        )
+        steps = []
+        for step in result["steps"]:
+            assert step["error"] is None and step["row_count"] == len(step["rows"]), step
+            ordered = step["clause"] == "order"
+            rows = step["rows"] if ordered else sorted(step["rows"])
+            steps.append((step["clause"], step["columns"], rows, ordered))
+        return steps
+
+    assert walk(GROUPED_SOURCE) == [
+        ("from", ["k", "tag"], [[1, "x"], [2, "y"], [3, "z"]], False),
+        (
+            "join",
+            ["k", "tag", "k", "v"],
+            [
+                [1, "x", 1, 10],
+                [1, "x", 1, 11],
+                [2, "y", 2, 20],
+                [2, "y", 2, 21],
+                [3, "z", 3, -1],
+                [3, "z", 3, 30],
+            ],
+            False,
+        ),
+        (
+            "where",
+            ["k", "tag", "k", "v"],
+            [[1, "x", 1, 10], [1, "x", 1, 11], [2, "y", 2, 20], [2, "y", 2, 21], [3, "z", 3, 30]],
+            False,
+        ),
+        ("group", ["k", "rows_in_group"], [[1, 2], [2, 2], [3, 1]], False),
+        ("having", ["k", "rows_in_group"], [[1, 2], [2, 2]], False),
+        ("select", ["k", "n"], [[1, 2], [2, 2]], False),
+        ("order", ["k", "n"], [[2, 2], [1, 2]], True),
+    ]
+    assert walk(CTE_SOURCE) == [
+        ("cte", ["n"], [[3], [4], [5]], False),
+        ("select", ["tens"], [[30], [40], [50]], False),
+        ("order", ["tens"], [[50], [40], [30]], True),
+    ]
+
+
+def test_sql_solution_context_stops_before_the_requested_answer(tmp_path: Path) -> None:
+    from ds60sqlpy.exercises import sql_solution_context
+
+    solutions = Path(__file__).resolve().parents[1] / "sql" / "professional" / "solutions"
+    start = sql_solution_context([solutions / "sql_start_02_values_null_order_solutions.sql"], 1)
+    assert "CREATE TEMP TABLE start_shipments" in start
+    assert "-- Exercises" not in start
+    found = [solutions / "sql_found_01_relational_design_solutions.sql"]
+    assert "-- Exercise 1:" not in sql_solution_context(found, 1)
+    fifth = sql_solution_context(found, 5)
+    assert "-- Exercise 4:" in fifth and "-- Exercise 5:" not in fifth
+
+    plain = tmp_path / "plain.sql"
+    plain.write_text("SELECT 1;\n", encoding="utf-8")
+    assert sql_solution_context([plain], 1) == ""
+    marked = tmp_path / "marked.sql"
+    marked.write_text(
+        "BEGIN;\nCREATE TEMP TABLE m (n int);\n-- Exercise 1\nSELECT n FROM m;\nROLLBACK;\n",
+        encoding="utf-8",
+    )
+    assert sql_solution_context([marked], 1) == "BEGIN;\nCREATE TEMP TABLE m (n int);"
+    assert sql_solution_context([marked], 9).endswith("SELECT n FROM m;")
+    numbered = tmp_path / "numbered.sql"
+    numbered.write_text(
+        "CREATE TEMP TABLE p (n int);\n-- Exercises\n-- 1. first\nCREATE TEMP TABLE a1 (n int);\n"
+        "-- 2. second\nSELECT n FROM a1;\nROLLBACK;\n",
+        encoding="utf-8",
+    )
+    assert sql_solution_context([numbered], 1) == "CREATE TEMP TABLE p (n int);"
+    assert "CREATE TEMP TABLE a1" in sql_solution_context([numbered], 2)
+    assert "SELECT n FROM a1" not in sql_solution_context([numbered], 2)
+
+
+def test_sql_solution_context_inlines_confined_psql_includes(tmp_path: Path) -> None:
+    from ds60sqlpy.exercises import sql_solution_context
+
+    track = tmp_path / "track"
+    (track / "fixtures").mkdir(parents=True)
+    (track / "solutions").mkdir()
+    (track / "fixtures" / "base.sql").write_text(
+        "\\set ON_ERROR_STOP on\nCREATE TEMP TABLE base (n int);\n\\ir nested.sql\n",
+        encoding="utf-8",
+    )
+    (track / "fixtures" / "nested.sql").write_text(
+        "INSERT INTO base VALUES (1);\nSELECT count(*) > 0 AS seeded FROM base\n\\gset\n"
+        "\\if :seeded\n\\echo seeded\n\\endif\nCREATE TEMP TABLE after_gset (n int);\n",
+        "utf-8",
+    )
+    (tmp_path / "outside.sql").write_text("CREATE TEMP TABLE leaked (n int);\n", "utf-8")
+    loop = track / "fixtures" / "loop.sql"
+    loop.write_text("SELECT 'loop';\n\\ir loop.sql\n", encoding="utf-8")
+    solution = track / "solutions" / "answers.sql"
+    solution.write_text(
+        "\\ir ../fixtures/base.sql\n\\ir ../../outside.sql\n\\ir ../fixtures/loop.sql\n"
+        "\\i ../fixtures/base.sql\n\\echo hi\n-- Exercise 1\nSELECT n FROM base;\n",
+        encoding="utf-8",
+    )
+
+    context = sql_solution_context([solution], 1)
+
+    assert "CREATE TEMP TABLE base (n int);" in context
+    assert "INSERT INTO base VALUES (1);" in context
+    assert "SELECT count(*) > 0 AS seeded FROM base\n;\n" in context
+    assert "CREATE TEMP TABLE after_gset (n int);" in context
+    assert "leaked" not in context
+    assert context.count("SELECT 'loop';") == 3
+    assert not any(line.lstrip().startswith("\\") for line in context.splitlines())
+
+
+def test_sanitized_sql_context_never_commits_or_loosens_walk_limits() -> None:
+    source = (
+        "BEGIN; CREATE TEMP TABLE t (n int); SAVEPOINT a; INSERT INTO t VALUES (1);"
+        " ROLLBACK TO SAVEPOINT a; RELEASE SAVEPOINT missing; SET statement_timeout = 0;"
+        " SET LOCAL lock_timeout = '1s'; SET search_path TO pg_temp, public; VACUUM t;"
+        " COPY t FROM STDIN; SAVEPOINT ds60_ctx; COMMIT AND CHAIN; INSERT INTO t VALUES (2);"
+        " ROLLBACK; COMMIT; SELECT 1"
+    )
+    assert stepping.sanitize_sql_context(source) == [
+        {"sql": "SAVEPOINT ds60_tx", "control": True},
+        {"sql": "CREATE TEMP TABLE t (n int)", "control": False},
+        {"sql": "SAVEPOINT a", "control": True},
+        {"sql": "INSERT INTO t VALUES (1)", "control": False},
+        {"sql": "ROLLBACK TO SAVEPOINT a", "control": True},
+        {"sql": "SET search_path TO pg_temp, public", "control": False},
+        {"sql": "RELEASE SAVEPOINT ds60_tx", "control": True},
+        {"sql": "SAVEPOINT ds60_tx", "control": True},
+        {"sql": "INSERT INTO t VALUES (2)", "control": False},
+        {"sql": "ROLLBACK TO SAVEPOINT ds60_tx", "control": True},
+        {"sql": "RELEASE SAVEPOINT ds60_tx", "control": True},
+        {"sql": "SELECT 1", "control": False},
+    ]
+    assert len(stepping.sanitize_sql_context("SELECT 1;" * 1000)) == stepping.MAX_SQL_CONTEXT
+
+
+def test_live_step_through_solution_replays_setup_and_rolls_it_back(
+    course: Catalog, live_database: LiveDatabase
+) -> None:
+    driver, target, schema = live_database.driver, live_database.target, live_database.schema
+    table, sequence = f"{schema}.ctx_rows", f"{schema}.ctx_sequence"
+    setup = (
+        f"BEGIN;\nCREATE TABLE {table} (n int, seen date);\n"
+        f"INSERT INTO {table} VALUES (1, 'infinity'), (2, '2024-01-02'), (3, '-infinity');\n"
+        "SELECT missing_column FROM nowhere;\n"
+        f"CREATE SEQUENCE {sequence};\nCOMMIT;\n"
+    )
+    query = f"SELECT n, seen FROM {table} WHERE n > 1 ORDER BY n"
+    runner = PadRunner(course)
+    walk = runner.step_through("python-01", "sql", query, timeout_seconds=60, trusted_setup=setup)
+    assert walk["error"] is None and walk["unsupported"] is None, walk
+    assert [step["error"] for step in walk["steps"]] == [None] * len(walk["steps"])
+    assert walk["steps"][-1]["rows"] == [[2, "2024-01-02"], [3, "-infinity"]]
+
+    practice = runner.step_through("python-01", "sql", query, timeout_seconds=15)
+    assert "does not exist" in practice["steps"][0]["error"], practice
+
+    writer = runner.step_through(
+        "python-01", "sql", f"SELECT nextval('{sequence}') AS n", trusted_setup=setup
+    )
+    assert writer["steps"][-1]["error"] == stepping.READ_ONLY_STEP, writer
+
+    rejected = runner.step_through("python-01", "sql", f"DELETE FROM {table}", trusted_setup=setup)
+    assert rejected["unsupported"] == stepping.SOLUTION_NOT_A_QUERY
+    with driver.connect(target, autocommit=True) as connection:
+        assert connection.execute(f"SELECT to_regclass('{table}')").fetchone() == (None,)

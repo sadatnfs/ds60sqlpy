@@ -522,6 +522,53 @@ def test_rejected_sql_step_through_skips_database_preparation_and_pad_path(
         server.server_close()
 
 
+def test_solution_sql_step_through_replays_setup_only_for_the_unchanged_answer(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from ds60sqlpy.exercises import trusted_solution_code
+
+    server = sql_walkthrough_server(tmp_path)
+    setups: list[str | None] = []
+
+    def trace(*args: object, trusted_setup: str | None = None, **kwargs: object) -> dict[str, Any]:
+        setups.append(trusted_setup)
+        return {"kind": "sql", "steps": [{"clause": "from"}], "error": None}
+
+    monkeypatch.setattr("ds60sqlpy.lab.ensure_before_run", lambda *args: None)
+    monkeypatch.setattr(server.pads, "step_through", trace)
+    lesson = server.catalog.get("sql-start-02")
+    answer = trusted_solution_code(
+        [server.catalog.resolve(path) for path in lesson.solution_paths], 1, "sql"
+    )
+    request = {
+        "action": "step-through",
+        "lesson_id": "sql-start-02",
+        "language": "sql",
+        "code": answer,
+        "purpose": "solution",
+        "exercise": 1,
+    }
+    try:
+        server.action(request)
+        server.action({**request, "code": answer.replace("\n", "\r\n")})
+        server.action({**request, "code": answer.replace("shipment_id;", "shipment_id DESC;")})
+        server.action({**request, "purpose": "practice"})
+        server.action({**request, "exercise": 2})
+        server.action({key: value for key, value in request.items() if key != "exercise"})
+        trusted = [setup for setup in setups if setup is not None]
+        assert len(trusted) == 2 and setups[2:] == [None] * 4
+        assert "CREATE TEMP TABLE start_shipments" in trusted[0] and trusted[0] == trusted[1]
+        monkeypatch.setattr(server.pads, "step_through", forbid("A write reached the worker."))
+        rejected = server.action({**request, "code": "DELETE FROM start_shipments;"})
+        assert rejected["unsupported"] == stepping.SOLUTION_NOT_A_QUERY
+        practice = server.action(
+            {**request, "code": "DELETE FROM start_shipments;", "purpose": "practice"}
+        )
+        assert practice["unsupported"] == stepping.NOT_A_QUERY
+    finally:
+        server.server_close()
+
+
 def test_supported_sql_step_through_prepares_before_trace(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -540,8 +587,10 @@ def test_supported_sql_step_through_prepares_before_trace(
         *,
         cursor_offset: int | None = None,
         timeout_seconds: int | None = None,
+        trusted_setup: str | None = None,
     ) -> dict[str, Any]:
         calls.append(("trace", lesson_id, language, code, cursor_offset, timeout_seconds))
+        assert trusted_setup is None
         return {"kind": "sql", "steps": [{"clause": "from"}], "error": None}
 
     monkeypatch.setattr("ds60sqlpy.lab.ensure_before_run", prepare)

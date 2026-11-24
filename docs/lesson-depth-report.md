@@ -176,7 +176,7 @@ examples actually teach the named topic.
 | `sql-49` | 2778 | 4 | 15 | 6/6 | 2504 | notebook gate n/a | PASS |
 | `sql-50` | 3033 | 4 | 15 | 6/6 | 2704 | notebook gate n/a | PASS |
 | `sql-51` | 3041 | 4 | 15 | 6/6 | 2530 | notebook gate n/a | PASS |
-| `sql-52` | 2822 | 4 | 15 | 6/6 | 2772 | notebook gate n/a | PASS |
+| `sql-52` | 2822 | 4 | 15 | 6/6 | 2845 | notebook gate n/a | PASS |
 | `sql-53` | 3149 | 4 | 16 | 6/6 | 2561 | notebook gate n/a | PASS |
 | `sql-54` | 2746 | 4 | 15 | 6/6 | 2787 | notebook gate n/a | PASS |
 | `sql-55` | 3080 | 4 | 15 | 6/6 | 2479 | notebook gate n/a | PASS |

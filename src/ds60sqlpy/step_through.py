@@ -39,12 +39,44 @@ LOCKING_QUERY = (
     "Step-through runs queries read-only, and FOR UPDATE or FOR SHARE needs to lock rows, "
     "so use Run for it."
 )
+READ_ONLY_STEP = (
+    "This step calls something that changes data, and step-through runs read-only, "
+    "so use Run to see it work."
+)
 UNBALANCED = "Check the parentheses in this query, then try Step through again."
 UNSUPPORTED_SQL = (
     "Step-through can't split this query into clauses, so use Run for it. "
     "If Run reports an error, check that the clauses are complete and in order: "
     "SELECT, FROM, WHERE, GROUP BY, HAVING, ORDER BY, LIMIT."
 )
+SOLUTION_NOT_A_QUERY = (
+    "This worked solution changes data or structure and has no SELECT to take apart. "
+    "Use Run solution to watch it work."
+)
+MAX_SQL_CONTEXT = 400
+_TX_SAVEPOINT = "ds60_tx"
+_SKIPPED_CONTEXT = {
+    "ALTER SYSTEM",
+    "CHECKPOINT",
+    "CLUSTER",
+    "COMMIT PREPARED",
+    "COPY",
+    "CREATE DATABASE",
+    "DISCARD",
+    "DROP DATABASE",
+    "PREPARE TRANSACTION",
+    "REINDEX",
+    "ROLLBACK PREPARED",
+    "SET SESSION",
+    "SET TRANSACTION",
+    "VACUUM",
+}
+_GUARDED_SETTINGS = {
+    "idle_in_transaction_session_timeout",
+    "lock_timeout",
+    "statement_timeout",
+    "transaction_read_only",
+}
 
 _PYTHON_TRACE_BODY = r"""
 import io, json, sys, types, warnings, _thread
@@ -559,7 +591,12 @@ import json, math, os, re, sys
 from decimal import Decimal
 from pathlib import Path
 
-steps = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+if isinstance(payload, dict):
+    context = payload.get("context") or []
+    steps = payload.get("steps") or []
+else:
+    context, steps = [], payload
 out = open(sys.argv[2], "w", encoding="utf-8")
 
 
@@ -570,10 +607,31 @@ def emit(record):
 
 try:
     import psycopg
+    from psycopg.types import datetime as pg_datetime
     from psycopg.types.json import set_json_loads
 except ImportError:
     emit({"fatal": "Install the Core/bridge profile in the selected Python backend."})
     sys.exit(1)
+
+
+def tolerant(base):
+    class Loader(base):
+        def load(self, data):
+            try:
+                return super().load(data)
+            except psycopg.DataError:
+                return bytes(data).decode("utf-8", "replace")
+
+    return Loader
+
+
+def register_loaders(conn):
+    # infinity, BC and year 10000+ values have no Python equivalent; show PostgreSQL's text.
+    for name, base in (("date", pg_datetime.DateLoader),
+            ("timestamp", pg_datetime.TimestampLoader),
+            ("timestamptz", pg_datetime.TimestamptzLoader),
+            ("interval", pg_datetime.IntervalLoader)):
+        conn.adapters.register_loader(name, tolerant(base))
 
 
 def json_float(token):
@@ -610,6 +668,8 @@ def transport_value(value):
 def first_line(exc):
     if isinstance(exc, psycopg.errors.QueryCanceled):
         return "This step took longer than 5 seconds, so PostgreSQL stopped it."
+    if isinstance(exc, psycopg.errors.ReadOnlySqlTransaction):
+        return READ_ONLY_STEP
     lines = str(exc).strip().splitlines()
     text = lines[0] if lines else type(exc).__name__
     return text[:300]
@@ -665,8 +725,24 @@ try:
 except psycopg.Error as exc:
     emit({"fatal": first_line(exc)})
     sys.exit(1)
+
+
+def replay(conn, item):
+    sql = item.get("sql", "")
+    if item.get("control"):
+        conn.execute(sql)
+        return
+    conn.execute("SAVEPOINT ds60_ctx")
+    try:
+        conn.execute(sql)
+    except psycopg.Error:
+        conn.execute("ROLLBACK TO SAVEPOINT ds60_ctx")
+    conn.execute("RELEASE SAVEPOINT ds60_ctx")
+
+
 try:
-    conn.read_only = True
+    # A worked solution's trusted setup writes inside this transaction, which is never committed.
+    conn.read_only = not context
     if conn.info.dbname != "advanced_sql_training":
         raise CourseRoleError("The SQL pad requires the disposable course database.")
     privileged = conn.execute(COURSE_ROLE_QUERY).fetchone()
@@ -676,11 +752,18 @@ try:
             "See docs/setup/postgresql.md for role setup."
         )
     set_json_loads(load_json, context=conn)
+    register_loaders(conn)
     started = conn.execute(
         "SELECT backend_start::text FROM pg_stat_activity WHERE pid=pg_backend_pid()"
     ).fetchone()[0]
     Path(os.environ["DS60_PAD_BACKEND_START"]).write_text(started)
     Path(os.environ["DS60_PAD_BACKEND_PID"]).write_text(str(conn.info.backend_pid))
+    if context:
+        for item in context:
+            replay(conn, item)
+        conn.execute("SET LOCAL statement_timeout = 5000")
+        conn.execute("SET LOCAL lock_timeout = 2000")
+        conn.execute("SET LOCAL transaction_read_only = on")
     for index, sql in enumerate(steps):
         out.write(run_step(conn, index, sql) + "\n")
         out.flush()
@@ -721,6 +804,7 @@ def sql_step_worker(role_query: str) -> str:
         "PREVIEW_ROWS": PREVIEW_ROWS,
         "SQL_CELL_LIMIT": SQL_CELL_LIMIT,
         "SQL_LINE_CAP": SQL_LINE_CAP,
+        "READ_ONLY_STEP": READ_ONLY_STEP,
     }
     prefix = "".join(f"{name} = {value!r}\n" for name, value in constants.items())
     return prefix + _SQL_STEP_BODY
@@ -1026,6 +1110,89 @@ def split_statements(code: str) -> list[tuple[int, int, int]]:
     if significant:
         spans.append((significant[0].start, significant[-1].end, significant[-1].end))
     return spans
+
+
+def _savepoint_name(token: Token | None) -> str | None:
+    if token is None:
+        return None
+    if token.kind == "quoted":
+        return token.text[1:-1].replace('""', '"')
+    return token.text.lower() if token.kind == "word" else None
+
+
+def _chains(words: list[str]) -> bool:
+    return "CHAIN" in words and "NO" not in words
+
+
+def sanitize_sql_context(text: str) -> list[dict[str, Any]]:
+    """Turn a worked solution's setup into statements one uncommitted transaction can replay.
+
+    Transaction boundaries become a ``ds60_tx`` savepoint so nothing commits, savepoint
+    commands run only when the simulated stack proves they cannot fail, and statements
+    that stream through a client, leave the transaction or loosen the walk's limits are
+    dropped. Control items run directly; the rest are isolated by the worker.
+    """
+
+    items: list[dict[str, Any]] = []
+    stack: list[str] = []
+
+    def control(sql: str) -> None:
+        items.append({"sql": sql, "control": True})
+
+    def open_tx() -> None:
+        control(f"SAVEPOINT {_TX_SAVEPOINT}")
+        stack.append(_TX_SAVEPOINT)
+
+    def close_tx(*, rollback: bool) -> None:
+        if rollback:
+            control(f"ROLLBACK TO SAVEPOINT {_TX_SAVEPOINT}")
+        control(f"RELEASE SAVEPOINT {_TX_SAVEPOINT}")
+        del stack[stack.index(_TX_SAVEPOINT) :]
+
+    for start, end, _ in split_statements(text):
+        if len(items) >= MAX_SQL_CONTEXT:
+            break
+        sql = text[start:end]
+        tokens = _significant(tokenize(sql))
+        words = [token.upper for token in tokens if token.kind == "word"]
+        head = " ".join(words[:2])
+        first = words[0] if words else ""
+        if first in _SKIPPED_CONTEXT or head in _SKIPPED_CONTEXT:
+            continue
+        if first in {"SET", "RESET"}:
+            names = [w for w in words[1:] if w not in {"LOCAL", "SESSION"}]
+            if names and names[0].lower() in _GUARDED_SETTINGS:
+                continue
+        in_tx = _TX_SAVEPOINT in stack
+        if first == "BEGIN" or head == "START TRANSACTION":
+            if not in_tx:
+                open_tx()
+            continue
+        if first in {"COMMIT", "END", "ROLLBACK", "ABORT"} and "TO" not in words:
+            if in_tx:
+                close_tx(rollback=first in {"ROLLBACK", "ABORT"})
+                if _chains(words):
+                    open_tx()
+            continue
+        if first in {"SAVEPOINT", "RELEASE", "ROLLBACK"}:
+            name_token = tokens[-1] if len(tokens) > 1 else None
+            name = _savepoint_name(name_token)
+            if name_token is None or name is None or name.startswith("ds60_"):
+                continue
+            if first == "SAVEPOINT":
+                control(f"SAVEPOINT {name_token.text}")
+                stack.append(name)
+            elif name in stack:
+                position = len(stack) - 1 - stack[::-1].index(name)
+                if first == "RELEASE":
+                    control(f"RELEASE SAVEPOINT {name_token.text}")
+                    del stack[position:]
+                else:
+                    control(f"ROLLBACK TO SAVEPOINT {name_token.text}")
+                    del stack[position + 1 :]
+            continue
+        items.append({"sql": sql, "control": False})
+    return items
 
 
 def _is_query(tokens: list[Token]) -> bool:
@@ -1918,17 +2085,20 @@ def _explain_limit(detail: dict[str, Any], count: int | None, previous: int | No
     return text
 
 
-def sql_unsupported_response(plan: SqlPlan) -> dict[str, Any] | None:
+def sql_unsupported_response(plan: SqlPlan, *, solution: bool = False) -> dict[str, Any] | None:
     """Return the shared no-database reply when a plan cannot be walked through."""
 
     if plan.unsupported is None and plan.steps:
         return None
+    unsupported = plan.unsupported or NO_QUERY
+    if solution and unsupported == NOT_A_QUERY:
+        unsupported = SOLUTION_NOT_A_QUERY
     return {
         "kind": "sql",
         "statement": plan.statement,
         "statement_offset": plan.statement_offset,
         "steps": [],
-        "unsupported": plan.unsupported or NO_QUERY,
+        "unsupported": unsupported,
         "elapsed_seconds": 0.0,
         "error": None,
     }

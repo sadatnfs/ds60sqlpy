@@ -80,6 +80,13 @@ _RANGE_REFERENCE = re.compile(
 _SQL_MARKER = re.compile(r"^--\s*Exercise\s+(?P<number>\d{1,3})\b", re.IGNORECASE)
 _SQL_SEPARATOR = re.compile(r"^--\s*-{3,}\s*$")
 _SQL_TERMINATOR = re.compile(r"^(?:ROLLBACK|COMMIT|END)\s*;\s*$", re.IGNORECASE)
+_SQL_SECTION_START = re.compile(r"^--\s*(?:Exercises\b|\d{1,3}\.\s)", re.IGNORECASE)
+_SQL_FINAL_ROLLBACK = re.compile(r"^ROLLBACK\s*;\s*$", re.IGNORECASE)
+_SQL_NUMBERED = re.compile(r"^--\s*(?P<number>\d{1,3})\.\s")
+_SQL_INCLUDE = re.compile(r"^\\(?:ir|include_relative)\s+(?P<target>\S+)\s*$")
+_SQL_SEND_BUFFER = re.compile(r"^\\(?:g|gx|gset|gexec|crosstabview|watch)(?:\s|$)")
+MAX_SQL_INCLUDE_DEPTH = 3
+MAX_SQL_INCLUDES = 32
 _FUTURE_IMPORT = re.compile(r"^from[ \t]+__future__[ \t]+import\b")
 _CODE_ALIASES = {
     "postgres": "sql",
@@ -1017,6 +1024,41 @@ def _parse_sql_blocks(text: str) -> dict[int, str]:
     return blocks
 
 
+def _sql_context_text(text: str, number: int) -> str:
+    """Return the setup an exercise's answer relies on in an executable SQL companion.
+
+    Files with ``-- Exercise N`` markers keep everything before exercise N's first
+    marker, because later answers may build on objects earlier answers created.
+    Files with ``-- N.`` sections keep the shared prelude plus the sections before N;
+    savepoint-isolated sections undo themselves when replayed.
+    """
+
+    lines = text.replace("\r\n", "\n").split("\n")
+    finals = [index for index, line in enumerate(lines) if _SQL_FINAL_ROLLBACK.match(line)]
+    end = finals[-1] if finals else len(lines)
+    markers = [
+        (index, int(match.group("number")))
+        for index, line in enumerate(lines)
+        if (match := _SQL_MARKER.match(line))
+    ]
+    if markers:
+        stop = next((index for index, value in markers if value >= number), end)
+    else:
+        stop = next(
+            (index for index, line in enumerate(lines) if _SQL_SECTION_START.match(line)), -1
+        )
+        if stop < 0:
+            return ""
+        numbered = [
+            (index, int(match.group("number")))
+            for index, line in enumerate(lines)
+            if (match := _SQL_NUMBERED.match(line))
+        ]
+        if numbered and numbered[0][1] < number:
+            stop = next((index for index, value in numbered if value >= number), end)
+    return "\n".join(lines[: min(stop, end)]).strip("\n")
+
+
 def _code_blocks(markdown: str) -> list[CodeBlock]:
     lines = markdown.split("\n")
     blocks: list[CodeBlock] = []
@@ -1152,6 +1194,56 @@ def _parsed_sql(path: str, _mtime_ns: int, _size: int) -> dict[int, str]:
     return _parse_sql_blocks(_read(Path(path)))
 
 
+@lru_cache(maxsize=512)
+def _sql_context_slice(path: str, _mtime_ns: int, _size: int, number: int) -> str:
+    return _sql_context_text(_read(Path(path)), number)
+
+
+def _inline_sql_includes(text: str, base: Path, root: Path, depth: int, budget: list[int]) -> str:
+    """Expand psql ``\\ir`` includes confined to ``root`` and drop other meta-commands.
+
+    Context replay runs through a driver, not psql, so a solution that builds its
+    setup with ``\\ir ../fixtures/x.sql`` would otherwise replay without that setup.
+    Commands such as ``\\gset`` that send the query buffer become ``;`` so the
+    pending statement does not merge into the next one. Conditional blocks keep
+    every branch.
+    """
+
+    lines: list[str] = []
+    for line in text.split("\n"):
+        stripped = line.strip()
+        if not stripped.startswith("\\"):
+            lines.append(line)
+            continue
+        match = _SQL_INCLUDE.match(stripped)
+        if match is None:
+            if _SQL_SEND_BUFFER.match(stripped):
+                lines.append(";")
+            continue
+        if depth >= MAX_SQL_INCLUDE_DEPTH or budget[0] <= 0:
+            continue
+        target = (base / match.group("target").strip("'\"")).resolve()
+        if (
+            not target.is_relative_to(root)
+            or target.suffix.lower() != ".sql"
+            or target.is_symlink()
+            or not target.is_file()
+        ):
+            continue
+        budget[0] -= 1
+        lines.append(_inline_sql_includes(_read(target), target.parent, root, depth + 1, budget))
+    return "\n".join(lines)
+
+
+def _sql_context(path: Path, number: int) -> str:
+    text = _sql_context_slice(*_cache_key(path), number)
+    if "\\" not in text:
+        return text
+    resolved = path.resolve()
+    budget = [MAX_SQL_INCLUDES]
+    return _inline_sql_includes(text, resolved.parent, resolved.parent.parent, 0, budget)
+
+
 @lru_cache(maxsize=256)
 def _notebook_source(path: str, _mtime_ns: int, _size: int) -> str:
     payload = json.loads(_read(Path(path)))
@@ -1198,6 +1290,33 @@ def sql_solution_blocks(solutions: Sequence[Path]) -> dict[int, str]:
             for number, text in _parsed_sql(*_cache_key(path)).items():
                 blocks.setdefault(number, text)
     return blocks
+
+
+def sql_solution_context(solutions: Sequence[Path], number: int) -> str:
+    """Return the trusted setup SQL that exercise ``number``'s worked answer runs after."""
+
+    parts = [_sql_context(path, number) for path in solutions if path.suffix.lower() == ".sql"]
+    return "\n\n".join(part for part in parts if part.strip())
+
+
+def _solution_code(solutions: Sequence[Path], number: int) -> tuple[str, list[CodeBlock]]:
+    markdown = solution_sections(solutions).get(number, "")
+    code = _code_blocks(markdown)
+    fallback = sql_solution_blocks(solutions).get(number)
+    if not code and fallback is not None:
+        code = [CodeBlock("sql", fallback)]
+        if not markdown:
+            markdown = f"```sql\n{fallback}\n```"
+    return markdown, code
+
+
+def trusted_solution_code(solutions: Sequence[Path], number: int, language: str) -> str:
+    """Return the worked answer exactly as the classroom joins it into one pad program."""
+
+    pad = code_language(language)
+    _, code = _solution_code(solutions, number)
+    blocks = [block.text.rstrip() for block in code if block.language == pad and block.text.strip()]
+    return "\n\n".join(blocks) + "\n" if blocks else ""
 
 
 def reference_programs(solutions: Sequence[Path], language: str) -> list[ReferenceProgram]:
@@ -1342,14 +1461,7 @@ def exercise_solution(
     """Render one exercise's separate solution and list its raw code blocks."""
 
     chosen = exercise_number(number)
-    sections = solution_sections(solutions)
-    markdown = sections.get(chosen, "")
-    code = _code_blocks(markdown)
-    fallback = sql_solution_blocks(solutions).get(chosen)
-    if not code and fallback is not None:
-        code = [CodeBlock("sql", fallback)]
-        if not markdown:
-            markdown = f"```sql\n{fallback}\n```"
+    markdown, code = _solution_code(solutions, chosen)
     if not markdown:
         raise ValueError(f"Exercise {chosen} has no separate written solution in this lesson.")
     source = next((path for path in solutions if path.suffix.lower() == ".md"), solutions[0])

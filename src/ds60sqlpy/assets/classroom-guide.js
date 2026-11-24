@@ -155,6 +155,8 @@
       purpose: purpose === "solution" ? "solution" : "practice",
       timeout_seconds: Number(byId("timeout")?.value) || 60,
     };
+    if (purpose === "solution" && view?.kind === "exercise" && Number.isInteger(view.number))
+      fields.exercise = view.number;
     if (language === "sql" && purpose !== "solution") {
       const editor = globalThis.DS60SourceEditor,
         cursor = editor?.cursor?.() ?? byId("source").selectionStart;

@@ -1051,7 +1051,10 @@ Press Run code. What your program prints, and any error messages, appear here.</
                 <dt>Run the solution</dt>
                 <dd>Runs the worked answer and shows its result. Your own code is not changed.</dd>
                 <dt>Step through the solution</dt>
-                <dd>Walks through the worked answer one step at a time (Python and SQL).</dd>
+                <dd
+                  >Walks through the worked answer one step at a time (Python and SQL). Your own
+                  code stays in the editor unchanged.</dd
+                >
                 <dt>Compare with my code</dt>
                 <dd>Shows your code and the solution side by side, with differences marked.</dd>
                 <dt>Use in my editor</dt>
@@ -1079,11 +1082,19 @@ Press Run code. What your program prints, and any error messages, appear here.</
                 </dd>
                 <dt>SQL</dt>
                 <dd>
-                  A query is shown in the order the database actually works: first
-                  <code>FROM</code> and <code>JOIN</code>, then <code>WHERE</code>,
-                  <code>GROUP BY</code>, <code>SELECT</code> and <code>ORDER BY</code>. Each step
-                  shows the rows it produces. If the editor holds several queries, click inside the
-                  one you want first.
+                  One <code>SELECT</code> query is shown in the order the database actually works:
+                  any <code>WITH</code> part first, then <code>FROM</code> and <code>JOIN</code>,
+                  <code>WHERE</code>, <code>GROUP BY</code>, <code>HAVING</code>,
+                  <code>SELECT</code>, <code>ORDER BY</code> and <code>LIMIT</code>. Each step runs
+                  read-only and shows the rows it produces. If the editor holds several queries,
+                  click inside the one you want first.
+                </dd>
+                <dt>When SQL cannot be stepped</dt>
+                <dd>
+                  Statements that change data or tables, queries that lock rows with
+                  <code>FOR UPDATE</code>, and queries whose clauses are out of order or incomplete
+                  are not stepped. You see a short message instead, and nothing runs against the
+                  database. Use <strong>Run code</strong> for those.
                 </dd>
               </dl>
               <p>

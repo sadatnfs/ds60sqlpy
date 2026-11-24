@@ -103,11 +103,23 @@ The answer creates one row per source payment with:
 - the customer version whose validity range contains `payment_date`;
 - `amount` and `method` as measures/attributes.
 
-The temporal join is:
+The table declares the fact grain and its dimension keys, and the load joins
+each payment to its order, its payment date, and the customer version that was
+valid on that date:
 
 ```sql
 SET search_path TO dwh, training, public;
 
+CREATE TABLE fact_payments (
+  payment_id bigint PRIMARY KEY,
+  order_id int NOT NULL,
+  date_key int NOT NULL REFERENCES dim_date (date_key),
+  customer_sk int NOT NULL REFERENCES dim_customer (customer_sk),
+  amount numeric(12, 2) NOT NULL,
+  method text NOT NULL
+);
+
+INSERT INTO fact_payments (payment_id, order_id, date_key, customer_sk, amount, method)
 SELECT
   p.payment_id,
   p.order_id,
@@ -121,10 +133,7 @@ FROM
   JOIN dim_date dd ON dd.date_actual = p.payment_date::date
   JOIN dim_customer dc ON dc.customer_id = o.customer_id
     AND p.payment_date::date >= dc.valid_from
-    AND p.payment_date::date <= COALESCE(dc.valid_to, 'infinity'::date)
-  ORDER BY
-    p.payment_id
-  LIMIT 20;
+    AND p.payment_date::date <= COALESCE(dc.valid_to, 'infinity'::date);
 ```
 
 After running the solution, verify source-to-fact completeness:
@@ -166,7 +175,7 @@ zero.
 - **Expected result/shape:** For sql-52 Exercise 2, expected output: `INSERT 0 3836`, one fact row per source payment, then a check row with `countries` 8, `fact_payment_rows` 3836, and `source_payment_rows` 3836. The fact columns are `payment_id`, `order_id`, `date_key`, `customer_sk`, `amount`, and `method`.
 - **Independent verification:** For sql-52 Exercise 2, confirm that `fact_payment_rows` equals `source_payment_rows` (3836) and that `SELECT SUM(amount) FROM fact_payments` equals `SELECT SUM(amount) FROM training.payments` (1831900.81); a join that lost payments would lower the count, and a join to every customer version would raise it.
 - **Intermediate relation check:** For sql-52 Exercise 2, join `training.payments` to `orders`, `dim_date`, and `dim_customer` one table at a time and check that the row count stays 3836 after each join.
-- **Clause check:** For sql-52 Exercise 2, the solution actually uses `FROM`, `JOIN ... ON`, `SELECT`, `ORDER BY`, and `LIMIT`. Read only those operations: begin at `training.payments`, `training.orders`, `dim_date`, and `dim_customer`, preserve one row per source payment, and finish with `payment_id`, `order_id`, `date_key`, `customer_sk`, `amount`, and `method` ordered by `p.payment_id`.
+- **Clause check:** For sql-52 Exercise 2, the solution actually uses `CREATE TABLE` with `PRIMARY KEY` and `REFERENCES`, then `INSERT INTO ... SELECT` with `FROM` and `JOIN ... ON`. Read only those operations: begin at `training.payments`, `training.orders`, `dim_date`, and `dim_customer`, preserve one row per source payment, and finish with `payment_id`, `order_id`, `date_key`, `customer_sk`, `amount`, and `method` loaded into `fact_payments`.
 - **Alternative/trade-off:** For sql-52 Exercise 2, the chosen form is justified by this lesson-specific rationale: The answer creates one row per source payment with: - `payment_id` as the idempotent fact key; - `order_id` as a degenerate operational reference; - the payment-day `date_key`; - the customer version whose vali. Evaluate another form against the concrete expected result (one row per source payment with: - `payment_id` as the idempotent fact key; - `order_id` as a degenerate operational reference; - the payment-) and the verification above.
 - **Edge case:** A payment whose date falls outside `dim_date` would be dropped silently by the inner join; Exercise 6 lists such payments with a `LEFT JOIN ... WHERE d.date_key IS NULL` check.
 
