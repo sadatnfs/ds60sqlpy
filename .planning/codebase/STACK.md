@@ -10,7 +10,7 @@ last_mapped_at: 2026-11-23
 ## Languages
 
 **Primary:**
-- Python 3.11–3.12 - classroom application, CLI, content tooling, and tests; package compatibility is `>=3.11,<3.13` in `pyproject.toml`.
+- Python 3.11-3.12 - classroom application, CLI, content tooling, and tests; package compatibility is `>=3.11,<3.13` in `pyproject.toml`.
 
 **Secondary:**
 - HTML, CSS, and JavaScript - static browser classroom in `src/ds60sqlpy/assets/`.

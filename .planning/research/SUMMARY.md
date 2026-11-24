@@ -15,10 +15,10 @@ The recommended sequence is to qualify the unfinished Python/SQL checkpoint, inv
 
 ### Recommended Stack
 
-Keep the current stack and add no new application framework or content platform. The product already uses Python 3.11–3.12, its standard-library HTTP server, packaged HTML/CSS/vanilla JavaScript, Docker Compose, profile-specific worker images, `uv`/`uv.lock`, pytest, and the existing content/runtime validators. The stack research is explicit: all-track improvement is a curriculum, renderer, and verification effort, not a rationale to migrate the web stack, database, or runtime boundary. Extend the existing test and validation patterns to represent every registered track; use browser review for browser behavior and do not mistake Python's permissive `html.parser` for a conformance or accessibility validator. See [STACK.md](STACK.md).
+Keep the current stack and add no new application framework or content platform. The product already uses Python 3.11-3.12, its standard-library HTTP server, packaged HTML/CSS/vanilla JavaScript, Docker Compose, profile-specific worker images, `uv`/`uv.lock`, pytest, and the existing content/runtime validators. The stack research is explicit: all-track improvement is a curriculum, renderer, and verification effort, not a rationale to migrate the web stack, database, or runtime boundary. Extend the existing test and validation patterns to represent every registered track; use browser review for browser behavior and do not mistake Python's permissive `html.parser` for a conformance or accessibility validator. See [STACK.md](STACK.md).
 
 **Core technologies:**
-- **Python 3.11–3.12 and the standard-library HTTP server:** established application/control plane with a supported runtime range; preserve it unless a concrete compatibility need emerges.
+- **Python 3.11-3.12 and the standard-library HTTP server:** established application/control plane with a supported runtime range; preserve it unless a concrete compatibility need emerges.
 - **Static HTML/CSS/vanilla JavaScript:** packaged, offline-compatible desktop classroom; improve in place rather than adding a framework/build chain.
 - **Docker Compose and profile-specific workers:** current local delivery and runtime isolation model; keep fixed, reviewed operations and avoid consolidating toolchains into the app image.
 - **pytest and existing validators:** extend current quality gates with catalog-driven, parametrized all-track coverage; avoid new validation dependencies without a specific gap.

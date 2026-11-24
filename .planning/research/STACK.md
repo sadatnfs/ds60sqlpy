@@ -11,7 +11,7 @@
 
 | Technology | Version | Purpose | Why |
 |------------|---------|---------|-----|
-| Python | 3.11–3.12 (`requires-python = ">=3.11,<3.13"`); classroom image currently uses 3.12.16 | Application, CLI, content tooling, tests | Established runtime with a locked contributor environment and working classroom services. Preserve the supported range; do not broaden or upgrade it as part of content improvement without a concrete compatibility need. |
+| Python | 3.11-3.12 (`requires-python = ">=3.11,<3.13"`); classroom image currently uses 3.12.16 | Application, CLI, content tooling, tests | Established runtime with a locked contributor environment and working classroom services. Preserve the supported range; do not broaden or upgrade it as part of content improvement without a concrete compatibility need. |
 | Python standard-library HTTP server | Existing implementation | Local classroom control plane and API | Already matches local/offline delivery and existing request-boundary design. Keep `LabServer`/`LabRequestHandler`; no framework migration is warranted. |
 | HTML, CSS, vanilla JavaScript | Existing static assets | Desktop browser classroom | Assets are packaged and work without a frontend build or remote asset service. Improve the current UI in place; do not introduce a framework or bundler. |
 

@@ -177,7 +177,7 @@
 ## Sources
 
 - Repository evidence and project constraints: `.planning/PROJECT.md`, `.planning/codebase/CONCERNS.md`, `.planning/codebase/TESTING.md`, `.planning/codebase/ARCHITECTURE.md` (analysis date 2026-11-23).
-- ACM/IEEE-CS/AAAI, [CS2023 Computer Science Curricula](https://csed.acm.org/) (endorsed Jan–Feb 2024).
+- ACM/IEEE-CS/AAAI, [CS2023 Computer Science Curricula](https://csed.acm.org/) (endorsed Jan-Feb 2024).
 - Cambridge University Press, [Novice Programmers and Introductory Programming](https://www.cambridge.org/core/books/cambridge-handbook-of-computing-education-research/novice-programmers-and-introductory-programming/0CEDFE1B121198D3FB5F1541EBE3DCAD).
 - PostgreSQL, [17: Lexical Structure](https://www.postgresql.org/docs/17/sql-syntax-lexical.html), [17: SELECT](https://www.postgresql.org/docs/17/sql-select.html), and [17: SET TRANSACTION](https://www.postgresql.org/docs/17/sql-set-transaction.html).
 - Python, [`os.replace`](https://docs.python.org/3/library/os.html#os.replace).

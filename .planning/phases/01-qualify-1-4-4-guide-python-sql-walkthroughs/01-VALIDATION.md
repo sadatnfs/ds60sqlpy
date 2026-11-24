@@ -7,7 +7,7 @@ wave_0_complete: false
 created: "2026-11-23"
 ---
 
-# Phase 01 — Validation Strategy
+# Phase 01: Validation Strategy
 
 > Per-phase validation contract for feedback sampling during execution.
 
@@ -51,11 +51,11 @@ researcher's supply-chain warning first.
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 01-01 | 01 | 0 | GUIDE-01 | — | Manual links and help content do not trigger runtime actions | browser + UI regression | `node scripts/check_classroom_ui.mjs`; disposable-browser command below | ✅ harness; extend guide and entry-point assertions in Wave 0 | ⬜ pending |
-| 01-02 | 01 | 0 | GUIDE-02 | — | Tour lifecycle preserves selection and draft and never executes code | browser | Disposable-browser command below | ✅ checker; extend tour lifecycle and route-neutrality assertions in Wave 0 | ⬜ pending |
-| 01-03 | 01 | 0 | WALK-01 | — | Trace is bounded and source-linked; error/limit outcomes are explicit | unit + browser | `.venv/bin/python -m pytest -n 0 tests/test_execution.py -q`; disposable-browser command below | ✅ backend tests; add trace-contract assertions in Wave 0 | ⬜ pending |
-| 01-04 | 01 | 0 | WALK-02 | — | Unsupported SQL is rejected before database preparation or execution; tested supported queries do not mutate learner data | unit + PostgreSQL integration | `uv run --no-sync python -m pytest -n 4 --dist loadgroup tests/test_execution.py tests/test_sql_expansion_live.py -q` | ✅ test files; add parser/offset and before/after state assertions in Wave 0 | ⬜ pending |
-| 01-05 | 01 | 0 | WALK-04 | — | Solution inspection is distinct from Run and preserves the learner's source | backend + browser | `env -u DS60_TEST_DATABASE_URL -u DS60_SQL_EXPANSION_TEST_URL -u DS60_DATABASE_URL .venv/bin/python -m pytest -n 0 tests/test_learning_lab.py tests/test_execution.py -q`; disposable-browser command below | ✅ run-preservation tests; add walkthrough-specific draft/history assertions in Wave 0 | ⬜ pending |
+| 01-01 | 01 | 0 | GUIDE-01 | n/a | Manual links and help content do not trigger runtime actions | browser + UI regression | `node scripts/check_classroom_ui.mjs`; disposable-browser command below | ✅ harness; extend guide and entry-point assertions in Wave 0 | ⬜ pending |
+| 01-02 | 01 | 0 | GUIDE-02 | n/a | Tour lifecycle preserves selection and draft and never executes code | browser | Disposable-browser command below | ✅ checker; extend tour lifecycle and route-neutrality assertions in Wave 0 | ⬜ pending |
+| 01-03 | 01 | 0 | WALK-01 | n/a | Trace is bounded and source-linked; error/limit outcomes are explicit | unit + browser | `.venv/bin/python -m pytest -n 0 tests/test_execution.py -q`; disposable-browser command below | ✅ backend tests; add trace-contract assertions in Wave 0 | ⬜ pending |
+| 01-04 | 01 | 0 | WALK-02 | n/a | Unsupported SQL is rejected before database preparation or execution; tested supported queries do not mutate learner data | unit + PostgreSQL integration | `uv run --no-sync python -m pytest -n 4 --dist loadgroup tests/test_execution.py tests/test_sql_expansion_live.py -q` | ✅ test files; add parser/offset and before/after state assertions in Wave 0 | ⬜ pending |
+| 01-05 | 01 | 0 | WALK-04 | n/a | Solution inspection is distinct from Run and preserves the learner's source | backend + browser | `env -u DS60_TEST_DATABASE_URL -u DS60_SQL_EXPANSION_TEST_URL -u DS60_DATABASE_URL .venv/bin/python -m pytest -n 0 tests/test_learning_lab.py tests/test_execution.py -q`; disposable-browser command below | ✅ run-preservation tests; add walkthrough-specific draft/history assertions in Wave 0 | ⬜ pending |
 
 Disposable-browser command:
 
