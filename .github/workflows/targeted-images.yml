@@ -1,7 +1,9 @@
 name: Targeted classroom images
 
 on:
+  # Branch pushes only: a release tag on a marked commit must not start a run.
   push:
+    branches: ["**"]
 
 permissions:
   contents: read

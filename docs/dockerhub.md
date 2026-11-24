@@ -15,16 +15,33 @@ pulls and resumes never upload images. There are three explicit publication rout
 All publication routes use one repository, `YOUR_DOCKERHUB_USER/ds60sqlpy`. Replace the placeholder
 with the actual lowercase username or organization namespace. The app and every
 ordinary worker have separate tags. From release 2.0.0 the DS60 PostgreSQL image
-is published with the App and Core seed as `VERSION-postgres` and `latest-postgres`,
-scanned under the same CVE policy, and Hub mode pulls it. Earlier releases have no
-database tag, so Hub mode builds it locally from `docker/postgres` for them.
+is built and published with the App and Core images as `VERSION-postgres` and `latest-postgres`,
+scanned under the same CVE policy, and Hub mode pulls it. The image creates the
+course roles only; the classroom loads the training tables on the first SQL run.
+Earlier releases have no database tag, so Hub mode builds it locally from
+`docker/postgres` for them.
 GPU workers, SDK/tooling base images and unrelated local images are excluded.
 
-This checkout targets **2.0.0**. Its publication, native image indexes and fresh
-pull/resume acceptance must be checked for that exact release. A version string
-or an earlier successful run does not establish those gates.
+This checkout matches the published **2.0.0** release. Its publication, native
+image indexes and fresh pull/resume acceptance are recorded below. A later source
+revision or a different version needs its own completed publisher; a version
+string or an earlier successful run does not establish those gates.
 
 ## Published release and its evidence
+
+The [2.0.0 publisher](https://github.com/sadatnfs/ds60sqlpy/actions/runs/45460757558)
+completed on November 24, 2026 (UTC) from
+[source `a4354ff8`](https://github.com/sadatnfs/ds60sqlpy/tree/a4354ff8bf50bd2ea48d7eff2c130b75fb34dcc6),
+with its [PyTorch package verification](https://github.com/sadatnfs/ds60sqlpy/actions/runs/45460822489)
+dispatched with the push. The publisher passed on its second attempt; the first
+stopped only when Maven Central rate-limited (HTTP 429) the Java worker's AMD64
+qualification. It promoted 27 combined AMD64/ARM64 version indexes, including the
+new `2.0.0-postgres`, and 27 latest aliases in `sadatnfs/ds60sqlpy`. Its native
+AMD64 and ARM64 pull jobs then inspected every published index and ran a fresh
+Core starter with stop and resume. The
+[GitHub release](https://github.com/sadatnfs/ds60sqlpy/releases/tag/v2.0.0) records
+the earlier stopped attempts. 2.0.0 supersedes the 1.4.x line; those tags remain on
+Docker Hub but receive no further fixes.
 
 The [1.4.3 publisher](https://github.com/sadatnfs/ds60sqlpy/actions/runs/44798675803)
 completed on November 20, 2026 (UTC) from

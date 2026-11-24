@@ -66,12 +66,11 @@ cd ds60sqlpy
 ./classroom
 ```
 
-This checkout targets release 2.0.0. To use prebuilt images, first verify a
-completed full publisher and fresh-pull acceptance for that release, then use
-its matching source or starter with
-`./classroom --all --from-hub sadatnfs --tag 2.0.0`.
-See [Docker Hub distribution](#optional-docker-hub-distribution) for historical
-evidence, current availability, selective installation and saved versions.
+Release 2.0.0 is published as combined AMD64/ARM64 images and passed fresh-pull
+acceptance on both architectures. To use the prebuilt images with this checkout,
+run `./classroom --all --from-hub sadatnfs --tag 2.0.0`.
+See [Docker Hub distribution](#optional-docker-hub-distribution) for the release
+evidence, selective installation and saved versions.
 
 `doctor` checks the local engine and configuration without starting services.
 In local-build mode, the final command prepares PostgreSQL and the ordinary
@@ -371,6 +370,15 @@ acceptance claim.
 
 ## Optional Docker Hub distribution
 
+Release [2.0.0](https://github.com/sadatnfs/ds60sqlpy/releases/tag/v2.0.0) is
+published. Its [publisher](https://github.com/sadatnfs/ds60sqlpy/actions/runs/45460757558)
+ran from [source `a4354ff8`](https://github.com/sadatnfs/ds60sqlpy/tree/a4354ff8bf50bd2ea48d7eff2c130b75fb34dcc6)
+and promoted the App, the DS60 PostgreSQL image and all 25 ordinary workers as
+combined Linux AMD64/ARM64 images, each with a `latest` alias. Its native AMD64
+and ARM64 pull jobs ran a fresh Core starter with stop and resume. 2.0.0
+supersedes the 1.4.x line. [Docker Hub distribution](docs/dockerhub.md#published-release-and-its-evidence)
+keeps the full evidence for this and earlier releases.
+
 The [historical 1.1.0 publisher](https://github.com/sadatnfs/ds60sqlpy/actions/runs/40961726148)
 completed from [source `59a0d116`](https://github.com/sadatnfs/ds60sqlpy/tree/59a0d116a1759d5d509718c52c4f3439e1986644),
 promoting App and all 25 ordinary workers as combined Linux AMD64/ARM64 images.
@@ -380,7 +388,7 @@ failed groups. An authenticated metadata check on October 30 returned HTTP 404
 for the old App tag. Those records describe historical results, not current
 availability or acceptance of this later source.
 
-For a completed full 2.0.0 publication, use the matching source or starter:
+Use the matching source or starter for the published 2.0.0 images:
 
 ```sh
 ./classroom --all --from-hub sadatnfs --tag 2.0.0

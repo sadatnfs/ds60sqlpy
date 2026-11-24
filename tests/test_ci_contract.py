@@ -160,7 +160,8 @@ def test_release_jobs_target_linux_containers_and_contributor_tooling() -> None:
             assert "runner: ubuntu-24.04-arm" in workflow
             assert "runner: ubuntu-24.04" in workflow
             assert "workflow_dispatch:" not in workflow
-            assert "on:\n  push:" in workflow
+            assert '  push:\n    branches: ["**"]\n' in workflow
+            assert "tags" not in workflow.split("permissions:", 1)[0]
         elif path.name == "audit-published-release.yml":
             assert runners == ["ubuntu-24.04", "${{ matrix.runner }}"]
             assert "workflow_dispatch:" in workflow and "  push:" not in workflow
