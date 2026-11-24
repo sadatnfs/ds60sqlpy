@@ -13,6 +13,8 @@ from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Any
 
+REVEAL_MESSAGE = "Explicitly reveal a solution after your own attempt."
+
 DEFAULT_TRACKS: dict[str, dict[str, str]] = {
     "python": {"title": "Python and data science", "plan": "python/PYTHON_TRAINING.md"},
     "sql": {"title": "PostgreSQL", "plan": "sql/ADVANCED_SQL_60DAY_PLAN.md"},

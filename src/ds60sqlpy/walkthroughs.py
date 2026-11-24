@@ -16,8 +16,7 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 
 from ds60sqlpy.browser_runs import BROWSER_PROFILES
-from ds60sqlpy.curriculum_framework import validate_content_path
-from ds60sqlpy.exercises import REVEAL_MESSAGE
+from ds60sqlpy.curriculum_framework import REVEAL_MESSAGE, validate_content_path
 from ds60sqlpy.gpu_runtime import GPU_PROFILES
 from ds60sqlpy.modules import LANGUAGES, MAX_SOURCE_BYTES, ModuleCatalog, ModuleLesson
 

@@ -20,6 +20,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from ds60sqlpy.curriculum_framework import REVEAL_MESSAGE as REVEAL_MESSAGE
 from ds60sqlpy.lesson_reader import (
     _FENCE_RE,
     _HEADING_RE,
@@ -34,7 +35,6 @@ from ds60sqlpy.reader_content import normalize_language
 MAX_DOCUMENT_BYTES = 2_000_000
 MAX_EXERCISE_NUMBER = 999
 MAX_TITLE_CHARACTERS = 120
-REVEAL_MESSAGE = "Explicitly reveal a solution after your own attempt."
 
 _EXERCISE_HEADING = re.compile(
     r"^(?:exercise|task|investigation|problem|challenge)\s+(?P<number>\d{1,3})\b"

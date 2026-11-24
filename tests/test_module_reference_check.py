@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -464,3 +466,15 @@ def test_inventory_reports_walkthrough_outputs_without_execution(
     assert by_id["go-001"]["source_path"] == "courses/go/solutions/go-001_solution.go"
     assert all(result["status"] == "pending" for result in report["results"])
     assert "carry walkthrough expected output; nothing executed" in capsys.readouterr().out
+
+
+def test_host_reference_gate_imports_with_the_standard_library_only() -> None:
+    # Runtime qualification runs this gate on the runner's bare Python.
+    result = subprocess.run(
+        [sys.executable, "-S", "scripts/check_module_references.py", "--help"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
