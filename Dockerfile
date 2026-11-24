@@ -24,7 +24,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 DS60_CONTAINER=1 \
 # hadolint ignore=DL3005
 RUN apt-get update && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
-    curl ca-certificates gosu libgomp1 \
+        curl ca-certificates gosu libgomp1 \
     && install -d /usr/share/postgresql-common/pgdg \
     && curl --fail --silent --show-error --location --retry 3 \
         https://www.postgresql.org/media/keys/ACCC4CF8.asc \
@@ -49,7 +49,7 @@ ARG DS60_PYTHON_INDEX_URL
 RUN python -m pip install ${DS60_PYTHON_INDEX_URL:+--index-url "$DS60_PYTHON_INDEX_URL"} --no-cache-dir \
     --require-hashes -r /tmp/bootstrap-pip.lock \
     && python -m pip install ${DS60_PYTHON_INDEX_URL:+--index-url "$DS60_PYTHON_INDEX_URL"} --no-cache-dir \
-    --require-hashes -r /tmp/bootstrap-uv.lock && rm /tmp/bootstrap-pip.lock /tmp/bootstrap-uv.lock \
+        --require-hashes -r /tmp/bootstrap-uv.lock && rm /tmp/bootstrap-pip.lock /tmp/bootstrap-uv.lock \
     && python -m pip uninstall --yes pip
 COPY pyproject.toml uv.lock README.md ./
 COPY src/ds60sqlpy/docker_profiles.py /tmp/ds60-docker-profiles.py
