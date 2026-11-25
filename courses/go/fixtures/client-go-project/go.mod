@@ -1,3 +1,4 @@
+// Fixture module for the client-go lesson; keep golang.org/x/net at v0.55.0 or later.
 module example.org/ds60/owned-pod-reader
 
 go 1.25.0

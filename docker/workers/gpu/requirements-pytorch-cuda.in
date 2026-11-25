@@ -1,3 +1,4 @@
+# CUDA PyTorch worker inputs; uv pip compile turns them into the hashed .lock.
 numpy==2.2.6
 cupy-cuda12x==13.6.0
 torch==2.15.0
