@@ -558,7 +558,7 @@ _C_TOP = re.compile(
 )
 _C_FUNCTION = re.compile(
     r"^(?:[\w:<>,*&\[\]]+\s+)+[*&]*\s*~?[A-Za-z_][\w:]*(?:<[^()]*>)?\s*\([^;]*\)"
-    r"\s*(?:const|noexcept|override|final|->\s*[\w:<>*&]+|\s)*(?:\{.*)?$"
+    r"(?:(?:const|noexcept|override|final)(?!\w)|->\s*[\w:<>*&]+(?![\w:<>*&])|\s)*(?:\{.*)?$"
 )
 _GO_TOP = re.compile(r"^(?:package|import|func|type|var|const)\b")
 _RUST_TOP = re.compile(
