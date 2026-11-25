@@ -283,7 +283,7 @@ def test_workflows_pin_actions_and_install_node_explicitly() -> None:
     for path in WORKFLOW.parent.glob("*.yml"):
         workflow = path.read_text(encoding="utf-8")
         for action in re.findall(r"uses:\s+(\S+)", workflow):
-            assert re.fullmatch(r"[\w.-]+/[\w.-]+@[0-9a-f]{40}", action), action
+            assert re.fullmatch(r"[\w.-]+/[\w.-]+(?:/[\w.-]+)*@[0-9a-f]{40}", action), action
         assert "contents: read" in workflow and "persist-credentials: false" in workflow
     core = WORKFLOW.read_text(encoding="utf-8")
     assert "actions/setup-node@" in core

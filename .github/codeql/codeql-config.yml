@@ -1,0 +1,16 @@
+name: DS60 CodeQL
+
+# Scan the shipped classroom, its tooling, image builders and scientific
+# packages. Course, lesson and reference content is excluded on purpose: the
+# security lessons contain deliberately vulnerable snippets for learners.
+paths:
+  - src
+  - scripts
+  - docker
+  - packages
+  - .github
+paths-ignore:
+  - "**/node_modules"
+  - "**/vendor"
+  - "**/*.min.js"
+  - work

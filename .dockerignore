@@ -21,6 +21,12 @@ dist
 work
 # Planning notes are not image inputs.
 .planning
+# Repository image recipes build the images; the App never builds or runs them,
+# so shipping copies under /opt/course only added root-user scan findings.
+# Learner Dockerfiles under courses/, examples/ and packages/ stay.
+/Dockerfile
+docker/**/Dockerfile
+docker/**/Dockerfile.*
 .env
 .env.*
 !.env.example

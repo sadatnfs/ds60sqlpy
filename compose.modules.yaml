@@ -360,6 +360,7 @@ services:
       dockerfile: docker/workers/Dockerfile.php
       args:
         DS60_PHP_IMAGE: ${DS60_PHP_IMAGE:-php:8.4.28-cli-trixie@sha256:6b13a8678b38ca38e4e3950be57b664ed8c8706131a0586111f68792aede4c58}
+        DS60_PYTHON_IMAGE: ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b}
     environment:
       DS60_WORKER_PROFILE: php-cli
 
