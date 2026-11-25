@@ -457,7 +457,13 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
         )
 
         choose_lesson(page, "python", "python-02", expect)
-        setup_heading = page.locator('#guide [id$="optional-contributor-notebook-route"]')
+        # Lesson guides link to the shared study guide, which owns the numbered
+        # contributor setup steps. The classroom serves it with the same renderer.
+        study_link = page.locator('#guide a[href$="python/STUDY-GUIDE.md.html"]')
+        expect(study_link).not_to_have_count(0)
+        study_page = context.new_page()
+        study_page.goto(origin + "/reference-pages/python/STUDY-GUIDE.md.html")
+        setup_heading = study_page.locator('[id$="optional-contributor-notebook-route"]')
         expect(setup_heading).to_have_count(1)
         setup_numbers: list[int] = setup_heading.evaluate(
             """heading => {
@@ -479,7 +485,8 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
         assert setup_numbers == [1, 2, 3, 4], (
             "Contributor setup numbering restarted after a command block or paragraph."
         )
-        audit.passed("Day 02 setup steps retain 1, 2, 3, 4 across commands and paragraphs")
+        study_page.close()
+        audit.passed("Python study guide setup steps retain 1, 2, 3, 4 across commands")
         page.locator(SOURCE_EDITOR).fill(python_source)
         page.locator("#phase-note").fill(NOTE)
         save(page, expect)
