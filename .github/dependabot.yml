@@ -8,3 +8,45 @@ updates:
     groups:
       workflow-actions:
         patterns: ["*"]
+  # The ecosystems below take security updates only. A zero limit turns off
+  # version updates, and each group folds an ecosystem's security fixes into
+  # one pull request so a burst of alerts does not starve the CI runners.
+  - package-ecosystem: uv
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    groups:
+      uv-security:
+        applies-to: security-updates
+        patterns: ["*"]
+  - package-ecosystem: pip
+    directories:
+      - /courses/llm-applied/fixtures/pretrained
+      - /docker/workers/gpu
+      - /packages/spark-tmbad/tooling
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    groups:
+      pip-security:
+        applies-to: security-updates
+        patterns: ["*"]
+  - package-ecosystem: npm
+    directory: /docker/formatting
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    groups:
+      npm-security:
+        applies-to: security-updates
+        patterns: ["*"]
+  - package-ecosystem: gomod
+    directory: /courses/go/fixtures/client-go-project
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    groups:
+      gomod-security:
+        applies-to: security-updates
+        patterns: ["*"]
