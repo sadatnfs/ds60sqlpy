@@ -121,6 +121,7 @@ It consumes only the pure core contracts and is qualified separately.
 Full ordinary publication currently covers 26 catalog images, App plus 25 workers.
 Optional GPU profiles and scientific project images are separate contracts.
 The full native scientific gate builds its project environments from that run's
-qualified ordinary bases; it does not add them to a learner's default workers or
-publish their local project tags automatically. See [validation](validation.md)
+qualified ordinary bases; it does not add them to a learner's default workers.
+Its scan-gated project images publish only as separate
+[scientific project tags](dockerhub.md#scientific-project-images). See [validation](validation.md)
 for the separate source, wheel, runtime, browser and hosted-release evidence.

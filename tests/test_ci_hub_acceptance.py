@@ -14,8 +14,23 @@ import pytest
 
 from scripts import ci_hub_acceptance as hub
 from scripts import ci_release_artifacts as artifacts
-from scripts.docker_registry import OCI_MANIFEST, Descriptor, ReleaseError, descriptor, sha256
-from scripts.docker_release import Context, catalog, index_body, latest_tag, version_tag
+from scripts.docker_registry import (
+    OCI_INDEX,
+    OCI_MANIFEST,
+    Descriptor,
+    ReleaseError,
+    descriptor,
+    sha256,
+)
+from scripts.docker_release import (
+    SCIENTIFIC_RELEASES,
+    Context,
+    catalog,
+    index_body,
+    latest_tag,
+    scientific_profiles,
+    version_tag,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 REVISION = "a" * 40
@@ -323,6 +338,130 @@ def test_full_arm_validates_complete_receipt_but_inspects_only_app_and_core(
     value["version_tags"] = value["version_tags"][:-1]
     with pytest.raises(ReleaseError, match="incomplete selected tag coverage"):
         hub.verify_indexes(value, "full", architecture="arm64")
+
+
+def with_scientific(
+    value: dict[str, Any], bodies: dict[str, bytes], *, skipped_latest: bool = False
+) -> dict[str, Any]:
+    """Add the scientific project rows that a Phase 11 full promotion records."""
+    current = context()
+    natives = {
+        "project-spark-torch": {
+            "amd64": Descriptor(OCI_MANIFEST, "sha256:" + "3" * 64, 128),
+            "arm64": Descriptor(OCI_MANIFEST, "sha256:" + "4" * 64, 128),
+        },
+        "project-spark-tmb": {
+            "amd64": Descriptor(OCI_MANIFEST, "sha256:" + "5" * 64, 128),
+            "arm64": Descriptor(OCI_MANIFEST, "sha256:" + "6" * 64, 128),
+        },
+    }
+    record: dict[str, Any] = {"version_tags": [], "latest_tags": [], "images": {}}
+    for key, profile in scientific_profiles().items():
+        source = SCIENTIFIC_RELEASES[key]
+        body = index_body(current, key, natives[source])
+        immutable = version_tag(profile, current.version)
+        alias = latest_tag(profile)
+        bodies[immutable] = body
+        bodies[alias] = body
+        fields = {"mediaType": OCI_INDEX, "digest": sha256(body), "size": len(body)}
+        record["version_tags"].append({"tag": immutable, **fields})
+        if not skipped_latest:
+            record["latest_tags"].append({"tag": alias, **fields})
+        record["images"][key] = {
+            "source": source,
+            "reused": False,
+            "natives": {arch: value.digest for arch, value in natives[source].items()},
+        }
+    value["scientific"] = record
+    return record
+
+
+def full_inspection(
+    monkeypatch: pytest.MonkeyPatch, bodies: dict[str, bytes], *, skip_latest: bool = False
+) -> list[str]:
+    monkeypatch.setattr(
+        hub,
+        "release_selection",
+        lambda receipt, mode, root: (
+            context(),
+            catalog(ROOT),
+            set(catalog(ROOT)),
+            None,
+            skip_latest,
+        ),
+    )
+    seen: list[str] = []
+
+    def output(args: list[str], **kwargs: Any) -> bytes:
+        tag = args[-1].split(":", 1)[1]
+        seen.append(tag)
+        return bodies[tag]
+
+    monkeypatch.setattr(hub, "run_output", output)
+    return seen
+
+
+def test_full_amd64_inspects_each_scientific_project_index(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    value, bodies = receipt("full")
+    with_scientific(value, bodies)
+    seen = full_inspection(monkeypatch, bodies)
+    hub.verify_indexes(value, "full")
+    assert set(seen) == set(bodies)
+    scientific = [tag for tag in seen if "-project-" in tag]
+    assert sorted(scientific) == sorted(
+        tag
+        for profile in scientific_profiles().values()
+        for tag in (version_tag(profile, "1.0.0"), latest_tag(profile))
+    )
+    seen.clear()
+    hub.verify_indexes(value, "full", architecture="arm64")
+    assert not any("-project-" in tag for tag in seen)
+
+
+def test_skipped_latest_checks_only_scientific_version_indexes(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    value, bodies = receipt("full", skipped_latest=True)
+    with_scientific(value, bodies, skipped_latest=True)
+    seen = full_inspection(monkeypatch, bodies, skip_latest=True)
+    hub.verify_indexes(value, "full")
+    assert len([tag for tag in seen if "-project-" in tag]) == len(SCIENTIFIC_RELEASES)
+    assert not any(tag.startswith("latest") for tag in seen)
+
+
+@pytest.mark.parametrize(
+    "change,message",
+    [
+        ("missing-project", "scientific images are malformed|scientific evidence is malformed"),
+        ("shared", "disagree on their shared native image"),
+        ("latest", "latest alias differs"),
+        ("recorded-natives", "differs from its recorded native images"),
+        ("missing-tag", "incomplete selected tag coverage"),
+    ],
+)
+def test_scientific_receipt_rows_must_match_their_published_indexes(
+    monkeypatch: pytest.MonkeyPatch, change: str, message: str
+) -> None:
+    value, bodies = receipt("full")
+    record = with_scientific(value, bodies)
+    images = record["images"]
+    if change == "missing-project":
+        del images["project-tmb-cpp-api"]
+    elif change == "shared":
+        images["project-tmb-cpp-api"]["natives"]["arm64"] = "sha256:" + "7" * 64
+    elif change == "latest":
+        record["latest_tags"][0].update(
+            record["version_tags"][1], tag=record["latest_tags"][0]["tag"]
+        )
+    elif change == "recorded-natives":
+        images["project-spark-torch"]["natives"]["amd64"] = "sha256:" + "8" * 64
+    else:
+        record["version_tags"].pop()
+    full_inspection(monkeypatch, bodies)
+    with pytest.raises(ReleaseError, match=message):
+        hub.verify_indexes(value, "full")
 
 
 def test_disposable_cleanup_refuses_unowned_labels(

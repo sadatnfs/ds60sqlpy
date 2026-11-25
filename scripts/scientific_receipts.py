@@ -7,16 +7,26 @@ import hashlib
 import json
 import math
 import re
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 from scripts import docker_release as release
-from scripts.docker_registry import Descriptor, Registry, ReleaseError, descriptor, require_digest
+from scripts.docker_registry import (
+    Descriptor,
+    Registry,
+    ReleaseError,
+    descriptor,
+    require_digest,
+    same_head,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 POLICY_PATH = "docker/ci-scientific-projects.json"
 PROJECTS = frozenset({"spark-torch", "spark-tmb", "tmb-public-api", "tmb-cpp-api"})
 BASES = frozenset({"spark-local-python", "llm-torch-cpu", "r-statistics", "java21"})
+# The two built project images and the profile under which each is scanned and staged.
+STAGED = {"spark-torch": "project-spark-torch", "spark-tmb": "project-spark-tmb"}
 IGNORED = frozenset(
     {
         "__pycache__",
@@ -518,6 +528,41 @@ def validate_base_records(
             )
 
 
+def local_tag(context: release.Context, architecture: str, project: str) -> str:
+    return f"ds60-scientific-{context.run_id}-{context.run_attempt}-{architecture}-{project}"
+
+
+def validate_published_images(
+    value: Any,
+    context: release.Context,
+    architecture: str,
+    identities: dict[str, Any],
+) -> dict[str, Any]:
+    """Each built project image was scanned clean, then pushed to its own candidate tag."""
+    if not isinstance(value, dict) or set(value) != {"scan", "images"}:
+        raise ReleaseError("Scientific receipt lacks its scanned candidate images")
+    images = value["images"]
+    if not isinstance(images, list) or len(images) != len(STAGED):
+        raise ReleaseError("Scientific receipt must stage each built project image once")
+    profiles = {profile: project for project, profile in STAGED.items()}
+    seen: set[str] = set()
+    for image in images:
+        if not isinstance(image, dict) or set(image) != release.STAGED_IMAGE_KEYS:
+            raise ReleaseError("Invalid staged scientific image fields")
+        key = image["profile"]
+        if key not in profiles or key in seen:
+            raise ReleaseError("Staged scientific image profile is unknown or duplicated")
+        seen.add(key)
+        project = profiles[key]
+        if image["local_repository"] != local_tag(context, architecture, project) or image[
+            "tested_image_id"
+        ] != identities.get(project):
+            raise ReleaseError("Staged scientific image differs from the qualified project image")
+        release.staged_image_proof(image, context, architecture)
+    release.scan_block(value["scan"], images)
+    return value
+
+
 def _validate_receipt(
     raw: dict[str, Any],
     context: release.Context,
@@ -540,6 +585,7 @@ def _validate_receipt(
         "source_manifest_sha256",
         "evidence_manifest_sha256",
         "machine",
+        "published_images",
     }
     if (
         set(raw) != required
@@ -665,6 +711,8 @@ def _validate_receipt(
         raise ReleaseError("TMB scientific checks must use the same prepared immutable image")
     if raw["evidence_manifest_sha256"] != digest(projects):
         raise ReleaseError("Scientific evidence manifest differs")
+    identities = {project["id"]: project["image_id"] for project in projects}
+    validate_published_images(raw["published_images"], recorded, architecture, identities)
     return raw
 
 
@@ -689,6 +737,7 @@ def validate_scientific_receipts(
     root: Path = ROOT,
     *,
     registry: Registry,
+    now: datetime | None = None,
 ) -> dict[str, Any]:
     if directory is None:
         raise ReleaseError(
@@ -717,4 +766,33 @@ def validate_scientific_receipts(
                 raise ReleaseError(
                     "Scientific imported config differs from the immutable native manifest"
                 )
+        published = receipt["published_images"]
+        release.promotion_scan_check(published["scan"], root, now or release.utc_now())
+        for image in published["images"]:
+            native = release.native_descriptor(image["native"], architecture)
+            if not same_head(
+                registry.head(image["candidate_tag"]), descriptor(image["candidate_root"])
+            ):
+                raise ReleaseError("Scientific candidate no longer matches its qualified receipt")
+            if not same_head(registry.head(native.digest), native):
+                raise ReleaseError("Scientific native manifest is missing")
     return chosen
+
+
+def published_natives(
+    chosen: dict[str, dict[str, Any]],
+) -> tuple[dict[str, dict[str, Descriptor]], dict[str, dict[str, Any]]]:
+    """Native descriptors and compact scan records for each staged scientific image."""
+    natives: dict[str, dict[str, Descriptor]] = {key: {} for key in STAGED.values()}
+    scans: dict[str, dict[str, Any]] = {key: {} for key in STAGED.values()}
+    for architecture, receipt in chosen.items():
+        published = receipt["published_images"]
+        rows = {row["profile"]: row for row in published["scan"]["images"]}
+        for image in published["images"]:
+            key = image["profile"]
+            native = release.native_descriptor(image["native"], architecture)
+            natives[key][architecture] = native
+            scans[key][architecture] = release.promotion_scan_record(
+                image, native, rows[key], published["scan"]
+            )
+    return natives, scans

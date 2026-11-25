@@ -71,6 +71,16 @@ RELEASE_VERSION = "org.opencontainers.image.version"
 SOURCE = "org.opencontainers.image.source"
 SCOPE = "io.ds60.release.scope"
 GROUP = "io.ds60.release.group"
+# Qualified scientific project images publish beside the catalog in the same
+# repository. The scientific CI job stages two native images per platform; the
+# TMB public API and C++ API projects are qualified inside the Spark TMB image.
+SCIENTIFIC_STAGED = frozenset(image_scan.SCIENTIFIC_PROFILES)
+SCIENTIFIC_RELEASES = {
+    "project-spark-torch": "project-spark-torch",
+    "project-spark-tmb": "project-spark-tmb",
+    "project-tmb-public-api": "project-spark-tmb",
+    "project-tmb-cpp-api": "project-spark-tmb",
+}
 
 
 @dataclass(frozen=True)
@@ -78,6 +88,14 @@ class Profile:
     profile: str
     local_repository: str
     suffix: str
+
+
+def scientific_profiles() -> dict[str, Profile]:
+    """Published scientific profiles: `VERSION-project-<id>` and `latest-project-<id>`."""
+    return {
+        key: Profile(key, "ds60-" + key.removeprefix("project-"), key)
+        for key in SCIENTIFIC_RELEASES
+    }
 
 
 @dataclass(frozen=True)
@@ -1314,6 +1332,23 @@ def verify_candidate(
     }
 
 
+def stage_candidate(
+    registry: Registry,
+    docker: Docker,
+    context: Context,
+    image: dict[str, Any],
+    architecture: str,
+) -> dict[str, Any]:
+    """Push one already scanned and qualified local image ID to its candidate tag."""
+    tag = candidate_tag(context, image["profile"], architecture)
+    if registry.head(tag) is None:
+        target = context.repository + ":" + tag
+        docker.tag(image["tested_image_id"], target)
+        docker.push(target)
+        head_after_write(registry, tag)
+    return verify_candidate(registry, context, image, architecture)
+
+
 def stage_images(
     context: Context,
     profiles: dict[str, Profile],
@@ -1346,14 +1381,8 @@ def stage_images(
             raise ReleaseError("A tested local image changed after qualification")
     staged = []
     for image in tested["images"]:
-        tag = candidate_tag(context, image["profile"], architecture)
         print(f"Verifying qualified candidate: {image['profile']} ({architecture})", flush=True)
-        if registry.head(tag) is None:
-            target = context.repository + ":" + tag
-            docker.tag(image["tested_image_id"], target)
-            docker.push(target)
-            head_after_write(registry, tag)
-        staged.append(verify_candidate(registry, context, image, architecture))
+        staged.append(stage_candidate(registry, docker, context, image, architecture))
         print(f"Candidate verified: {image['profile']} ({architecture})", flush=True)
     return {
         "schema_version": 2,
@@ -1366,6 +1395,41 @@ def stage_images(
         "scan": scan,
         "images": staged,
     }
+
+
+STAGED_IMAGE_KEYS = frozenset(
+    {
+        "profile",
+        "local_repository",
+        "tested_image_id",
+        "candidate_tag",
+        "candidate_root",
+        "native",
+        "config_digest",
+        "identity_basis",
+    }
+)
+
+
+def staged_image_proof(image: dict[str, Any], context: Context, architecture: str) -> str | None:
+    """Check one staged candidate's tag and identity proof; returns its config digest."""
+    if image["candidate_tag"] != candidate_tag(context, image["profile"], architecture):
+        raise ReleaseError("Candidate tag does not bind the source/run/attempt/platform")
+    root_descriptor = descriptor(image["candidate_root"])
+    native = native_descriptor(image["native"], architecture)
+    identity = require_digest(image["tested_image_id"])
+    config = image["config_digest"]
+    if config is not None:
+        require_digest(config)
+    if (
+        (image["identity_basis"] == "root" and identity != root_descriptor.digest)
+        or (image["identity_basis"] == "config" and identity != config)
+        or image["identity_basis"] not in {"root", "config"}
+    ):
+        raise ReleaseError("Staged identity proof is inconsistent")
+    if root_descriptor.media_type in IMAGE_TYPES and root_descriptor != native:
+        raise ReleaseError("A single-image root must be the selected native descriptor")
+    return config if isinstance(config, str) else None
 
 
 def staged_receipt(
@@ -1397,16 +1461,7 @@ def staged_receipt(
         raise ReleaseError("Invalid staged image count")
     selected: set[str] = set()
     for image in images:
-        if not isinstance(image, dict) or set(image) != {
-            "profile",
-            "local_repository",
-            "tested_image_id",
-            "candidate_tag",
-            "candidate_root",
-            "native",
-            "config_digest",
-            "identity_basis",
-        }:
+        if not isinstance(image, dict) or set(image) != STAGED_IMAGE_KEYS:
             raise ReleaseError("Invalid staged native image fields")
         key = image["profile"]
         if (
@@ -1417,22 +1472,7 @@ def staged_receipt(
         ):
             raise ReleaseError("Staged image profile is unknown or duplicated")
         selected.add(key)
-        if image["candidate_tag"] != candidate_tag(recorded_context, key, architecture):
-            raise ReleaseError("Candidate tag does not bind the source/run/attempt/platform")
-        root_descriptor = descriptor(image["candidate_root"])
-        native = native_descriptor(image["native"], architecture)
-        identity = require_digest(image["tested_image_id"])
-        config = image["config_digest"]
-        if config is not None:
-            require_digest(config)
-        if (
-            (image["identity_basis"] == "root" and identity != root_descriptor.digest)
-            or (image["identity_basis"] == "config" and identity != config)
-            or image["identity_basis"] not in {"root", "config"}
-        ):
-            raise ReleaseError("Staged identity proof is inconsistent")
-        if root_descriptor.media_type in IMAGE_TYPES and root_descriptor != native:
-            raise ReleaseError("A single-image root must be the selected native descriptor")
+        config = staged_image_proof(image, recorded_context, architecture)
         if key in SEEDS and config is None:
             raise ReleaseError("Seed receipts require the native image config digest")
     if raw.get("group") != image_group(selected, profiles, root):
@@ -1554,6 +1594,24 @@ def receipt_files(directory: Path) -> list[Path]:
     return sorted(files)
 
 
+def promotion_scan_record(
+    image: dict[str, Any], native: Descriptor, row: dict[str, Any], scan: dict[str, Any]
+) -> dict[str, Any]:
+    """The compact per-platform scan record a release report keeps for one native image."""
+    return {
+        "tested_image_id": image["tested_image_id"],
+        "native_digest": native.digest,
+        "counts": row["counts"],
+        "suppressed": sorted({found["id"] for found in row["suppressed"]}),
+        "report_sha256": row["report_sha256"],
+        "evidence_sha256": scan["evidence_sha256"],
+        "scanner_image": scan["scanner_image"],
+        "db_updated_at": scan["db_updated_at"],
+        "policy_sha256": scan["policy_sha256"],
+        "scanned_at": scan["scanned_at"],
+    }
+
+
 def promotion_inputs(
     directory: Path,
     context: Context,
@@ -1619,19 +1677,7 @@ def promotion_inputs(
             if not same_head(registry.head(expected.digest), expected):
                 raise ReleaseError("Qualified native manifest is missing")
             result[key][arch] = expected
-            row = scanned[key]
-            records[key][arch] = {
-                "tested_image_id": image["tested_image_id"],
-                "native_digest": expected.digest,
-                "counts": row["counts"],
-                "suppressed": sorted({found["id"] for found in row["suppressed"]}),
-                "report_sha256": row["report_sha256"],
-                "evidence_sha256": raw["scan"]["evidence_sha256"],
-                "scanner_image": raw["scan"]["scanner_image"],
-                "db_updated_at": raw["scan"]["db_updated_at"],
-                "policy_sha256": raw["scan"]["policy_sha256"],
-                "scanned_at": raw["scan"]["scanned_at"],
-            }
+            records[key][arch] = promotion_scan_record(image, expected, scanned[key], raw["scan"])
     if any(set(items) != set(ARCHITECTURES) for items in result.values()):
         raise ReleaseError(
             "Promotion requires complete catalog coverage on amd64 and arm64"
@@ -1689,6 +1735,70 @@ def latest_would_downgrade(
     return False
 
 
+def scientific_plan(
+    context: Context,
+    registry: Registry,
+    natives: dict[str, dict[str, Descriptor]],
+    scan: dict[str, dict[str, Any]] | None,
+) -> tuple[dict[str, Profile], dict[str, Manifest], dict[str, Any]]:
+    """Validate every scientific version tag before any write and choose each index.
+
+    An index already published for this version and revision wins, because a
+    workflow rerun rebuilds the scientific images and cannot reproduce their
+    digests. Every project derived from one staged image shares one native set.
+    """
+    if set(natives) != SCIENTIFIC_STAGED or any(
+        set(natives[key]) != set(ARCHITECTURES) for key in natives
+    ):
+        raise ReleaseError("Scientific natives must cover each staged project on both platforms")
+    if scan is not None and (
+        set(scan) != SCIENTIFIC_STAGED
+        or any(
+            set(scan[key]) != set(ARCHITECTURES)
+            or any(
+                scan[key][arch]["native_digest"] != natives[key][arch].digest for arch in scan[key]
+            )
+            for key in scan
+        )
+    ):
+        raise ReleaseError("Scientific scan records do not cover exactly the staged native digests")
+    profiles = scientific_profiles()
+    published = {
+        key: load_published(registry, profile, context) for key, profile in profiles.items()
+    }
+    effective: dict[str, dict[str, Descriptor]] = {}
+    for key, existing in published.items():
+        if existing is None:
+            continue
+        require_scope(existing, None)
+        _, _, recorded = published_index(existing, key, context.source_repository)
+        source = SCIENTIFIC_RELEASES[key]
+        if effective.setdefault(source, recorded) != recorded:
+            raise ReleaseError("Published scientific projects disagree on their shared image")
+    releases: dict[str, Manifest] = {}
+    images: dict[str, Any] = {}
+    for key in profiles:
+        source = SCIENTIFIC_RELEASES[key]
+        chosen = effective.get(source, natives[source])
+        existing = published[key]
+        if existing is not None:
+            releases[key] = existing
+        else:
+            body = index_body(context, key, chosen)
+            releases[key] = Manifest(
+                Descriptor(OCI_INDEX, sha256(body), len(body)), json_object(body), body
+            )
+        images[key] = {
+            "source": source,
+            "reused": chosen != natives[source],
+            "natives": {arch: chosen[arch].digest for arch in ARCHITECTURES},
+        }
+    record: dict[str, Any] = {"version_tags": [], "latest_tags": [], "images": images}
+    if scan is not None:
+        record["scan"] = scan
+    return profiles, releases, record
+
+
 def promote_release(
     context: Context,
     profiles: dict[str, Profile],
@@ -1699,8 +1809,14 @@ def promote_release(
     target_group: str | None = None,
     root: Path = ROOT,
     scan: dict[str, dict[str, Any]] | None = None,
+    scientific: dict[str, dict[str, Descriptor]] | None = None,
+    scientific_scan: dict[str, dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     selected = selected_release_profiles(profiles, target_group, root)
+    if scientific is None and scientific_scan is not None:
+        raise ReleaseError("Scientific scan records require scientific native images")
+    if scientific is not None and target_group is not None:
+        raise ReleaseError("Scientific project images publish only with a full release")
     if natives is not None and set(natives) != selected:
         raise ReleaseError("Qualified native selection differs from the promotion scope")
     if scan is not None and (
@@ -1743,8 +1859,20 @@ def promote_release(
             releases[key] = existing  # Matching content/revision is never rewritten.
         else:
             releases[key] = expected
+    science_profiles: dict[str, Profile] = {}
+    science_record: dict[str, Any] | None = None
+    if scientific is not None:
+        if set(profiles) & set(SCIENTIFIC_RELEASES):
+            raise ReleaseError("Scientific project tags collide with catalog profiles")
+        science_profiles, science_releases, science_record = scientific_plan(
+            context, registry, scientific, scientific_scan
+        )
+        releases.update(science_releases)
+    every_profile = {**profiles, **science_profiles}
     latest = current_latest(registry, context)
-    skip_latest = latest_would_downgrade(registry, context, scoped_profiles, releases, latest)
+    skip_latest = latest_would_downgrade(
+        registry, context, {**scoped_profiles, **science_profiles}, releases, latest
+    )
     latest_snapshot = latest.descriptor.digest if latest is not None else None
     report: dict[str, Any] = {
         "schema_version": 1,
@@ -1761,10 +1889,36 @@ def promote_release(
         report["profiles"] = sorted(selected)
     if scan is not None:
         report["scan"] = scan
-    write_json(output, report)
-    order = [key for key in scoped_profiles if key != "app"] + ["app"]
+    if science_record is not None:
+        report["scientific"] = science_record
+    # Scientific tags follow every ordinary worker and precede the app pointer,
+    # so a published app version or alias implies the complete scientific set.
+    order = [key for key in scoped_profiles if key != "app"] + [*science_profiles, "app"]
+    final = json.loads(json.dumps(report))
+    final["status"] = "published"
     for key in order:
-        tag = version_tag(profiles[key], context.version)
+        rows = final["scientific"] if key in science_profiles else final
+        rows["version_tags"].append(
+            {
+                "tag": version_tag(every_profile[key], context.version),
+                **releases[key].descriptor.record(),
+            }
+        )
+        if not skip_latest:
+            rows["latest_tags"].append(
+                {"tag": latest_tag(every_profile[key]), **releases[key].descriptor.record()}
+            )
+    if len(json.dumps(final, sort_keys=True, indent=2, allow_nan=False)) + 1 > MAX_RECEIPT:
+        raise ReleaseError("Release metadata would exceed its 256 KiB bound; no tag was written")
+    write_json(output, report)
+
+    def record(key: str, kind: str, tag: str, value: Descriptor) -> None:
+        rows = report["scientific"][kind] if key in science_profiles else report[kind]
+        rows.append({"tag": tag, **value.record()})
+        write_json(output, report)
+
+    for key in order:
+        tag = version_tag(every_profile[key], context.version)
         expected = releases[key]
         head = registry.head(tag)
         if head is None:
@@ -1773,8 +1927,7 @@ def promote_release(
             raise ReleaseError("Version tag changed before publication; no overwrite is permitted")
         if not same_head(head_after_write(registry, tag), expected.descriptor):
             raise ReleaseError("Immutable version tag failed readback")
-        report["version_tags"].append({"tag": tag, **expected.descriptor.record()})
-        write_json(output, report)
+        record(key, "version_tags", tag, expected.descriptor)
         print("Verified immutable version tag: " + tag, flush=True)
     # All immutable worker versions and app VERSION are verified before aliases.
     if not skip_latest:
@@ -1782,7 +1935,7 @@ def promote_release(
             now = registry.head("latest")
             if (now.digest if now is not None else None) != latest_snapshot:
                 raise ReleaseError("Latest changed concurrently; no further aliases were moved")
-            tag = latest_tag(profiles[key])
+            tag = latest_tag(every_profile[key])
             expected = releases[key]
             current = registry.head(tag)
             if not same_head(current, expected.descriptor):
@@ -1801,8 +1954,7 @@ def promote_release(
                 head_after_write(registry, tag, expected.descriptor), expected.descriptor
             ):
                 raise ReleaseError("Latest alias failed readback")
-            report["latest_tags"].append({"tag": tag, **expected.descriptor.record()})
-            write_json(output, report)
+            record(key, "latest_tags", tag, expected.descriptor)
             print("Verified latest alias: " + tag, flush=True)
     report["status"] = "published"
     write_json(output, report)
@@ -1941,15 +2093,21 @@ def main(argv: list[str] | None = None) -> int:
                 if mode == "build" or target_group is None
                 else None
             )
+            scientific = None
+            scientific_scan = None
             if target_group is None:
                 # Full recovery must retain the same scientific evidence as a new
                 # full promotion. Published tags alone never bypass this gate.
-                from scripts.scientific_receipts import validate_scientific_receipts
+                from scripts.scientific_receipts import (
+                    published_natives,
+                    validate_scientific_receipts,
+                )
 
                 assert natives is not None
-                validate_scientific_receipts(
+                chosen = validate_scientific_receipts(
                     args.project_receipts_dir, context, profiles, natives, ROOT, registry=registry
                 )
+                scientific, scientific_scan = published_natives(chosen)
             promote_release(
                 context,
                 profiles,
@@ -1958,6 +2116,8 @@ def main(argv: list[str] | None = None) -> int:
                 output=args.output,
                 target_group=target_group,
                 scan=scans if natives is not None else None,
+                scientific=scientific,
+                scientific_scan=scientific_scan,
             )
         print("Release operation completed: " + args.command)
         return 0

@@ -143,6 +143,35 @@ option. Publishing ARM64 images from a Mac does not create AMD64 images for a
 typical Windows/WSL machine, and the local publisher does not create a combined
 manifest. [Docker multi-platform images](https://docs.docker.com/build/building/multi-platform/)
 
+### Scientific project images
+
+A full CI release also publishes the four qualified scientific project images
+to the same Hub repository. They are separate from the ordinary catalog.
+`--all`, `--profile` and `--from-hub` never select them. Only the full
+publication workflow writes these tags; the manual publisher and the targeted
+workflow do not.
+
+| Project | Release tag | Moving alias |
+| --- | --- | --- |
+| [Spark/Torch workshop](../courses/advanced-spark-modeling/projects/spark-torch/README.md) | `VERSION-project-spark-torch` | `latest-project-spark-torch` |
+| [Optional Spark/TMB reference](../courses/advanced-spark-modeling/projects/spark-tmb/README.md) | `VERSION-project-spark-tmb` | `latest-project-spark-tmb` |
+| Standalone TMB public API | `VERSION-project-tmb-public-api` | `latest-project-tmb-public-api` |
+| Standalone TMB C++ families | `VERSION-project-tmb-cpp-api` | `latest-project-tmb-cpp-api` |
+
+Each tag is a combined index with Linux `amd64` and `arm64` images, so Docker
+pulls the native variant:
+
+```sh
+docker pull sadatnfs/ds60sqlpy:latest-project-spark-torch
+docker pull sadatnfs/ds60sqlpy:VERSION-project-tmb-public-api
+```
+
+Replace `VERSION` with a completed full release that lists these tags in its
+promotion receipt. Releases through 2.0.0 predate them. The TMB public API and
+C++ families are qualified inside the Spark/TMB image, so their indexes reference
+the same native images as `project-spark-tmb`; each index still carries its own
+project annotation and digest.
+
 ### Subjects, runtime profiles and canonical images
 
 The app contains the complete shipped reading library. A worker image contains
@@ -521,12 +550,32 @@ the publication workflow performs the native runtime qualification itself.
    archives through Actions artifacts.
 3. The dedicated scientific-project jobs prepare and qualify the installed
    Spark/Torch package and optional R/TMB reference serially on each native
-   architecture, using this run's exact qualified bases. Their complete
-   source-bound receipts are also required.
-4. Promotion requires the complete ordinary image set for both architectures
-   and all required checks to succeed. It publishes and validates the worker
-   version tags first, then the app version tag. Worker latest aliases follow,
-   and the app `latest` pointer moves last.
+   architecture, using this run's exact qualified bases. Each job then records
+   the two qualified project image IDs and scans them without registry
+   credentials, using the same pinned scanner and
+   `docker/cve-policy.json` as ordinary images.
+   Only a scan with no blocking finding lets the job push the images to
+   candidate tags such as
+   `ci-SHA-RUN-ATTEMPT-project-spark-torch-arm64`. Its complete source-bound
+   receipt records each candidate tag, native digest and scan record.
+4. Promotion requires the complete ordinary image set and both scientific
+   receipts for both architectures, and all required checks to succeed. It
+   rechecks that each scientific candidate still has its recorded digest, that
+   the scan database is less than 24 hours old and that the scan policy matches
+   the committed one. It publishes and validates the worker version tags first,
+   then the scientific project version tags, then the app version tag. Worker
+   and scientific latest aliases follow in the same order, and the app `latest`
+   pointer moves last. A downgrade-protected release skips every latest alias.
+
+The promotion receipt `release.json` (artifact
+`published-release-attempt-ATTEMPT`) records the scientific tags under
+`scientific`: each version and alias row with its index digest, the AMD64 and
+ARM64 native digests behind each project, and the scan records. The receipt
+must stay within its 256 KiB bound; promotion checks the complete final size
+before it writes any tag. A rerun that finds a scientific version tag already
+published for the same version and revision keeps that index, because rebuilt
+project images cannot reproduce the earlier digests. The AMD64 Hub acceptance
+job inspects every published scientific index against the receipt.
 
 Staging uploads can occur before the full matrix completes. A staging tag is
 not a completed release. Normal installation uses the completed app/version

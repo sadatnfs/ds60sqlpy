@@ -39,10 +39,12 @@ from scripts.docker_registry import (  # noqa: E402
     ReleaseError,
     descriptor,
     json_object,
+    require_digest,
     sha256,
 )
 from scripts.docker_release import (  # noqa: E402
     ARCHITECTURES,
+    SCIENTIFIC_RELEASES,
     catalog,
     context_record,
     github_context,
@@ -50,6 +52,7 @@ from scripts.docker_release import (  # noqa: E402
     published_index,
     read_json,
     require_scope,
+    scientific_profiles,
     selected_release_profiles,
     version_tag,
     write_json,
@@ -271,6 +274,9 @@ def release_selection(
         if type(receipt["scan"]) is not dict or not receipt["scan"]:
             raise ReleaseError("Promotion receipt scan evidence is malformed")
         base.add("scan")
+    # Full releases promoted after Phase 11 also publish the scientific projects.
+    if mode == "full" and "scientific" in receipt:
+        base.add("scientific")
     if mode == "partial":
         if (
             set(receipt) != base | {"scope", "group", "profiles"}
@@ -292,7 +298,9 @@ def release_selection(
     return current, profiles, selected, group, skip_latest
 
 
-def receipt_tags(rows: Any, expected: dict[str, str]) -> dict[str, Descriptor]:
+def receipt_tags(
+    rows: Any, expected: dict[str, str], *, last: str | None = "app"
+) -> dict[str, Descriptor]:
     if not isinstance(rows, list) or len(rows) != len(expected):
         raise ReleaseError("Published receipt has incomplete selected tag coverage")
     result: dict[str, Descriptor] = {}
@@ -306,9 +314,54 @@ def receipt_tags(rows: Any, expected: dict[str, str]) -> dict[str, Descriptor]:
         if value.media_type != OCI_INDEX:
             raise ReleaseError("Published release tag is not an OCI index")
         result[tag] = value
-    if set(result) != set(expected.values()) or rows[-1]["tag"] != expected["app"]:
+    if set(result) != set(expected.values()) or (
+        last is not None and rows[-1]["tag"] != expected[last]
+    ):
         raise ReleaseError("Published app pointer must follow every selected worker")
     return result
+
+
+def scientific_tags(
+    record: Any, context: Any, skip_latest: bool
+) -> list[tuple[str, str, Descriptor, dict[str, str]]]:
+    """Validate the scientific project rows; return (profile, tag, index, natives)."""
+    if (
+        type(record) is not dict
+        or set(record) - {"scan"} != {"version_tags", "latest_tags", "images"}
+        or ("scan" in record and (type(record["scan"]) is not dict or not record["scan"]))
+        or type(record["images"]) is not dict
+        or set(record["images"]) != set(SCIENTIFIC_RELEASES)
+    ):
+        raise ReleaseError("Promotion receipt scientific evidence is malformed")
+    natives: dict[str, dict[str, str]] = {}
+    for key, image in record["images"].items():
+        if (
+            type(image) is not dict
+            or set(image) != {"source", "reused", "natives"}
+            or image["source"] != SCIENTIFIC_RELEASES[key]
+            or type(image["reused"]) is not bool
+            or type(image["natives"]) is not dict
+            or set(image["natives"]) != set(ARCHITECTURES)
+        ):
+            raise ReleaseError("Promotion receipt scientific images are malformed")
+        natives[key] = {arch: require_digest(image["natives"][arch]) for arch in ARCHITECTURES}
+    if any(natives[key] != natives[source] for key, source in SCIENTIFIC_RELEASES.items()):
+        raise ReleaseError("Scientific projects disagree on their shared native image")
+    profiles = scientific_profiles()
+    versions = {key: version_tag(profile, context.version) for key, profile in profiles.items()}
+    version_rows = receipt_tags(record["version_tags"], versions, last=None)
+    rows = [(key, versions[key], version_rows[versions[key]], natives[key]) for key in profiles]
+    if skip_latest:
+        if record["latest_tags"] != []:
+            raise ReleaseError("A downgrade-protected release cannot claim latest aliases")
+        return rows
+    aliases = {key: latest_tag(profile) for key, profile in profiles.items()}
+    latest_rows = receipt_tags(record["latest_tags"], aliases, last=None)
+    for key in profiles:
+        if latest_rows[aliases[key]] != version_rows[versions[key]]:
+            raise ReleaseError("Published latest alias differs from the immutable version")
+        rows.append((key, aliases[key], latest_rows[aliases[key]], natives[key]))
+    return rows
 
 
 def inspect_index(
@@ -375,9 +428,24 @@ def verify_indexes(
             inspect_index(
                 context.repository + ":" + alias, latest_rows[alias], key, context, group, root
             )
+    scientific = (
+        scientific_tags(receipt["scientific"], context, skip_latest)
+        if "scientific" in receipt
+        else []
+    )
+    # Both native scientific images were scanned and qualified before staging;
+    # the AMD64 job reads each published scientific index once.
+    if architecture == "amd64":
+        for key, tag, expected, natives in scientific:
+            found = inspect_index(
+                context.repository + ":" + tag, expected, key, context, None, root
+            )
+            if {arch: value.digest for arch, value in found.items()} != natives:
+                raise ReleaseError("Scientific index differs from its recorded native images")
     print(
         f"Verified {len(inspected)} published two-platform indexes on native {architecture}; "
         f"validated {len(selected)} selected receipt entries"
+        + (f" and {len(scientific)} scientific project tags" if scientific else "")
     )
     return context, profiles, selected, group, skip_latest
 

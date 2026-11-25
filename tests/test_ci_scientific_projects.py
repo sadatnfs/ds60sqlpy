@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import copy
 import io
 import json
 import stat
 import zipfile
 from dataclasses import asdict, replace
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -32,7 +34,12 @@ def fixture(tmp_path: Path) -> dict[str, Any]:
     root = tmp_path / "checkout"
     root.mkdir()
     (root / "docker").mkdir()
-    for name in ("classroom-images.tsv", "ci-profile-groups.json", "ci-scientific-projects.json"):
+    for name in (
+        "classroom-images.tsv",
+        "ci-profile-groups.json",
+        "ci-scientific-projects.json",
+        "cve-policy.json",
+    ):
         (root / "docker" / name).write_bytes((ROOT / "docker" / name).read_bytes())
     declared = scientific.policy(root)
     for project in declared["projects"].values():
@@ -58,16 +65,30 @@ def fixture(tmp_path: Path) -> dict[str, Any]:
         }
         for name in profiles
     }
+    science = {
+        profile: {
+            arch: Descriptor(OCI_MANIFEST, hashed("science" + profile + arch), 1234)
+            for arch in release.ARCHITECTURES
+        }
+        for profile in scientific.STAGED.values()
+    }
 
     class ImmutableRegistry:
         def head(self, reference: str) -> Any:
+            if reference.startswith("ci-"):
+                # Each scanned scientific image stays at its own candidate tag.
+                for profile, platforms in science.items():
+                    for architecture, manifest in platforms.items():
+                        if reference.endswith(f"-{profile}-{architecture}"):
+                            return SimpleNamespace(**vars(manifest))
+                return None
             manifest = self.get(reference).descriptor
             return SimpleNamespace(
                 media_type=manifest.media_type, digest=manifest.digest, size=manifest.size
             )
 
         def get(self, reference: str) -> Any:
-            for name, platforms in natives.items():
+            for name, platforms in {**natives, **science}.items():
                 for architecture, manifest in platforms.items():
                     if manifest.digest == reference:
                         return SimpleNamespace(
@@ -83,6 +104,59 @@ def fixture(tmp_path: Path) -> dict[str, Any]:
         "context": context,
         "profiles": profiles,
         "natives": natives,
+        "science": science,
+        "policy_sha256": release.committed_policy(root, datetime.now(UTC).date()).sha256,
+    }
+
+
+def scan_stamp(hours: float = 1) -> str:
+    return (datetime.now(UTC) - timedelta(hours=hours)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def published_fixture(
+    fixture: dict[str, Any], architecture: str, identities: dict[str, str]
+) -> dict[str, Any]:
+    """Clean, current scan evidence and the candidate each project image was pushed to."""
+    context = fixture["context"]
+    images = []
+    for project, profile in scientific.STAGED.items():
+        native = fixture["science"][profile][architecture]
+        images.append(
+            {
+                "profile": profile,
+                "local_repository": scientific.local_tag(context, architecture, project),
+                "tested_image_id": identities[project],
+                "candidate_tag": release.candidate_tag(context, profile, architecture),
+                "candidate_root": native.record(),
+                "native": {
+                    **native.record(),
+                    "platform": {"os": "linux", "architecture": architecture},
+                },
+                "config_digest": identities[project],
+                "identity_basis": "config",
+            }
+        )
+    return {
+        "scan": {
+            "evidence_sha256": "e" * 64,
+            "scanner_image": image_scan.TRIVY_IMAGE,
+            "scanner_version": image_scan.TRIVY_VERSION,
+            "db_updated_at": scan_stamp(2),
+            "java_db_updated_at": scan_stamp(2),
+            "policy_sha256": fixture["policy_sha256"],
+            "scanned_at": scan_stamp(1),
+            "images": [
+                {
+                    "profile": image["profile"],
+                    "tested_image_id": image["tested_image_id"],
+                    "counts": dict.fromkeys(image_scan.SEVERITIES, 0),
+                    "suppressed": [],
+                    "report_sha256": "f" * 64,
+                }
+                for image in images
+            ],
+        },
+        "images": images,
     }
 
 
@@ -458,6 +532,9 @@ def successful_receipt(fixture: dict[str, Any], architecture: str = "arm64") -> 
             "docker_os": "linux",
             "docker_architecture": architecture,
         },
+        "published_images": published_fixture(
+            fixture, architecture, {row["id"]: row["image_id"] for row in projects}
+        ),
     }
 
 
@@ -1001,3 +1078,241 @@ def test_optional_reference_pure_wheel_identity_is_required(
         scientific.observation_checks(
             "spark-tmb", rows, fixture["policy"], "arm64", fixture["root"]
         )
+
+
+def receipts_directory(fixture: dict[str, Any], directory: Path) -> Path:
+    directory.mkdir()
+    for architecture in release.ARCHITECTURES:
+        raw = successful_receipt(fixture, architecture)
+        (directory / (architecture + ".json")).write_text(json.dumps(raw))
+    return directory
+
+
+def test_published_scientific_natives_and_scan_records_come_from_both_receipts(
+    fixture: dict[str, Any], tmp_path: Path
+) -> None:
+    chosen = scientific.validate_scientific_receipts(
+        receipts_directory(fixture, tmp_path / "science"),
+        fixture["context"],
+        fixture["profiles"],
+        fixture["natives"],
+        fixture["root"],
+        registry=fixture["registry"],
+    )
+    natives, scans = scientific.published_natives(chosen)
+    assert natives == fixture["science"]
+    assert set(natives) == release.SCIENTIFIC_STAGED == set(scans)
+    for profile, by_arch in scans.items():
+        for architecture, row in by_arch.items():
+            assert row["native_digest"] == fixture["science"][profile][architecture].digest
+            assert row["policy_sha256"] == fixture["policy_sha256"]
+            assert row["suppressed"] == [] and row["evidence_sha256"] == "e" * 64
+
+
+@pytest.mark.parametrize(
+    "mutation,message",
+    [
+        ("absent", "exact schema"),
+        ("missing", "each built project image once"),
+        ("duplicate", "unknown or duplicated"),
+        ("local-tag", "differs from the qualified project image"),
+        ("other-image", "differs from the qualified project image"),
+        ("candidate-tag", "Candidate tag does not bind"),
+        ("unscanned", "exactly the staged image IDs"),
+    ],
+)
+def test_scientific_receipt_requires_each_scanned_candidate_image(
+    fixture: dict[str, Any], mutation: str, message: str
+) -> None:
+    raw = successful_receipt(fixture)
+    published = raw["published_images"]
+    images = published["images"]
+    if mutation == "absent":
+        del raw["published_images"]
+    elif mutation == "missing":
+        images.pop()
+    elif mutation == "duplicate":
+        images[1] = copy.deepcopy(images[0])
+    elif mutation == "local-tag":
+        images[0]["local_repository"] = "ds60-scientific-other"
+    elif mutation == "other-image":
+        images[0]["tested_image_id"] = images[0]["config_digest"] = hashed("rebuilt")
+    elif mutation == "candidate-tag":
+        images[0]["candidate_tag"] = release.candidate_tag(
+            fixture["context"], images[0]["profile"], "amd64"
+        )
+    else:
+        published["scan"]["images"].pop()
+    with pytest.raises(ReleaseError, match=message):
+        validate(raw, fixture)
+
+
+@pytest.mark.parametrize("mutation", ["stale-database", "other-policy", "moved-candidate"])
+def test_scientific_promotion_rechecks_scan_freshness_and_candidates(
+    fixture: dict[str, Any], tmp_path: Path, mutation: str
+) -> None:
+    directory = receipts_directory(fixture, tmp_path / "science")
+    registry = fixture["registry"]
+    now = None
+    message = "no longer matches"
+    if mutation == "stale-database":
+        now = datetime.now(UTC) + timedelta(hours=30)
+        message = "last 24 hours"
+    elif mutation == "other-policy":
+        path = directory / "arm64.json"
+        raw = json.loads(path.read_text())
+        raw["published_images"]["scan"]["policy_sha256"] = "0" * 64
+        path.write_text(json.dumps(raw))
+        message = "differs from the committed one"
+    else:
+        original = registry
+
+        class MovedRegistry:
+            def head(self, reference: str) -> Any:
+                return None if reference.startswith("ci-") else original.head(reference)
+
+            def get(self, reference: str) -> Any:
+                return original.get(reference)
+
+        registry = MovedRegistry()
+    with pytest.raises(ReleaseError, match=message):
+        scientific.validate_scientific_receipts(
+            directory,
+            fixture["context"],
+            fixture["profiles"],
+            fixture["natives"],
+            fixture["root"],
+            registry=registry,
+            now=now,
+        )
+
+
+def staging_fixture(
+    fixture: dict[str, Any], tmp_path: Path, architecture: str = "arm64"
+) -> tuple[Any, Any, Path, Path]:
+    from tests.test_docker_release import FakeDocker, FakeRegistry, native, root_index
+
+    context, root = fixture["context"], fixture["root"]
+    registry = FakeRegistry()
+    docker = FakeDocker(registry)
+    directory = tmp_path / "work/scientific"
+    directory.mkdir(parents=True)
+    binding = scientific.source_binding(root, fixture["policy"])
+    for project in scientific.STAGED:
+        image, _ = native(registry, project + architecture)
+        pushed = root_index(registry, image, architecture)
+        docker.by_id[pushed.descriptor.digest] = pushed
+        docker.images[scientific.local_tag(context, architecture, project)] = {
+            "Id": pushed.descriptor.digest,
+            "Os": "linux",
+            "Architecture": architecture,
+            "Descriptor": pushed.descriptor.record(),
+            "Config": {"Labels": {release.REVISION: context.revision}},
+        }
+        for name, extra in (
+            (
+                "build",
+                {
+                    "project": project,
+                    "source_manifest_sha256": binding,
+                    "image_id": pushed.descriptor.digest,
+                },
+            ),
+            ("checks", {"projects": [{"image_id": pushed.descriptor.digest}]}),
+        ):
+            release.write_json(
+                directory / f"{project}-{name}.json",
+                {"context": asdict(context), "architecture": architecture, **extra},
+            )
+    snapshot = execution.tested_snapshot(context, architecture, directory, docker, root)
+    release.write_json(directory / "tested-images.json", snapshot)
+    scan = tmp_path / "work/scientific-scan/scan-evidence.json"
+    from tests.test_docker_release import scan_evidence
+
+    release.write_json(scan, scan_evidence(snapshot, fixture["policy_sha256"]))
+    return registry, docker, directory, scan
+
+
+def test_stage_pushes_only_scanned_qualified_project_images_once(
+    fixture: dict[str, Any], tmp_path: Path
+) -> None:
+    context, root = fixture["context"], fixture["root"]
+    registry, docker, directory, scan = staging_fixture(fixture, tmp_path)
+    result = execution.stage_projects(context, "arm64", directory, scan, registry, docker, root)
+    pushes = [operation for operation in docker.operations if operation[0] == "push"]
+    assert pushes == [
+        ("push", context.repository + ":" + release.candidate_tag(context, profile, "arm64"))
+        for profile in scientific.STAGED.values()
+    ]
+    assert json.loads((directory / "published-images.json").read_text()) == result
+    identities = {
+        project: docker.images[scientific.local_tag(context, "arm64", project)]["Id"]
+        for project in scientific.STAGED
+    }
+    scientific.validate_published_images(result, context, "arm64", identities)
+    docker.operations.clear()
+    assert (
+        execution.stage_projects(context, "arm64", directory, scan, registry, docker, root)
+        == result
+    )
+    assert not any(operation[0] in {"tag", "push"} for operation in docker.operations)
+
+
+@pytest.mark.parametrize("mutation", ["blocking", "rebuilt", "other-architecture"])
+def test_stage_refuses_blocking_or_changed_images_before_any_push(
+    fixture: dict[str, Any], tmp_path: Path, mutation: str
+) -> None:
+    context, root = fixture["context"], fixture["root"]
+    registry, docker, directory, scan = staging_fixture(fixture, tmp_path)
+    architecture = "arm64"
+    if mutation == "blocking":
+        evidence = json.loads(scan.read_text())
+        evidence["images"][1]["blocking"] = [{"id": "CVE-2026-0001", "package": "fixture"}]
+        scan.write_text(json.dumps(evidence))
+        message = "blocking findings"
+    elif mutation == "rebuilt":
+        tag = scientific.local_tag(context, architecture, "spark-tmb")
+        docker.images[tag]["Id"] = hashed("rebuilt-after-scan")
+        message = "changed"
+    else:
+        architecture = "amd64"
+        message = "architecture|platform"
+    with pytest.raises(ReleaseError, match=message):
+        execution.stage_projects(context, architecture, directory, scan, registry, docker, root)
+    assert not any(operation[0] in {"tag", "push"} for operation in docker.operations)
+    assert registry.puts == [] and not (directory / "published-images.json").exists()
+
+
+def test_workflow_scans_scientific_images_before_a_credentialed_stage() -> None:
+    yaml = pytest.importorskip("yaml")
+    path = ROOT / ".github/workflows/publish-images.yml"
+    steps = yaml.load(path.read_text(), Loader=yaml.BaseLoader)["jobs"]["scientific-projects"][
+        "steps"
+    ]
+
+    def index(fragment: str) -> int:
+        matches = [
+            number
+            for number, step in enumerate(steps)
+            if fragment in step.get("run", "") or fragment in step.get("uses", "")
+        ]
+        assert len(matches) == 1, fragment
+        return matches[0]
+
+    qualify = max(
+        number
+        for number, step in enumerate(steps)
+        if "ci_scientific_projects.py qualify" in step.get("run", "")
+    )
+    tested = index("ci_scientific_projects.py tested")
+    cache = index("actions/cache@")
+    scan = index("image_scan.py scan")
+    stage = index("ci_scientific_projects.py stage")
+    complete = index("ci_scientific_projects.py complete")
+    assert qualify < tested < cache < scan < stage < complete
+    assert "--policy docker/cve-policy.json" in steps[scan]["run"]
+    assert "DOCKERHUB" not in json.dumps(steps[scan]) + json.dumps(steps[tested])
+    stage_step = steps[stage]
+    assert "--scan work/scientific-scan/scan-evidence.json" in stage_step["run"]
+    assert set(stage_step["env"]) == {"DOCKERHUB_USERNAME", "DOCKERHUB_TOKEN"}
+    assert "set -euo pipefail" in stage_step["run"] and "docker logout" in stage_step["run"]

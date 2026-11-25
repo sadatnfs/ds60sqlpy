@@ -103,6 +103,16 @@ def test_full_receipt_rejects_wrong_publication_identity(change: str) -> None:
         audit.validate_receipt(receipt, request())
 
 
+def test_full_receipt_accepts_only_recorded_scientific_projects() -> None:
+    receipt, _ = full_receipt()
+    receipt["scientific"] = {"version_tags": [], "latest_tags": [], "images": {}}
+    assert audit.validate_receipt(receipt, request()) == context()
+    for malformed in ({}, [], None):
+        receipt["scientific"] = malformed
+        with pytest.raises(ReleaseError, match="differs"):
+            audit.validate_receipt(receipt, request())
+
+
 def test_full_receipt_covers_every_profile_and_matches_exported_version(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

@@ -446,6 +446,22 @@ that pulls and applies images without compiling. Keep the same custom
 `--project NAME` to retain its volumes. Images do not carry saved progress;
 moving machines needs a separate learning/database backup.
 
+### Scientific project images
+
+Full releases after 2.0.0 also publish the four qualified scientific project
+images to the same repository as combined AMD64/ARM64 tags:
+`VERSION-project-spark-torch`, `VERSION-project-spark-tmb`,
+`VERSION-project-tmb-public-api` and `VERSION-project-tmb-cpp-api`, each with a
+`latest-project-*` alias. The launcher never selects them; pull one directly:
+
+```sh
+docker pull sadatnfs/ds60sqlpy:latest-project-spark-torch
+```
+
+Only the full publication workflow pushes them, after the same CVE scan policy
+as ordinary images passes on both architectures. See
+[scientific project images](docs/dockerhub.md#scientific-project-images).
+
 ### Publish through GitHub Actions
 
 The full publication workflow builds and pushes only for a push to `main`
@@ -473,8 +489,9 @@ git push origin main
 
 Native AMD64 and ARM64 jobs build and qualify the app, Core and worker groups.
 Commit-specific staging uploads precede final promotion. Only the complete
-successful checks allow versioned worker tags, then the app version, followed
-by latest aliases with app `latest` last. Small receipts record the evidence;
+successful checks allow versioned worker tags, then the scan-gated scientific
+project tags and the app version, followed by latest aliases with app `latest`
+last. Small receipts record the evidence;
 large Docker archives are not transferred through Actions artifacts.
 
 The version comes from checked-in source. An incompatible existing version is

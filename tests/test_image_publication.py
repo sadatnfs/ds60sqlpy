@@ -185,7 +185,7 @@ def test_login_is_short_lived_and_never_places_a_token_in_command_arguments() ->
                 assert 'DOCKER_CONFIG="$RUNNER_TEMP/' in command
                 assert "docker logout" in command and "trap " in command
                 assert step["env"]["DOCKERHUB_TOKEN"] == "${{ secrets.DOCKERHUB_TOKEN }}"
-    assert count == 7
+    assert count == 8
     for filename in ("ci.yml", "app-build.yml", "kubernetes.yml"):
         assert "secrets.DOCKERHUB" not in (WORKFLOW.parent / filename).read_text()
 

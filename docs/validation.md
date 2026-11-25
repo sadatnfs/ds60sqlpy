@@ -943,7 +943,9 @@ The executable contract lives in
 [`ci_scientific_projects.py`](../scripts/ci_scientific_projects.py),
 [`scientific_receipts.py`](../scripts/scientific_receipts.py) and
 [`scientific_package_receipts.py`](../scripts/scientific_package_receipts.py).
-These project environments are not additional ordinary Hub images. Full promotion
+These project environments are not additional ordinary Hub images; their
+scan-gated images publish as separate
+[scientific project tags](dockerhub.md#scientific-project-images). Full promotion
 and recovery require complete scientific receipts bound to the same run, source,
 version, native bases and App/Core seeds. Earlier successful attempts may be reused
 only under those exact bindings. Targeted partial-image jobs retain their documented

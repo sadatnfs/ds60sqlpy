@@ -130,6 +130,9 @@ def validate_receipt(receipt: dict[str, Any], request: recovery.Request) -> Cont
     # Releases promoted after Phase 8 also record their image scan evidence.
     if "scan" in receipt and type(receipt["scan"]) is dict and receipt["scan"]:
         expected.add("scan")
+    # Releases promoted after Phase 11 also record the scientific project indexes.
+    if "scientific" in receipt and type(receipt["scientific"]) is dict and receipt["scientific"]:
+        expected.add("scientific")
     context = context_record(receipt.get("context"))
     if (
         set(receipt) != expected

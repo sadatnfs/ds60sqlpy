@@ -1665,3 +1665,223 @@ def test_promote_scan_accepts_fresh_evidence_and_records_it_per_promoted_digest(
             root=tmp_path,
             scan=tampered,
         )
+
+
+SCIENTIFIC_TAGS = [
+    "project-spark-torch",
+    "project-spark-tmb",
+    "project-tmb-public-api",
+    "project-tmb-cpp-api",
+]
+
+
+def scientific_natives(registry: FakeRegistry, label: str) -> dict[str, dict[str, Descriptor]]:
+    return {
+        key: {
+            arch: native(registry, f"{label}-{key}-{arch}")[0].descriptor
+            for arch in release.ARCHITECTURES
+        }
+        for key in sorted(release.SCIENTIFIC_STAGED)
+    }
+
+
+def scientific_scan(natives: dict[str, dict[str, Descriptor]]) -> dict[str, dict[str, Any]]:
+    return {
+        key: {
+            arch: {
+                "tested_image_id": "sha256:" + hashlib.sha256((key + arch).encode()).hexdigest(),
+                "native_digest": value.digest,
+                "counts": dict(COUNTS),
+                "suppressed": [],
+                "report_sha256": "f" * 64,
+                "evidence_sha256": "e" * 64,
+                "scanner_image": image_scan.TRIVY_IMAGE,
+                "db_updated_at": "2026-01-01T00:00:00Z",
+                "policy_sha256": POLICY_SHA,
+                "scanned_at": "2026-01-01T01:00:00Z",
+            }
+            for arch, value in by_arch.items()
+        }
+        for key, by_arch in natives.items()
+    }
+
+
+def test_scientific_indexes_publish_after_workers_and_before_each_app_pointer(
+    tmp_path: Path, context: release.Context, profiles: dict[str, release.Profile]
+) -> None:
+    registry = FakeRegistry()
+    inputs = complete_receipts(tmp_path / "receipts", registry, context, profiles)
+    science = scientific_natives(registry, "first")
+    scan = scientific_scan(science)
+    output = tmp_path / "release.json"
+    report = release.promote_release(
+        context,
+        profiles,
+        registry,
+        natives=inputs,
+        output=output,
+        scientific=science,
+        scientific_scan=scan,
+    )
+    workers = ["worker-python-core", "worker-java21", "postgres"]
+    assert registry.puts == [
+        *(f"1.0.0-{suffix}" for suffix in workers),
+        *(f"1.0.0-{suffix}" for suffix in SCIENTIFIC_TAGS),
+        "1.0.0",
+        *(f"latest-{suffix}" for suffix in workers),
+        *(f"latest-{suffix}" for suffix in SCIENTIFIC_TAGS),
+        "latest",
+    ]
+    assert json.loads(output.read_text()) == report and report["status"] == "published"
+    assert len(report["version_tags"]) == len(report["latest_tags"]) == 4
+    record = report["scientific"]
+    assert record["scan"] == scan
+    assert [row["tag"] for row in record["version_tags"]] == [
+        "1.0.0-" + suffix for suffix in SCIENTIFIC_TAGS
+    ]
+    assert [row["tag"] for row in record["latest_tags"]] == [
+        "latest-" + suffix for suffix in SCIENTIFIC_TAGS
+    ]
+    for row in (*record["version_tags"], *record["latest_tags"]):
+        assert registry.tags[row["tag"]] == row["digest"]
+    for key in SCIENTIFIC_TAGS:
+        source = release.SCIENTIFIC_RELEASES[key]
+        assert record["images"][key] == {
+            "source": source,
+            "reused": False,
+            "natives": {arch: science[source][arch].digest for arch in release.ARCHITECTURES},
+        }
+        version, revision, recorded = release.published_index(
+            registry.get(f"1.0.0-{key}"), key, context.source_repository
+        )
+        assert (version, revision, recorded) == ("1.0.0", context.revision, science[source])
+    assert (
+        registry.tags["1.0.0-project-tmb-cpp-api"] != registry.tags["1.0.0-project-spark-tmb"]
+    )  # Each project index names its own profile even when it shares the native images.
+
+
+def test_scientific_rerun_reuses_the_published_indexes_of_this_revision(
+    tmp_path: Path, context: release.Context, profiles: dict[str, release.Profile]
+) -> None:
+    registry = FakeRegistry()
+    inputs = complete_receipts(tmp_path / "receipts", registry, context, profiles)
+    first = scientific_natives(registry, "first")
+    release.promote_release(
+        context, profiles, registry, natives=inputs, output=tmp_path / "a.json", scientific=first
+    )
+    written = len(registry.puts)
+    rebuilt = scientific_natives(registry, "rebuilt")
+    report = release.promote_release(
+        context,
+        profiles,
+        registry,
+        natives=inputs,
+        output=tmp_path / "b.json",
+        scientific=rebuilt,
+        scientific_scan=scientific_scan(rebuilt),
+    )
+    assert len(registry.puts) == written
+    for key, image in report["scientific"]["images"].items():
+        source = release.SCIENTIFIC_RELEASES[key]
+        assert image["reused"] is True
+        assert image["natives"] == {
+            arch: first[source][arch].digest for arch in release.ARCHITECTURES
+        }
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "targeted",
+        "missing-arch",
+        "scan-without-images",
+        "scan-other-digest",
+        "other-revision",
+        "shared-disagree",
+    ],
+)
+def test_scientific_publication_is_refused_before_any_write(
+    mutation: str,
+    tmp_path: Path,
+    context: release.Context,
+    profiles: dict[str, release.Profile],
+) -> None:
+    registry = FakeRegistry()
+    inputs = complete_receipts(tmp_path / "receipts", registry, context, profiles)
+    science: dict[str, dict[str, Descriptor]] | None = scientific_natives(registry, "first")
+    assert science is not None
+    scan = scientific_scan(science)
+    options: dict[str, Any] = {}
+    message = ""
+    if mutation == "targeted":
+        options = {"target_group": "java", "root": tmp_path}
+        inputs = {key: inputs[key] for key in ("app", "java21", "postgres", "python-core")}
+        message = "only with a full release"
+    elif mutation == "missing-arch":
+        del science["project-spark-tmb"]["arm64"]
+        message = "on both platforms"
+    elif mutation == "scan-without-images":
+        science = None
+        message = "require scientific native images"
+    elif mutation == "scan-other-digest":
+        scan["project-spark-torch"]["amd64"]["native_digest"] = "sha256:" + "0" * 64
+        message = "exactly the staged native digests"
+    elif mutation == "other-revision":
+        other = replace(context, revision="b" * 40)
+        registry.add(
+            release.index_body(other, "project-spark-tmb", science["project-spark-tmb"]),
+            "1.0.0-project-spark-tmb",
+        )
+        message = "another revision"
+    else:
+        registry.add(
+            release.index_body(context, "project-spark-tmb", science["project-spark-tmb"]),
+            "1.0.0-project-spark-tmb",
+        )
+        registry.add(
+            release.index_body(context, "project-tmb-cpp-api", science["project-spark-torch"]),
+            "1.0.0-project-tmb-cpp-api",
+        )
+        message = "disagree on their shared image"
+    output = tmp_path / "release.json"
+    with pytest.raises(ReleaseError, match=message):
+        release.promote_release(
+            context,
+            profiles,
+            registry,
+            natives=inputs,
+            output=output,
+            scientific=science,
+            scientific_scan=scan,
+            **options,
+        )
+    assert registry.puts == [] and not output.exists()
+
+
+def test_scientific_release_metadata_size_is_checked_before_any_tag(
+    tmp_path: Path,
+    context: release.Context,
+    profiles: dict[str, release.Profile],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    ordinary = FakeRegistry()
+    inputs = complete_receipts(tmp_path / "ordinary", ordinary, context, profiles)
+    release.promote_release(
+        context, profiles, ordinary, natives=inputs, output=tmp_path / "ordinary.json"
+    )
+    monkeypatch.setattr(release, "MAX_RECEIPT", (tmp_path / "ordinary.json").stat().st_size + 64)
+    registry = FakeRegistry()
+    inputs = complete_receipts(tmp_path / "science", registry, context, profiles)
+    science = scientific_natives(registry, "first")
+    output = tmp_path / "release.json"
+    with pytest.raises(ReleaseError, match="256 KiB bound; no tag was written"):
+        release.promote_release(
+            context,
+            profiles,
+            registry,
+            natives=inputs,
+            output=output,
+            scientific=science,
+            scientific_scan=scientific_scan(science),
+        )
+    assert registry.puts == [] and not output.exists()

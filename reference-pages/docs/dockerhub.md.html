@@ -230,6 +230,38 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tbody></table></div>
 <p>A candidate such as <code>ci-59a0d116a1759d5d509718c52c4f3439e1986644-40961726148-1-r-statistics-amd64</code> records the source, run, attempt, profile and native architecture. It is a staging tag. Normal R setup uses <code>2.0.0-worker-r-statistics</code>; the corresponding moving alias is <code>latest-worker-r-statistics</code>. All ordinary worker aliases use <code>latest-&lt;catalog suffix&gt;</code>. Do not enter a <code>ci-*</code> candidate as the learner release.</p>
 <p>Each combined release tag points to an image index containing Linux <code>amd64</code> and <code>arm64</code> variants. Docker selects the variant matching the engine. This is the default <code>--from-hub</code> layout. Manual architecture tags require the consumer&#x27;s explicit <code>--architecture-tags</code> option. Publishing ARM64 images from a Mac does not create AMD64 images for a typical Windows/WSL machine, and the local publisher does not create a combined manifest. <a href="https://docs.docker.com/build/building/multi-platform/">Docker multi-platform images</a></p>
+<h4 id="scientific-project-images">Scientific project images<a class="heading-anchor" href="#scientific-project-images" aria-label="Link to this section">#</a></h4>
+<p>A full CI release also publishes the four qualified scientific project images to the same Hub repository. They are separate from the ordinary catalog. <code>--all</code>, <code>--profile</code> and <code>--from-hub</code> never select them. Only the full publication workflow writes these tags; the manual publisher and the targeted workflow do not.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Project</th>
+<th>Release tag</th>
+<th>Moving alias</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="../courses/advanced-spark-modeling/projects/spark-torch/README.md.html">Spark/Torch workshop</a></td>
+<td><code>VERSION-project-spark-torch</code></td>
+<td><code>latest-project-spark-torch</code></td>
+</tr>
+<tr>
+<td><a href="../courses/advanced-spark-modeling/projects/spark-tmb/README.md.html">Optional Spark/TMB reference</a></td>
+<td><code>VERSION-project-spark-tmb</code></td>
+<td><code>latest-project-spark-tmb</code></td>
+</tr>
+<tr>
+<td>Standalone TMB public API</td>
+<td><code>VERSION-project-tmb-public-api</code></td>
+<td><code>latest-project-tmb-public-api</code></td>
+</tr>
+<tr>
+<td>Standalone TMB C++ families</td>
+<td><code>VERSION-project-tmb-cpp-api</code></td>
+<td><code>latest-project-tmb-cpp-api</code></td>
+</tr>
+</tbody></table></div>
+<p>Each tag is a combined index with Linux <code>amd64</code> and <code>arm64</code> images, so Docker pulls the native variant:</p>
+<pre class="highlighted-code"><code class="language-bash">docker pull sadatnfs/ds60sqlpy:latest-project-spark-torch
+docker pull sadatnfs/ds60sqlpy:VERSION-project-tmb-public-api</code></pre>
+<p>Replace <code>VERSION</code> with a completed full release that lists these tags in its promotion receipt. Releases through 2.0.0 predate them. The TMB public API and C++ families are qualified inside the Spark/TMB image, so their indexes reference the same native images as <code>project-spark-tmb</code>; each index still carries its own project annotation and digest.</p>
 <h4 id="subjects-runtime-profiles-and-canonical-images">Subjects, runtime profiles and canonical images<a class="heading-anchor" href="#subjects-runtime-profiles-and-canonical-images" aria-label="Link to this section">#</a></h4>
 <p>The app contains the complete shipped reading library. A worker image contains the prepared tools for its execution profile. Several subjects can share a compatible worker, and a subject can offer variants using different workers. There is no separate image for each lesson. The following mapping comes from <code>ModuleCatalog</code> and <a href="../docker/classroom-images.tsv.html"><code>docker/classroom-images.tsv</code></a>. Every tag below is under <code>sadatnfs/ds60sqlpy:</code> for the 2.0.0 release layout. They are available only after its completed publication and acceptance. Each row describes only the lessons or variants declaring that profile. App is always included; use <code>--profile</code> for ordinary workers and <code>--image-tag app=VERSION</code> when explicitly choosing the app version.</p>
 <div class="table-wrap"><table><thead><tr>
@@ -466,9 +498,10 @@ git push origin main</code></pre>
 <ol>
 <li>Native Linux AMD64 and ARM64 runners build and qualify their app and Python Core seed images, then the ordinary worker groups. Builds and runtime qualification are real work and can take substantial time.</li>
 <li>Images are uploaded under commit-specific staging tags in the same Hub repository. Small receipts bind source revision, profile, platform, immutable image identity and qualification evidence. Image layers move through the registry; the workflow does not transfer giant Docker image archives through Actions artifacts.</li>
-<li>The dedicated scientific-project jobs prepare and qualify the installed Spark/Torch package and optional R/TMB reference serially on each native architecture, using this run&#x27;s exact qualified bases. Their complete source-bound receipts are also required.</li>
-<li>Promotion requires the complete ordinary image set for both architectures and all required checks to succeed. It publishes and validates the worker version tags first, then the app version tag. Worker latest aliases follow, and the app <code>latest</code> pointer moves last.</li>
+<li>The dedicated scientific-project jobs prepare and qualify the installed Spark/Torch package and optional R/TMB reference serially on each native architecture, using this run&#x27;s exact qualified bases. Each job then records the two qualified project image IDs and scans them without registry credentials, using the same pinned scanner and <code>docker/cve-policy.json</code> as ordinary images. Only a scan with no blocking finding lets the job push the images to candidate tags such as <code>ci-SHA-RUN-ATTEMPT-project-spark-torch-arm64</code>. Its complete source-bound receipt records each candidate tag, native digest and scan record.</li>
+<li>Promotion requires the complete ordinary image set and both scientific receipts for both architectures, and all required checks to succeed. It rechecks that each scientific candidate still has its recorded digest, that the scan database is less than 24 hours old and that the scan policy matches the committed one. It publishes and validates the worker version tags first, then the scientific project version tags, then the app version tag. Worker and scientific latest aliases follow in the same order, and the app <code>latest</code> pointer moves last. A downgrade-protected release skips every latest alias.</li>
 </ol>
+<p>The promotion receipt <code>release.json</code> (artifact <code>published-release-attempt-ATTEMPT</code>) records the scientific tags under <code>scientific</code>: each version and alias row with its index digest, the AMD64 and ARM64 native digests behind each project, and the scan records. The receipt must stay within its 256 KiB bound; promotion checks the complete final size before it writes any tag. A rerun that finds a scientific version tag already published for the same version and revision keeps that index, because rebuilt project images cannot reproduce the earlier digests. The AMD64 Hub acceptance job inspects every published scientific index against the receipt.</p>
 <p>Staging uploads can occur before the full matrix completes. A staging tag is not a completed release. Normal installation uses the completed app/version pointer and its concrete worker version tags. This order avoids selecting a new app before its required worker versions are available.</p>
 <h4 id="retrying-an-interrupted-run">Retrying an interrupted run<a class="heading-anchor" href="#retrying-an-interrupted-run" aria-label="Link to this section">#</a></h4>
 <p>Registry operations across multiple tags are not a transaction. Staging and promotion read back every manifest they write, and wait up to about a minute when Docker Hub briefly reports a just-written manifest as missing, or still serves a moved latest alias&#x27;s previous manifest; one that is still missing, or that still shows a different digest, stops the run before any later tag is written. <strong>Re-run failed jobs</strong> can reuse successful receipts from earlier attempts of the same workflow run and source revision. The selected receipts must be unique and valid, and worker receipts must bind the exact app/Core seed digests they used. Receipts from another run or revision are rejected; rebuilt seeds cannot silently be combined with old worker results.</p>

@@ -30,7 +30,9 @@ from scripts.docker_registry import (  # noqa: E402
 )
 from scripts.scientific_receipts import (  # noqa: E402
     BASES,
+    STAGED,
     digest,
+    local_tag,
     observation_checks,
     policy,
     require_runner_cases,
@@ -38,6 +40,7 @@ from scripts.scientific_receipts import (  # noqa: E402
     source_binding,
     source_manifest,
     validate_base_records,
+    validate_published_images,
     validate_receipt,
 )
 
@@ -363,7 +366,7 @@ def build_project(
     for record in bases["base_images"].values():
         if image_id(docker, record["reference"], architecture) != record["local_image_id"]:
             raise ReleaseError("Qualified imported base changed before build")
-    tag = f"ds60-scientific-{context.run_id}-{context.run_attempt}-{architecture}-{project}"
+    tag = local_tag(context, architecture, project)
 
     def reference(key: str) -> str:
         return str(bases["base_images"][key]["reference"])
@@ -434,6 +437,8 @@ def build_project(
         + owner_labels(context, architecture)["io.ds60.scientific.owner"],
         "--label",
         "io.ds60.scientific.revision=" + context.revision,
+        "--label",
+        release.REVISION + "=" + context.revision,
         "-f",
         str(root / f"courses/advanced-spark-modeling/projects/{project}/Dockerfile"),
         "-t",
@@ -588,16 +593,94 @@ def qualify_project(
     return reports
 
 
+def tested_snapshot(
+    context: release.Context,
+    architecture: str,
+    directory: Path,
+    docker: release.Docker,
+    root: Path = ROOT,
+) -> dict[str, Any]:
+    """Record the two qualified project image IDs in the scanner's snapshot format."""
+    declared = policy(root)
+    docker.native(architecture)
+    images = []
+    for project, profile in STAGED.items():
+        built = release.read_json(directory / f"{project}-build.json")
+        release.bound_context(built, context)
+        checks = release.read_json(directory / f"{project}-checks.json")
+        release.bound_context(checks, context)
+        if (
+            built.get("project") != project
+            or built.get("architecture") != architecture
+            or checks.get("architecture") != architecture
+            or built.get("source_manifest_sha256") != source_binding(root, declared)
+        ):
+            raise ReleaseError("Scientific build source or architecture changed")
+        tag = local_tag(context, architecture, project)
+        image = release.inspected_image(
+            docker.inspect(tag), release.Profile(profile, tag, profile), context, architecture
+        )
+        reports = checks.get("projects")
+        if (
+            image["tested_image_id"] != built["image_id"]
+            or not isinstance(reports, list)
+            or not reports
+            or any(report.get("image_id") != built["image_id"] for report in reports)
+        ):
+            raise ReleaseError("Scientific image changed after its offline qualification")
+        images.append(image)
+    return {
+        "schema_version": 1,
+        "kind": "ds60-tested-images",
+        "context": asdict(context),
+        "architecture": architecture,
+        "group": "scientific",
+        "seed_receipt": None,
+        "images": images,
+    }
+
+
+def stage_projects(
+    context: release.Context,
+    architecture: str,
+    directory: Path,
+    scan_path: Path,
+    registry: Any,
+    docker: release.Docker,
+    root: Path = ROOT,
+) -> dict[str, Any]:
+    """Push each qualified project image only after clean, current CVE scan evidence."""
+    tested = release.read_json(directory / "tested-images.json")
+    if tested != tested_snapshot(context, architecture, directory, docker, root):
+        raise ReleaseError("A scientific image changed after its scan snapshot")
+    scan = release.load_scan(scan_path, tested, root)
+    release.scan_block(scan, tested["images"])
+    staged = []
+    for image in tested["images"]:
+        print(f"Staging scanned scientific image: {image['profile']} ({architecture})", flush=True)
+        staged.append(release.stage_candidate(registry, docker, context, image, architecture))
+    result = {"scan": scan, "images": staged}
+    identities = {
+        project: next(image["tested_image_id"] for image in staged if image["profile"] == profile)
+        for project, profile in STAGED.items()
+    }
+    validate_published_images(result, context, architecture, identities)
+    release.write_json(directory / "published-images.json", result)
+    return result
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "command", choices=("import-bases", "build", "qualify", "complete", "cleanup")
+        "command",
+        choices=("import-bases", "build", "qualify", "tested", "stage", "complete", "cleanup"),
     )
     parser.add_argument("--gate", required=True, type=Path)
     parser.add_argument("--architecture", required=True, choices=release.ARCHITECTURES)
     parser.add_argument("--receipts-dir", type=Path)
     parser.add_argument("--directory", required=True, type=Path)
     parser.add_argument("--project", choices=("spark-torch", "spark-tmb"))
+    parser.add_argument("--scan", type=Path)
     args = parser.parse_args(argv)
     raw_gate = release.read_json(args.gate)
     if "selection" in raw_gate:
@@ -613,6 +696,24 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "cleanup":
         cleanup_owned_images(context, args.architecture, docker)
         print("Removed only labeled images owned by this scientific job")
+        return 0
+    if args.command == "tested":
+        snapshot = tested_snapshot(context, args.architecture, directory, docker)
+        release.write_json(directory / "tested-images.json", snapshot)
+        print("Recorded the qualified scientific image IDs for scanning")
+        return 0
+    if args.command == "stage":
+        if args.scan is None:
+            raise ReleaseError("Staging requires clean scan evidence")
+        stage_projects(
+            context,
+            args.architecture,
+            directory,
+            owned_path(args.scan),
+            release.registry_for(context, push=True),
+            docker,
+        )
+        print("Staged only the scanned and qualified scientific images")
         return 0
     if args.command == "import-bases":
         if args.receipts_dir is None:
@@ -665,6 +766,7 @@ def main(argv: list[str] | None = None) -> int:
                     "docker_os": "linux",
                     "docker_architecture": args.architecture,
                 },
+                "published_images": release.read_json(directory / "published-images.json"),
             }
             # Reconstruct only already-validated selected descriptors for local final validation.
             natives = {
