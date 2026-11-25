@@ -1,6 +1,6 @@
 # Custom likelihoods with Spark and PyTorch
 
-This optional project runs Spark 4.3.0, PyTorch 2.15.0 CPU and Lightning 2.6.1
+This optional project runs Spark 4.3.0, PyTorch 2.15.0 CPU and Lightning 2.6.6
 together. The ordinary Spark and Torch coding pads remain separate environments.
 The project is a complete local Docker workflow, with prepared dependencies and
 offline execution. It uses the same source package as the worked chapters.
@@ -157,7 +157,7 @@ multi-node claim follows from these small numerical examples.
 - [Spark 4.3.0 TorchDistributor source](https://github.com/apache/spark/blob/v4.3.0/python/pyspark/ml/torch/distributor.py)
 - [PyTorch 2.9 autograd gradients](https://docs.pytorch.org/docs/2.9/generated/torch.autograd.grad.html)
 - [PyTorch distributed data parallel](https://docs.pytorch.org/docs/2.9/generated/torch.nn.parallel.DistributedDataParallel.html)
-- [Lightning 2.6.1 release](https://pypi.org/project/lightning/2.6.1/)
+- [Lightning 2.6.6 release](https://pypi.org/project/lightning/2.6.6/)
 
 All lesson examples here are original. Installed dependencies retain their own
 licenses. The project does not copy implementation code from those references.

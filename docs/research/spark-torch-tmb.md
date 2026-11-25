@@ -241,7 +241,7 @@ model, while upstream Spark Pipeline metadata can import stage classes and must
 come from a trusted source.
 
 The [combined project](../../courses/advanced-spark-modeling/projects/spark-torch/README.md)
-prepares Spark 4.3.0, Torch 2.15.0 CPU, Lightning 2.6.1 and the required conversion
+prepares Spark 4.3.0, Torch 2.15.0 CPU, Lightning 2.6.6 and the required conversion
 libraries together. The ordinary Spark and Torch pads remain separate images.
 Its fixed cases cover global logistic and nonlinear fits, independent group
 fits, actual Arrow batches, TorchDistributor, Lightning and sampler coverage.

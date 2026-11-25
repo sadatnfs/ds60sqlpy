@@ -195,7 +195,7 @@
       "runtime": {
         "spark": "4.3.0",
         "torch": "2.15.0+cpu",
-        "lightning": "2.6.1",
+        "lightning": "2.6.6",
         "java_major": "17",
         "scipy": "1.15.3",
         "ds60-spark-likelihood": "0.2.0"

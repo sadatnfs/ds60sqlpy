@@ -32,7 +32,7 @@ class PreparationChecks(unittest.TestCase):
             self.assertEqual(cpu["torch"], "2.15.0+cpu")
             self.assertEqual(cpu["numpy"], "2.2.6")
             self.assertEqual(science["scipy"], "1.15.3")
-            self.assertEqual(science["lightning"], "2.6.1")
+            self.assertEqual(science["lightning"], "2.6.6")
             self.assertFalse(cpu.keys() & science.keys())
 
     def test_unhashed_unpinned_duplicate_and_directive_inputs_fail(self):

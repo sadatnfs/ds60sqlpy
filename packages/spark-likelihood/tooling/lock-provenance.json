@@ -16,9 +16,9 @@
     },
     "locks/scientific.lock": {
       "upstream_repository_path": "courses/advanced-spark-modeling/projects/spark-torch/requirements.lock",
-      "upstream_source_sha256": "ac43ad0f8e74b725abef3503a9f0e63105753298f00b2c1b7dcf59768902170c",
-      "copied_lock_sha256": "0ef1ded78805fd4216ff06bd6190972bf450395e80cfb75fc6993183db3d930b",
-      "change": "Comment-only path/provenance normalization; requirement pins and hashes retained."
+      "upstream_source_sha256": "9fa53344450d18d1571a7f393fbbd8b848a7a6a4fce4b6ad4cf5fb81ce1f0ed0",
+      "copied_lock_sha256": "287e0a2413ec0c86ba7a85f4e4d18c7872a590a4b037d637e0408befa3107fd5",
+      "change": "Comment-only path/provenance normalization; requirement pins and hashes retained from the upstream file, which moved to Lightning 2.6.6 and PyArrow 23.0.1 for fixable image CVEs."
     },
     "locks/build.lock": {
       "upstream_repository_path": "packages/spark-tmbad/tooling/python-build-requirements.txt",
