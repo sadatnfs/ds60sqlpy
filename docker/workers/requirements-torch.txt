@@ -1,3 +1,4 @@
 # The explicit CPU index supplies both supported Linux architectures.
+# The CUDA build of torch is pinned separately in gpu/requirements-pytorch-cuda.in.
 torch==2.15.0+cpu
 numpy==2.2.6
