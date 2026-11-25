@@ -35,7 +35,8 @@ class FakeClient:
 
 def test_r_worker_keeps_the_compilers_that_learner_packages_need() -> None:
     dockerfile = (ROOT / "docker/workers/Dockerfile.r").read_text(encoding="utf-8")
-    install = re.search(r"apt-get install[^&]+", dockerfile)
+    runtime = dockerfile.split(" AS r-runtime\n", 1)[1]
+    install = re.search(r"apt-get install[^&]+", runtime)
     assert install is not None and set(install.group(0).split()) >= TOOLCHAIN
     assert not re.search(r"apt-get (?:purge|remove|autoremove)", dockerfile)
 

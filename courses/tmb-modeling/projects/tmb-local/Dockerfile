@@ -2,8 +2,8 @@
 ARG R_BASE_IMAGE
 FROM ${R_BASE_IMAGE} AS dependencies
 USER root
-# The published R statistics worker ships without compilers; this separately
-# prepared TMB environment adds the C, C++ and Fortran toolchain it compiles with.
+# The R statistics worker already carries the C, C++ and Fortran toolchain.
+# Naming it here keeps the TMB build self-describing; apt leaves present packages as they are.
 # hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y --no-install-recommends gcc g++ gfortran make libc6-dev \
     && rm -rf /var/lib/apt/lists/*

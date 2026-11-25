@@ -55,7 +55,7 @@ The statistic uses only integers and a stated empty policy, so it needs no platf
 
 Build JourneyCore on a prepared Linux Swift environment and separately build JourneyApp on macOS.
 
-**Written answer.** The Linux half was run: in a copy of JourneyCore on swift:6.3.3-noble, swift build ended with Build complete! and swift test reported Executed 4 tests, with 0 failures. The macOS half was not run for this reference; on a prepared Mac, follow the JourneyApp README and build JourneyMac with xcodebuild. Record the two results separately, since one does not prove the other.
+**Written answer.** The Linux half was run: in a copy of JourneyCore on swift:6.3.3-amazonlinux2023, swift build ended with Build complete! and swift test reported Executed 4 tests, with 0 failures. The macOS half was not run for this reference; on a prepared Mac, follow the JourneyApp README and build JourneyMac with xcodebuild. Record the two results separately, since one does not prove the other.
 
 ### Task 4: Diagnose a defect
 

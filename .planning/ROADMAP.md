@@ -244,7 +244,7 @@ Plans:
   5. Qualified scientific-project images are pushed to the registry from GitHub Actions only, with scan gates and multi-architecture manifests.
   6. The full test suite passes repeatedly under parallel execution with no known flaky tests.
   7. No tracked first-party file contains an em dash or en dash, and a repository-wide gate keeps it that way.
-**Plans**: 8 plans
+**Plans**: 9 plans
 
 Plans:
 - [ ] 11-01-PLAN.md: Repository-wide dash removal and gate
@@ -255,6 +255,7 @@ Plans:
 - [ ] 11-06-PLAN.md: Companion-guide code execution harness and sample fixes
 - [ ] 11-07-PLAN.md: Lesson-specific rewrites of templated prose
 - [ ] 11-08-PLAN.md: CI qualification, policy refresh and Phase 11 closeout
+- [ ] 11-09-PLAN.md: Minimal-CVE R and Swift bases and release 2.1.1
 
 ## Progress
 
@@ -271,4 +272,4 @@ Plans:
 | 08.1. Unslop Classroom UI Chrome (INSERTED) | 1/1 | Complete | 2026-11-24 |
 | 9. Code & Desktop Acceptance Gates | 2/2 | Complete | 2026-11-24 |
 | 10. Verified Publication & Safe Closeout | 2/2 | Complete | 2026-11-24 |
-| 11. Post-release Hardening & Content Completion | 0/8 | Not started | - |
+| 11. Post-release Hardening & Content Completion | 7/9 | In progress | - |

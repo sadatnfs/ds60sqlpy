@@ -1,5 +1,5 @@
-ARG TORCH_IMAGE=ds60sqlpy-worker-llm-torch-cpu:2.1.0
-ARG SPARK_IMAGE=ds60sqlpy-worker-spark-local-python:2.1.0
+ARG TORCH_IMAGE=ds60sqlpy-worker-llm-torch-cpu:2.1.1
+ARG SPARK_IMAGE=ds60sqlpy-worker-spark-local-python:2.1.1
 FROM ${TORCH_IMAGE} AS torch
 FROM ${SPARK_IMAGE}
 USER root

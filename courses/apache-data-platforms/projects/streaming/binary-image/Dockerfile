@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ds60sqlpy-worker-java21:2.1.0
+ARG BASE_IMAGE=ds60sqlpy-worker-java21:2.1.1
 FROM ${BASE_IMAGE}
 USER root
 COPY install.py /tmp/install-kafka.py

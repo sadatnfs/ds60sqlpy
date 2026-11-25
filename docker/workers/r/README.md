@@ -5,8 +5,17 @@ closure in `packages.lock.json`. Downloads remain SHA-256 verified and the R
 version check remains mandatory. A failed installation stops the build; later
 packages are not attempted.
 
-The worker builds on the digest-pinned `rocker/r-ver` image, which compiles R
-from source on Ubuntu LTS. Its bundled recommended Matrix is older than the
+The worker compiles R 4.6.1 from the SHA-256 verified upstream source on the
+digest-pinned Debian 13 slim Python base shared by the other workers, in a
+separate build stage. The configure options keep the shared `libR`, memory
+profiling, readline, OpenBLAS as BLAS and LAPACK and the recommended packages.
+Graphics use cairo 1.18.6, also built from SHA-256 verified upstream source with
+only the image, PDF, PostScript and SVG surfaces and FreeType and fontconfig
+text (PNG, JPEG, SVG and PDF devices). There is no display, so X11, XCB and
+Tcl/Tk are not built, and the unused TIFF device is left out with its library.
+The locked packages install in a separate build stage that adds the curl,
+OpenSSL, libxml2 and libuv headers they compile against; only the compiled
+site library and the runtime libraries reach the worker. Its bundled recommended Matrix is older than the
 Matrix the course and the TMB project were qualified with, so the lock lists
 Matrix first and installs it into the site library. The C, C++ and Fortran
 compilers, `make` and the C headers stay installed after these source builds, so

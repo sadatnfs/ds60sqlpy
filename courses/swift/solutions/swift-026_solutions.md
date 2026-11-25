@@ -34,13 +34,13 @@ total is the reusable calculation with no knowledge of text, while render only f
 
 Build the complete JourneyCore package with swift build.
 
-**Written answer.** Copy fixtures/JourneyCore into your own workspace and run swift build in the copied directory. It compiles the JourneyCore library and the journey-demo executable and ends with Build complete!; in the reference run on swift:6.3.3-noble the last steps were Linking journey-demo and Build complete! (3.01s). No dependency is fetched, because the manifest declares none.
+**Written answer.** Copy fixtures/JourneyCore into your own workspace and run swift build in the copied directory. It compiles the JourneyCore library and the journey-demo executable and ends with Build complete!; in the reference run on swift:6.3.3-amazonlinux2023 the last steps were Linking journey-demo and Build complete! (2.33s). No dependency is fetched, because the manifest declares none.
 
 ### Task 3: Independent construction
 
 Run swift test and the journey-demo executable.
 
-**Written answer.** In the copied package run swift test, then swift run journey-demo. The reference run on swift:6.3.3-noble reported Executed 4 tests, with 0 failures and printed JourneyCore: 1/2 complete; round trip passed. The tests exercise the library through @testable import, and the executable consumes only its public API.
+**Written answer.** In the copied package run swift test, then swift run journey-demo. The reference run on swift:6.3.3-amazonlinux2023 reported Executed 4 tests, with 0 failures and printed JourneyCore: 1/2 complete; round trip passed. The tests exercise the library through @testable import, and the executable consumes only its public API.
 
 ### Task 4: Diagnose a defect
 

@@ -14,7 +14,7 @@ help:
 	@echo "format: style maintained sources with Docker; format-check: check without changing sources"
 	@echo "lint: read-only static source checks using the same Docker toolchain"
 	@echo "test: grouped parallel suite (TEST_WORKERS=4); test-serial: serial debugging"
-	@echo "scan: Trivy-scan a local image read-only (IMAGE=ds60sqlpy-lab:2.1.0 PROFILE=app)"
+	@echo "scan: Trivy-scan a local image read-only (IMAGE=ds60sqlpy-lab:2.1.1 PROFILE=app)"
 
 setup:
 	bash scripts/setup.sh
@@ -78,7 +78,7 @@ docker-status:
 	bash classroom status
 
 # Read-only image vulnerability gate; see docs/validation.md "Image vulnerability scans".
-IMAGE ?= ds60sqlpy-lab:2.1.0
+IMAGE ?= ds60sqlpy-lab:2.1.1
 PROFILE ?= app
 
 scan:

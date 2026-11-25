@@ -7,7 +7,7 @@ repository root after changing any case code:
     python courses/c/authoring/qualify_variants.py
 
 It needs a local Docker engine and the prepared worker image (default
-ds60sqlpy-worker-c17:2.1.0, override with C_VARIANT_IMAGE). Every mutant is built
+ds60sqlpy-worker-c17:2.1.1, override with C_VARIANT_IMAGE). Every mutant is built
 with the classroom flags plus AddressSanitizer and UndefinedBehaviorSanitizer, and
 a mutant in a thread lesson is also built with ThreadSanitizer. A candidate that
 triggers any sanitizer report is rejected, so practice never asks a learner to run
@@ -30,7 +30,7 @@ sys.path.insert(0, str(HERE))
 import render  # noqa: E402
 import variants  # noqa: E402
 
-IMAGE = os.environ.get("C_VARIANT_IMAGE", "ds60sqlpy-worker-c17:2.1.0")
+IMAGE = os.environ.get("C_VARIANT_IMAGE", "ds60sqlpy-worker-c17:2.1.1")
 LIMIT = 14
 NUMBERED = (
     "#define CHECK_AT(id, condition) do { if (!(condition)) "

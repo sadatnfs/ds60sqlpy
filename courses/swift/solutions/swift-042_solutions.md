@@ -55,7 +55,7 @@ Synthesized decoding treats an optional property as absent-means-nil, so adding 
 
 Inspect JourneyApp save and load errors with an owned test file.
 
-**Written answer.** The full app check needs a prepared Mac and was not run here. PlanStore decodes plan.json through StudyPlan.decode; on failure it sets persistenceBlocked, keeps the file, and shows The saved plan could not be loaded. A reference JourneyCore test on swift:6.3.3-noble confirmed the inputs: empty and truncated data threw DecodingError, and schemaVersion 2 threw unsupportedVersion. Test with a copy in your own directory, never with your only saved plan.
+**Written answer.** The full app check needs a prepared Mac and was not run here. PlanStore decodes plan.json through StudyPlan.decode; on failure it sets persistenceBlocked, keeps the file, and shows The saved plan could not be loaded. A reference JourneyCore test on swift:6.3.3-amazonlinux2023 confirmed the inputs: empty and truncated data threw DecodingError, and schemaVersion 2 threw unsupportedVersion. Test with a copy in your own directory, never with your only saved plan.
 
 ### Task 4: Diagnose a defect
 

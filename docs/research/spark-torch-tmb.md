@@ -638,13 +638,15 @@ describes exact receipt and promotion boundaries. Local compiled/library executi
 does not mean those hosted jobs or the final release have already completed.
 
 The 2.0.0 base moves surfaced two layout drifts in the Spark/TMB image that the
-local gates could not see. The Spark Python layer now comes from Debian 13, so its
-`ssl` and `hashlib` modules need OpenSSL 3.5 while the Ubuntu 24.04 R worker
-ships 3.0. The image therefore carries the Debian `libssl.so.3` and
-`libcrypto.so.3` in `/usr/local/lib`, first on `LD_LIBRARY_PATH`; R's `openssl`
-and `curl` packages load the same 3.5 runtime in the shared rpy2 process. The R
-worker also moved to `rocker/r-ver`, which installs R under `/usr/local/lib/R`
-rather than `/usr/lib/R`. The image build checks both before any project step.
+local gates could not see. The Spark Python layer comes from Debian 13, so its
+`ssl` and `hashlib` modules need OpenSSL 3.5, and R installs under
+`/usr/local/lib/R` rather than `/usr/lib/R`. In 2.1.1 the R worker itself moved
+to Debian 13 and compiles R 4.6.1 from the verified upstream source, so the
+Spark layer and R now load the same system OpenSSL in the shared rpy2 process
+and the image no longer carries a second copy. The R worker's cairo is built
+without X11, so the TMB and Spark/TMB images no longer carry the X11 client
+libraries either. The image build checks the Python modules, `libR.so` and the
+R and TMB versions before any project step.
 
 The [Brad Bell and native automatic-differentiation report](brad-bell-autodiff.md)
 separately examines CppAD, TMBad and the R-free native experiment. A native AD proof

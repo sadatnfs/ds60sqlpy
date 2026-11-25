@@ -7,7 +7,7 @@ repository root after changing any case code:
     python courses/go/authoring/qualify_variants.py
 
 It needs a local Docker engine and the prepared worker image (default
-ds60sqlpy-worker-go:2.1.0, override with GO_VARIANT_IMAGE). Programs are compiled
+ds60sqlpy-worker-go:2.1.1, override with GO_VARIANT_IMAGE). Programs are compiled
 with the classroom's fixed import configuration and run offline with no repository
 mount; they are passed on standard input. Unchanged
 cases keep their existing records. The script writes only authoring/variants.json.
@@ -27,7 +27,7 @@ sys.path.insert(0, str(HERE))
 import render  # noqa: E402
 import variants  # noqa: E402
 
-IMAGE = os.environ.get("GO_VARIANT_IMAGE", "ds60sqlpy-worker-go:2.1.0")
+IMAGE = os.environ.get("GO_VARIANT_IMAGE", "ds60sqlpy-worker-go:2.1.1")
 LIMIT = 14
 NUMBERED = 'func checkAt(id int, ok bool, message string) { if !ok { panic(fmt.Sprintf("CHECK#%d %s", id, message)) } }'
 

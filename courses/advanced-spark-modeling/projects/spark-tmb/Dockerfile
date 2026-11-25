@@ -1,16 +1,15 @@
 # Build only from already prepared native images. Runtime never downloads packages.
 ARG TMB_IMAGE=ds60-tmb-local:dev-1.9.25
-ARG SPARK_IMAGE=ds60sqlpy-worker-spark-local-python:2.1.0
-ARG JAVA_IMAGE=ds60sqlpy-worker-java21:2.1.0
+ARG SPARK_IMAGE=ds60sqlpy-worker-spark-local-python:2.1.1
+ARG JAVA_IMAGE=ds60sqlpy-worker-java21:2.1.1
 FROM ${SPARK_IMAGE} AS spark
 FROM ${JAVA_IMAGE} AS java
 FROM ${TMB_IMAGE} AS prepared
 USER root
 COPY --from=spark /usr/local/ /usr/local/
-# The Spark Python layer is built on Debian 13 and its ssl and hashlib modules
-# need that OpenSSL 3.5 runtime, newer than the Ubuntu one in the R image.
-# /usr/local/lib is first on LD_LIBRARY_PATH; OpenSSL 3 keeps ABI within 3.x.
-COPY --from=spark /usr/lib/*-linux-gnu/libssl.so.3 /usr/lib/*-linux-gnu/libcrypto.so.3 /usr/local/lib/
+# The Spark Python layer and the R image share the Debian 13 base, so Python's
+# ssl and hashlib modules and R's openssl and curl packages load the same
+# system OpenSSL 3.5 runtime in the shared rpy2 process.
 COPY --from=spark /opt/spark/ /opt/spark/
 COPY --from=java /opt/java/openjdk/ /opt/java/openjdk/
 ENV JAVA_HOME=/opt/java/openjdk PATH="/opt/java/openjdk/bin:/usr/local/bin:$PATH" \

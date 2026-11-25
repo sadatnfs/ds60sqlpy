@@ -42,7 +42,7 @@ The count is computed from the items each time, so there is no second stored num
 
 Build and test JourneyCore, then run the complete JourneyApp on a prepared Apple destination.
 
-**Written answer.** The JourneyCore half was run: on swift:6.3.3-noble, swift build ended with Build complete!, swift test reported Executed 4 tests, with 0 failures, and swift run journey-demo printed JourneyCore: 1/2 complete; round trip passed. Running the full JourneyApp needs a prepared Apple destination and was not done for this reference; follow its README and record the destination you actually used.
+**Written answer.** The JourneyCore half was run: on swift:6.3.3-amazonlinux2023, swift build ended with Build complete!, swift test reported Executed 4 tests, with 0 failures, and swift run journey-demo printed JourneyCore: 1/2 complete; round trip passed. Running the full JourneyApp needs a prepared Apple destination and was not done for this reference; follow its README and record the destination you actually used.
 
 ### Task 4: Diagnose a defect
 

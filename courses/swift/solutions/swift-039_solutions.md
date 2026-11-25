@@ -56,7 +56,7 @@ The rename is pure: it returns a new value and keeps identity, and the rule that
 
 Build and test JourneyCore before opening the Apple app.
 
-**Written answer.** Copy fixtures/JourneyCore into your own workspace and run swift build and then swift test there before touching JourneyApp. In the reference run on swift:6.3.3-noble the build ended with Build complete! and the test run reported Executed 4 tests, with 0 failures. A green core is the precondition for the app, but it says nothing yet about rendering or navigation.
+**Written answer.** Copy fixtures/JourneyCore into your own workspace and run swift build and then swift test there before touching JourneyApp. In the reference run on swift:6.3.3-amazonlinux2023 the build ended with Build complete! and the test run reported Executed 4 tests, with 0 failures. A green core is the precondition for the app, but it says nothing yet about rendering or navigation.
 
 ### Task 4: Diagnose a defect
 

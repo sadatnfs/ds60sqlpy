@@ -196,7 +196,7 @@ Docker-only learner entrypoint:
 ```sh
 python courses/python-web/projects/web-lab/check_project.py \
   --workspace work/python-web-ci-workspace \
-  --image ds60sqlpy-worker-python-web:2.1.0 \
+  --image ds60sqlpy-worker-python-web:2.1.1 \
   --browser-python /absolute/path/to/prepared/browser-python \
   --report work/python-web-project-receipts.json \
   --confirm-disposable

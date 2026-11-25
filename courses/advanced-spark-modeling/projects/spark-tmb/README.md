@@ -20,7 +20,7 @@ First prepare the ordinary R, Spark and Java worker images using the classroom's
 ```bash
 docker build --pull=false --progress=plain \
   --target dependencies \
-  --build-arg R_BASE_IMAGE=ds60sqlpy-worker-r-statistics:2.1.0 \
+  --build-arg R_BASE_IMAGE=ds60sqlpy-worker-r-statistics:2.1.1 \
   -f courses/tmb-modeling/projects/tmb-local/Dockerfile \
   -t ds60-tmb-local:dev-1.9.25 \
   courses/tmb-modeling/projects/tmb-local
@@ -37,8 +37,8 @@ For different already prepared local image tags:
 
 ```bash
 DS60_TMB_BASE=ds60-tmb-local:dev-1.9.25 \
-  DS60_SPARK_BASE=ds60sqlpy-worker-spark-local-python:2.1.0 \
-  DS60_JAVA_BASE=ds60sqlpy-worker-java21:2.1.0 \
+  DS60_SPARK_BASE=ds60sqlpy-worker-spark-local-python:2.1.1 \
+  DS60_JAVA_BASE=ds60sqlpy-worker-java21:2.1.1 \
   courses/advanced-spark-modeling/projects/spark-tmb/workshop build
 ```
 

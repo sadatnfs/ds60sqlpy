@@ -226,7 +226,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The rename is pure: it returns a new value and keeps identity, and the rule that titles are nonempty lives in the domain, so every caller gets the same refusal.</p>
 <h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
 <p>Build and test JourneyCore before opening the Apple app.</p>
-<p><strong>Written answer.</strong> Copy fixtures/JourneyCore into your own workspace and run swift build and then swift test there before touching JourneyApp. In the reference run on swift:6.3.3-noble the build ended with Build complete! and the test run reported Executed 4 tests, with 0 failures. A green core is the precondition for the app, but it says nothing yet about rendering or navigation.</p>
+<p><strong>Written answer.</strong> Copy fixtures/JourneyCore into your own workspace and run swift build and then swift test there before touching JourneyApp. In the reference run on swift:6.3.3-amazonlinux2023 the build ended with Build complete! and the test run reported Executed 4 tests, with 0 failures. A green core is the precondition for the app, but it says nothing yet about rendering or navigation.</p>
 <h4 id="task-4-diagnose-a-defect">Task 4: Diagnose a defect<a class="heading-anchor" href="#task-4-diagnose-a-defect" aria-label="Link to this section">#</a></h4>
 <p>Diagnose placing file access directly inside a model property getter.</p>
 <p><strong>Reference answer.</strong> It runs as the <code>Task 4</code> block of the reference program.</p>

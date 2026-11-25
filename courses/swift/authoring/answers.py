@@ -1706,10 +1706,10 @@ precondition(render(sum) == "total=10")""",
             explain="total is the reusable calculation with no knowledge of text, while render only formats; that split is the library-versus-executable boundary a package makes explicit.",
         ),
         2: dict(
-            explain="Copy fixtures/JourneyCore into your own workspace and run swift build in the copied directory. It compiles the JourneyCore library and the journey-demo executable and ends with Build complete!; in the reference run on swift:6.3.3-noble the last steps were Linking journey-demo and Build complete! (3.01s). No dependency is fetched, because the manifest declares none.",
+            explain="Copy fixtures/JourneyCore into your own workspace and run swift build in the copied directory. It compiles the JourneyCore library and the journey-demo executable and ends with Build complete!; in the reference run on swift:6.3.3-amazonlinux2023 the last steps were Linking journey-demo and Build complete! (2.33s). No dependency is fetched, because the manifest declares none.",
         ),
         3: dict(
-            explain="In the copied package run swift test, then swift run journey-demo. The reference run on swift:6.3.3-noble reported Executed 4 tests, with 0 failures and printed JourneyCore: 1/2 complete; round trip passed. The tests exercise the library through @testable import, and the executable consumes only its public API.",
+            explain="In the copied package run swift test, then swift run journey-demo. The reference run on swift:6.3.3-amazonlinux2023 reported Executed 4 tests, with 0 failures and printed JourneyCore: 1/2 complete; round trip passed. The tests exercise the library through @testable import, and the executable consumes only its public API.",
         ),
         4: dict(
             explain="Removing public from StudyPlan.completedCount still compiles inside JourneyCore, but the JourneyDemo target then fails with 'completedCount' is inaccessible due to 'internal' protection level, as the reference build showed. Symbols default to internal, visible only within their module; anything another target must call needs public, which also makes it a compatibility promise.",
@@ -2372,7 +2372,7 @@ precondition((try? renamed(item, to: "   ")) == nil)""",
             explain="The rename is pure: it returns a new value and keeps identity, and the rule that titles are nonempty lives in the domain, so every caller gets the same refusal.",
         ),
         3: dict(
-            explain="Copy fixtures/JourneyCore into your own workspace and run swift build and then swift test there before touching JourneyApp. In the reference run on swift:6.3.3-noble the build ended with Build complete! and the test run reported Executed 4 tests, with 0 failures. A green core is the precondition for the app, but it says nothing yet about rendering or navigation.",
+            explain="Copy fixtures/JourneyCore into your own workspace and run swift build and then swift test there before touching JourneyApp. In the reference run on swift:6.3.3-amazonlinux2023 the build ended with Build complete! and the test run reported Executed 4 tests, with 0 failures. A green core is the precondition for the app, but it says nothing yet about rendering or navigation.",
         ),
         4: dict(
             code=r"""struct PlanSnapshot {
@@ -2551,7 +2551,7 @@ precondition(decoded.note == nil && decoded.titles == ["Read"])""",
             explain="Synthesized decoding treats an optional property as absent-means-nil, so adding an optional field stays compatible with files written before it existed.",
         ),
         3: dict(
-            explain="The full app check needs a prepared Mac and was not run here. PlanStore decodes plan.json through StudyPlan.decode; on failure it sets persistenceBlocked, keeps the file, and shows The saved plan could not be loaded. A reference JourneyCore test on swift:6.3.3-noble confirmed the inputs: empty and truncated data threw DecodingError, and schemaVersion 2 threw unsupportedVersion. Test with a copy in your own directory, never with your only saved plan.",
+            explain="The full app check needs a prepared Mac and was not run here. PlanStore decodes plan.json through StudyPlan.decode; on failure it sets persistenceBlocked, keeps the file, and shows The saved plan could not be loaded. A reference JourneyCore test on swift:6.3.3-amazonlinux2023 confirmed the inputs: empty and truncated data threw DecodingError, and schemaVersion 2 threw unsupportedVersion. Test with a copy in your own directory, never with your only saved plan.",
         ),
         4: dict(
             code=r"""enum LoadResult: Equatable {
@@ -2830,7 +2830,7 @@ precondition(percentComplete(completed: 0, total: 0) == 0)""",
             explain="The statistic uses only integers and a stated empty policy, so it needs no platform API and gives the same answer on Linux and Apple systems.",
         ),
         3: dict(
-            explain="The Linux half was run: in a copy of JourneyCore on swift:6.3.3-noble, swift build ended with Build complete! and swift test reported Executed 4 tests, with 0 failures. The macOS half was not run for this reference; on a prepared Mac, follow the JourneyApp README and build JourneyMac with xcodebuild. Record the two results separately, since one does not prove the other.",
+            explain="The Linux half was run: in a copy of JourneyCore on swift:6.3.3-amazonlinux2023, swift build ended with Build complete! and swift test reported Executed 4 tests, with 0 failures. The macOS half was not run for this reference; on a prepared Mac, follow the JourneyApp README and build JourneyMac with xcodebuild. Record the two results separately, since one does not prove the other.",
         ),
         4: dict(
             explain="UIKit exists only on Apple platforms, so a shared target that imports it stops compiling everywhere else. In the reference container, a one-line file with import UIKit failed with error: no such module 'UIKit'. Keep the domain target on Foundation or the standard library, and put UIKit code in the iOS app target or behind canImport(UIKit).",
@@ -2863,7 +2863,7 @@ precondition(progress == "2/3 complete")""",
             explain="The count is computed from the items each time, so there is no second stored number that could drift out of sync after an edit.",
         ),
         3: dict(
-            explain="The JourneyCore half was run: on swift:6.3.3-noble, swift build ended with Build complete!, swift test reported Executed 4 tests, with 0 failures, and swift run journey-demo printed JourneyCore: 1/2 complete; round trip passed. Running the full JourneyApp needs a prepared Apple destination and was not done for this reference; follow its README and record the destination you actually used.",
+            explain="The JourneyCore half was run: on swift:6.3.3-amazonlinux2023, swift build ended with Build complete!, swift test reported Executed 4 tests, with 0 failures, and swift run journey-demo printed JourneyCore: 1/2 complete; round trip passed. Running the full JourneyApp needs a prepared Apple destination and was not done for this reference; follow its README and record the destination you actually used.",
         ),
         4: dict(
             code=r"""enum CapstoneError: Error { case duplicate }
