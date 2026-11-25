@@ -137,7 +137,9 @@ def main() -> None:
     for row in trainer.train_dataset:
         labels = row.get("labels")
         if labels is None or len(labels) != len(row["input_ids"]):
-            raise ValueError("Processed data must retain per-token labels for the prompt and answer")
+            raise ValueError(
+                "Processed data must retain per-token labels for the prompt and answer"
+            )
         completion_mask = [int(label != -100) for label in labels]
         if not any(completion_mask) or all(completion_mask):
             raise ValueError("Processed data must retain prompt and completion participation masks")
