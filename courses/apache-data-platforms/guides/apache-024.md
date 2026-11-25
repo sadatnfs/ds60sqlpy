@@ -61,7 +61,7 @@ The complete native client is short:
 
 From [`projects/ballista/rust-client/src/main.rs`](../projects/ballista/rust-client/src/main.rs):
 
-```rust
+```rust external
 use ballista::datafusion::{
     common::Result,
     prelude::{ParquetReadOptions, SessionContext},

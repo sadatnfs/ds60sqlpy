@@ -30,7 +30,7 @@ project's example:
 The client walks that hierarchy with three bounded listing requests before it asks
 for table metadata:
 
-<!-- include: projects/delta-sharing/client.py from="code, _, body = control(" to="Expected owned table absent" python -->
+<!-- include: projects/delta-sharing/client.py from="code, _, body = control(" to="Expected owned table absent" python fragment -->
 
 ## Worked case A: discover one explicitly owned table
 

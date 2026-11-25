@@ -49,7 +49,7 @@ inactivity observations.
 The keyed function keeps one total and one pending timer per key, replaces the
 timer on every event and emits the total when the watermark passes the deadline:
 
-<!-- include: projects/flink/src/WorkshopJobs.java from="public static final class Inactivity" until="public static final class ManagedTotal" java -->
+<!-- include: projects/flink/src/WorkshopJobs.java from="public static final class Inactivity" until="public static final class ManagedTotal" java fragment -->
 
 A subsequent east event at 2500 therefore starts a fresh total 3, with deadline 3000.
 Watermark 4000 fires that timer. The checker expects the fresh total rather than 14,

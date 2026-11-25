@@ -29,7 +29,7 @@ asset event in this fixture.
 The consumer DAG is scheduled by the asset rather than by a clock, and its summary
 task is mapped over the two regions:
 
-<!-- include: projects/airflow/dags/classroom_workflows.py #asset_workflow python -->
+<!-- include: projects/airflow/dags/classroom_workflows.py #asset_workflow python fragment -->
 
 `schedule=[ORDERS]` creates a consumer run after the producer's `write` task, which
 lists `ORDERS` in its `outlets`, succeeds. `.partial(...)` fixes the arguments shared

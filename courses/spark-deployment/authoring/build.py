@@ -19,12 +19,18 @@ INCLUDE = re.compile(
     r"^<!-- include: (?P<path>[\w./-]+)(?: #(?P<symbol>\w+))?"
     r"""(?: from=(?P<q1>["'])(?P<start>.+?)(?P=q1))?"""
     r"""(?: to=(?P<q2>["'])(?P<end>.+?)(?P=q2))?"""
-    r"""(?: until=(?P<q3>["'])(?P<until>.+?)(?P=q3))? (?P<language>[\w+-]+) -->$""",
+    r"""(?: until=(?P<q3>["'])(?P<until>.+?)(?P=q3))? (?P<language>[\w+-]+)"""
+    r"(?P<flags>(?: [\w=./-]+)*) -->$",
     re.M,
 )
 CASE = re.compile(r"^## Worked case (\w+): (.+)$", re.M)
 EXAMPLE_LANGUAGES = {"python", "bash", "yaml", "ini", "dockerfile", "sql", "text"}
-EXAMPLE_FIELDS = {"title", "language", "code", "output", "interpretation"}
+EXAMPLE_FIELDS = {"title", "language", "code", "output", "interpretation", "fence"}
+OPTIONAL_FIELDS = {"output", "fence"}
+FENCE_FLAGS = re.compile(
+    r"(?:fragment|external|expect-error|isolated|prelude=[\w./-]+|profile=[\w-]+)"
+    r"(?: (?:fragment|external|expect-error|isolated|prelude=[\w./-]+|profile=[\w-]+))*"
+)
 GUIDE_WORDS = re.compile(r"\b[\w'-]+\b")
 
 
@@ -107,7 +113,10 @@ def excerpt(match):
         raise ValueError(f"Include {relative} cannot be fenced")
     if match["language"] == "python":
         body = python_excerpt(relative, text, first, last, body)
-    return f"From [`{relative}`](../{relative}):\n\n```{match['language']}\n{body}\n```"
+    if match["flags"] and not FENCE_FLAGS.fullmatch(match["flags"].strip()):
+        raise ValueError(f"Include {relative} has unsupported fence flags")
+    info = match["language"] + match["flags"]
+    return f"From [`{relative}`](../{relative}):\n\n```{info}\n{body}\n```"
 
 
 def key_terms_block(unit):
@@ -135,11 +144,15 @@ def worked_examples_block(unit, titles, codes):
         raise ValueError(f"{key} needs at least one worked example")
     sections = []
     for example in examples:
-        if set(example) - EXAMPLE_FIELDS or not EXAMPLE_FIELDS - {"output"} <= set(example):
+        if set(example) - EXAMPLE_FIELDS or not set(example) >= EXAMPLE_FIELDS - OPTIONAL_FIELDS:
             raise ValueError(f"{key} worked examples need exactly the documented fields")
         title, code = example["title"].strip(), example["code"].strip("\n")
         language, note = example["language"], example["interpretation"].strip()
         output = example.get("output", "").strip("\n")
+        fence = example.get("fence", "")
+        if fence and not FENCE_FLAGS.fullmatch(fence):
+            raise ValueError(f"{key} has an unsupported worked example fence: {fence}")
+        info = language + (" " + fence if fence else "")
         if not title or not code.strip() or language not in EXAMPLE_LANGUAGES:
             raise ValueError(f"{key} has an empty or unsupported worked example")
         if title.lower() in titles or code in codes:
@@ -156,7 +169,7 @@ def worked_examples_block(unit, titles, codes):
             ast.parse(code, filename=f"{key} worked example")
         observed = f"Output from running the block above:\n\n```text\n{output}\n```\n\n"
         sections.append(
-            f"## Worked example: {title}\n\n```{language}\n{code}\n```\n\n"
+            f"## Worked example: {title}\n\n```{info}\n{code}\n```\n\n"
             + (observed if output else "")
             + note
         )

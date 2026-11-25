@@ -74,6 +74,8 @@ The inner range starts after i, so each unordered pair is counted once and self-
 ### Example 2
 
 ```python
+from collections import Counter
+
 left = Counter(["a", "a", "b"])
 right = Counter(["a", "b", "b"])
 difference = {

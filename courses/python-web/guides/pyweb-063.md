@@ -107,7 +107,7 @@ Continue with retries and outboxes. Their central question is what happens when 
 
 Run this complete finite program in the prepared Python web profile. It exercises real framework clients and bounded local fixtures, then exits. It does not open a browser or start an externally reachable HTTP server. Long-running applications use the separately documented owned projects. Runtime: `python-web`.
 
-```python
+```python isolated
 """Finite cross-framework engineering investigation with explicit scope."""
 
 import asyncio

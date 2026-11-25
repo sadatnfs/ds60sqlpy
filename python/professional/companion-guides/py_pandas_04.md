@@ -63,6 +63,9 @@ Typed CSV chunks provide a concrete input boundary. Parse IDs and integer amount
 ### Example 1
 
 ```python
+import numpy as np
+import pandas as pd
+
 chunks = [pd.Series([1.0, 3.0]), pd.Series([100.0])]
 means = [chunk.mean() for chunk in chunks]
 correct = sum(chunk.sum() for chunk in chunks) / sum(chunk.count() for chunk in chunks)
@@ -75,6 +78,8 @@ The second chunk contains only one observation, so giving it the same influence 
 ### Example 2
 
 ```python
+from io import StringIO
+
 text = "event_id,customer_id,amount_cents\n1,a,10\n2,b,\n3,a,20\n"
 chunks = list(
     pd.read_csv(

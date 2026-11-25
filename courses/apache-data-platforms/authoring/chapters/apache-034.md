@@ -29,7 +29,7 @@ merely because the producer object was created.
 
 The probe's producer configuration states the delivery contract explicitly:
 
-<!-- include: projects/streaming/TransactionProbe.java from="private static Properties producerProperties()" until="private static KafkaConsumer" java -->
+<!-- include: projects/streaming/TransactionProbe.java from="private static Properties producerProperties()" until="private static KafkaConsumer" java fragment -->
 
 `acks=all` waits until every in-sync replica has the write; `enable.idempotence`
 lets the broker discard a retried duplicate of the same producer sequence number;

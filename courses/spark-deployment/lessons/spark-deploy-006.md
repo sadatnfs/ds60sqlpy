@@ -27,7 +27,7 @@ container:
 
 From [`projects/cluster-lab/app/notebook_session.py`](../projects/cluster-lab/app/notebook_session.py):
 
-```python
+```python external
 spark = (
     SparkSession.builder.appName("ds60-notebook-session")
     .master("spark://master:7077")
@@ -63,7 +63,7 @@ The complete example stops Spark in `finally`. For interactive exploration, sepa
 
 ## Worked case B: reproduce a stale-session configuration
 
-```python
+```python fragment
 # In a kernel that already has a session, this may return that existing session.
 same = SparkSession.builder.config("spark.driver.host", "new-name").getOrCreate()
 print(same.sparkContext.applicationId)
@@ -73,7 +73,7 @@ Some deployment settings belong to SparkContext creation. Changing builder text 
 
 ## Worked example: separate notebook cells for create, act and clean up
 
-```python
+```python external
 # Cell 1: create
 from pyspark.sql import SparkSession
 

@@ -78,7 +78,7 @@ A reviewer should be able to explain the cutoff boundary, zero retention, confli
 
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
-```scala
+```scala prelude=../solutions/spark-042_solution.scala
 import org.apache.spark.sql.functions._
 import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
@@ -106,7 +106,7 @@ publishFile(
 val staticA = spark.read.schema(productSchema).json(input.toString)
 ```
 
-```python
+```python prelude=../solutions/spark-042_solution.py
 from pyspark.sql import functions as F
 from pathlib import Path
 import tempfile

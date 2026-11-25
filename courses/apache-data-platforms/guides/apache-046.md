@@ -44,7 +44,7 @@ The timeline source emits events and watermarks itself, which is why the job pas
 
 From [`projects/flink/src/TimelineSource.java`](../projects/flink/src/TimelineSource.java):
 
-```java
+```java fragment
 if (command.event == null) output.emitWatermark(new Watermark(command.watermark));
 else output.collect(command.event, command.event.timestamp);
 ```
@@ -54,7 +54,7 @@ windows and routes records that arrive after their window closed to a side outpu
 
 From [`projects/flink/src/WorkshopJobs.java`](../projects/flink/src/WorkshopJobs.java):
 
-```java
+```java fragment
 var windows = events
   .keyBy(event -> event.key)
   .window(TumblingEventTimeWindows.of(Duration.ofMillis(2000)))

@@ -54,7 +54,7 @@ not a Python loop that merely prints retry labels.
 
 The retry settings live on the task decorator in the DAG shown in apache-027:
 
-<!-- include: projects/airflow/dags/classroom_workflows.py from="@task(retries=1" to="@task(retries=1" python -->
+<!-- include: projects/airflow/dags/classroom_workflows.py from="@task(retries=1" to="@task(retries=1" python fragment -->
 
 `retries=1` allows one more attempt, `retry_delay` waits one second before it, and
 `execution_timeout` fails an attempt that runs longer than 30 seconds.

@@ -43,7 +43,7 @@ The bounded mode of the Java job builds this pipeline:
 
 From [`projects/flink/src/WorkshopJobs.java`](../projects/flink/src/WorkshopJobs.java):
 
-```java
+```java fragment
 var source = FileSource.forRecordStreamFormat(
   new TextLineInputFormat(),
   new Path("/state/input/orders.csv")
@@ -63,7 +63,7 @@ keyed function below keeps one running total per region:
 
 From [`projects/flink/src/WorkshopJobs.java`](../projects/flink/src/WorkshopJobs.java):
 
-```java
+```java fragment
 public static final class RunningTotal extends KeyedProcessFunction<String, Event, String> {
 
   private transient ValueState<Long> total;
@@ -107,7 +107,7 @@ question in batch mode:
 
 From [`projects/flink/src/WorkshopJobs.java`](../projects/flink/src/WorkshopJobs.java):
 
-```java
+```java fragment
 TableEnvironment table = TableEnvironment.create(settings);
 table.executeSql(
   "CREATE TEMPORARY TABLE orders (id BIGINT, region STRING, amount BIGINT, event_ms BIGINT) " +

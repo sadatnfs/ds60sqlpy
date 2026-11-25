@@ -121,7 +121,7 @@ From the prepared iceberg.hql, STORED BY ICEBERG means commits go through Iceber
 
 ### Confirm a second reader sees the same snapshot
 
-```python
+```python fragment
 table = catalog.load_table("ds60.orders_iceberg")
 snapshot = table.current_snapshot()
 print(snapshot.snapshot_id, table.metadata_location)

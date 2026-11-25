@@ -52,7 +52,7 @@ Generate assignment and complete outcomes under plausible baseline, effect, tail
 
 Paste after `normal_total_size` in [experiment_04.py](examples/experiment_04.py) to trace the inverse-square law.
 
-```python
+```python prelude=examples/experiment_04.py
 for delta in [2.0, 1.0, 0.5, 0.25]:
     n = normal_total_size(2, 2, delta)
     print(f"delta={delta:4.2f} total users={int(np.ceil(n)):5d}")

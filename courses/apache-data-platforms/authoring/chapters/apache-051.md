@@ -32,7 +32,7 @@ clustering order: order 3 before order 1, with amounts 7 and 4.
 The client creates the keyspace and the query-first table with these CQL
 statements:
 
-<!-- include: projects/cassandra/client.py from='if local["data_center"] != "datacenter1":' until='current = list(session.execute(ROW_QUERY))' python -->
+<!-- include: projects/cassandra/client.py from='if local["data_center"] != "datacenter1":' until='current = list(session.execute(ROW_QUERY))' python fragment -->
 
 `PRIMARY KEY ((customer_id, day_bucket), ordered_at, order_id)` makes the pair
 `(customer_id, day_bucket)` the partition key, which decides the replica that stores
@@ -66,7 +66,7 @@ so an unrelated network or syntax failure cannot satisfy this negative case.
 
 After a bounded clustering-range read, the check sends the filter and accepts only the expected diagnostic:
 
-<!-- include: projects/cassandra/client.py from='window = list(session.execute(ID_QUERY' to='Unapproved unindexed filter' python -->
+<!-- include: projects/cassandra/client.py from='window = list(session.execute(ID_QUERY' to='Unapproved unindexed filter' python fragment -->
 
 Cassandra refuses the query because `amount` is neither a key column nor indexed;
 adding `ALLOW FILTERING` would make it scan every partition instead.

@@ -77,6 +77,8 @@ Breadth-first search would discover b directly in one hop. A cost-aware search m
 ### Example 2
 
 ```python
+import heapq
+
 heap = []
 for value in [4.0, 1.0, 9.0, 3.0, 8.0]:
     if len(heap) < 3:

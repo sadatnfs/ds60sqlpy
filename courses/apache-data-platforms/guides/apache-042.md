@@ -92,7 +92,7 @@ safe to replay.
 
 ### Reject a commit based on stale metadata
 
-```python
+```python fragment
 from pyiceberg.exceptions import CommitFailedException
 from pyiceberg.types import LongType
 
@@ -110,7 +110,7 @@ The second writer loaded the table before the note column existed, so its commit
 
 ### Reload, revalidate and retry the intended change
 
-```python
+```python fragment
 current = catalog.load_table("demo.orders")
 names = current.schema().column_names
 if "stale_field" not in names:
@@ -123,7 +123,7 @@ The retry starts from freshly loaded metadata and checks whether its change is s
 
 ### Inspect the metadata pointer after each commit
 
-```python
+```python fragment
 print(catalog.load_table("demo.orders").metadata_location)
 with current.update_schema() as update:
     update.add_column("reviewed", LongType())

@@ -82,10 +82,12 @@ Each record has a `runtime` block:
   that route can claim. Ordinary profiles also name their CI group.
 - `unavailable`: every profile outside the ordinary worker set (except core
   lessons), with the reason registered in `EXTERNAL_REASONS`, word for word.
-- `guide_examples`: what checks the guide code. Guide code blocks are not executed
-  in this phase; content rendering checks cover them. Track notes name the extra
-  checks that do exist (C++ expected outputs, JavaScript syntax checks, statistics
-  fence parity).
+- `guide_examples`: what checks the guide code. `scripts/check_guide_examples.py`
+  runs or statically checks every guide code block (see "Guide example execution"
+  in `docs/validation.md`); it reports documentation blocks, blocks marked
+  `fragment` or `external`, and GPU code without running them. Track notes name
+  the extra checks that also exist (C++ expected outputs, JavaScript syntax
+  checks, statistics fence parity).
 - `walkthrough_outputs_checked`: true exactly when the track uses at least one
   ordinary CI group and a recorded CI run qualified every one of them. Tracks
   with no ordinary group (core python, sql and bridge, dax, cuda, docker,

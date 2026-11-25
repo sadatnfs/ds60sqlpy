@@ -27,12 +27,12 @@ presence of sleep in source code.
 
 The pressure mode builds a deliberately slow second stage:
 
-<!-- include: projects/flink/src/WorkshopJobs.java from='mode.equals("pressure")' until='} else {' java -->
+<!-- include: projects/flink/src/WorkshopJobs.java from='mode.equals("pressure")' until='} else {' java fragment -->
 
 `disableChaining()` keeps the producer and the consumer in separate tasks, so records
 cross a network buffer between them, and `SlowConsumer` sleeps 10 ms per record:
 
-<!-- include: projects/flink/src/WorkshopJobs.java from="public static final class SlowConsumer" until="private static void sink" java -->
+<!-- include: projects/flink/src/WorkshopJobs.java from="public static final class SlowConsumer" until="private static void sink" java fragment -->
 
 A tiny input can fit entirely in buffers and never create measurable pressure.
 The route therefore declares its finite payload size, pacing and observation

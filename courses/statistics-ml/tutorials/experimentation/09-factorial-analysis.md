@@ -44,7 +44,7 @@ If each pair of runs shares a batch, day or location effect, randomize within th
 
 The fitted coefficients in `examples/experiment_09.py` summarize four cell means, so it helps to look at those means directly before trusting any slope. This snippet rebuilds the replicated two-factor table and pivots it so that rows are levels of B and columns are levels of A.
 
-```python
+```python prelude=examples/experiment_09.py
 import pandas as pd
 
 cells = np.array(list(product([-1.0, 1.0], repeat=2)))

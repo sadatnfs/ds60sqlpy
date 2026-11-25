@@ -45,7 +45,7 @@ Equivalence does not mean accepting a nonsignificant null. If differences within
 
 The same Welch machinery answers similarity questions once the margin is set. Run this in [experiment_06.py](examples/experiment_06.py); `alpha=0.10` produces the 90% interval used by two one-sided tests.
 
-```python
+```python prelude=examples/experiment_06.py
 users, _, _, _ = experiment_fixture()
 t, c = users[users.assigned == 1], users[users.assigned == 0]
 est, se, ci90 = welch_summary(t.value, c.value, alpha=0.10)

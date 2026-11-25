@@ -32,7 +32,8 @@
       "title": "The pressure topology with chaining disabled",
       "language": "java",
       "code": "result = environment\n  .fromSource(\n    new NumberSequenceSource(0, 499),\n    WatermarkStrategy.noWatermarks(),\n    \"pressure-numbers\"\n  )\n  .uid(\"pressure-source\")\n  .map(new Payload())\n  .name(\"pressure-payload-producer\")\n  .uid(\"pressure-payload\")\n  .disableChaining()\n  .map(new SlowConsumer())\n  .name(\"bounded-slow-consumer\")\n  .uid(\"pressure-consumer\")\n  .disableChaining();",
-      "interpretation": "This fragment from WorkshopJobs.java keeps the producer and the slow consumer as separate tasks. Chaining would fuse them into one thread, and a fused chain cannot report that one side is waiting on buffers from the other, so the backpressure metric would stay at zero even though the job is slow. The finite sequence of 500 numbers also gives a fixed oracle: whatever the pressure reading, the finished output must contain exactly those values."
+      "interpretation": "This fragment from WorkshopJobs.java keeps the producer and the slow consumer as separate tasks. Chaining would fuse them into one thread, and a fused chain cannot report that one side is waiting on buffers from the other, so the backpressure metric would stay at zero even though the job is slow. The finite sequence of 500 numbers also gives a fixed oracle: whatever the pressure reading, the finished output must contain exactly those values.",
+      "fence": "fragment"
     },
     {
       "title": "Require a measured metric, not a configured delay",

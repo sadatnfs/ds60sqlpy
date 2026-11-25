@@ -279,6 +279,8 @@ Make the CPU function a top-level function with serializable arguments and
 results. Use:
 
 ```python
+import multiprocessing
+
 multiprocessing.get_context("spawn")
 ```
 

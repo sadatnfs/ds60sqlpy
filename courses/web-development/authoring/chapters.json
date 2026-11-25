@@ -1167,7 +1167,7 @@
       "contrast": {
         "heading": "a value set by script versus a value typed by a user",
         "setup": "Run this in the console against the minutes field from worked example 1 and read each pair of results.",
-        "lang": "js",
+        "lang": "js fragment",
         "code": "const field = document.getElementById(\"minutes\");\nfield.value = \"\";\nconsole.log(field.validity.valueMissing, field.checkValidity());\nfield.value = \"4\";\nconsole.log(field.validity.rangeUnderflow, field.checkValidity());\nfield.value = \"30\";\nconsole.log(field.checkValidity());",
         "reading": "The first line prints true false because the field is required and empty. The second prints true false because 4 is below `min=\"5\"`. The last prints true. These range and required checks respond to scripted values, but the alias field's `minlength` behaves differently: browsers apply `tooShort` only after a user edit, so setting `value = \"ab\"` from script can still report valid. That is why the lesson asks you to test real typing as well as console assignments."
       }
@@ -3166,14 +3166,14 @@
         [
           "Update text safely",
           "A name is data even when it contains angle brackets.",
-          "javascript",
+          "javascript fragment",
           "const label = document.querySelector('#label');\nlabel.textContent = '<new learner>';",
           "The literal name appears as text, not a new HTML element."
         ],
         [
           "A small state transition",
           "The state is numeric and independent of its label.",
-          "javascript",
+          "javascript fragment",
           "let count = 0;\nbutton.addEventListener('click', () => {\n  count += 1;\n  output.textContent = String(count);\n});",
           "Each activation increments the stored number and updates the display."
         ]
@@ -3300,7 +3300,7 @@
         [
           "An explicit dialog action",
           "Opening is an intentional event, not page-load interruption.",
-          "javascript",
+          "javascript fragment",
           "openButton.addEventListener('click', () => dialog.showModal());\ncloseButton.addEventListener('click', () => dialog.close());",
           "The user controls entry and exit from the dialog."
         ]
@@ -3435,7 +3435,7 @@
         [
           "Safe feedback",
           "The message is data rather than markup.",
-          "javascript",
+          "javascript fragment",
           "error.textContent = message;\ninput.setAttribute('aria-invalid', message ? 'true' : 'false');",
           "The visible and semantic error states agree."
         ]
@@ -3557,14 +3557,14 @@
         [
           "Derived records",
           "Filtering keeps the input array available.",
-          "javascript",
+          "javascript fragment",
           "const visible = rows.filter((row) => row.minutes >= 40);",
           "Only rows meeting the declared threshold appear in the derived view."
         ],
         [
           "A safe table cell",
           "A category name is plain data.",
-          "javascript",
+          "javascript fragment",
           "const cell = document.createElement('td');\ncell.textContent = row.subject;",
           "Special characters in the name do not create HTML."
         ]
@@ -3687,7 +3687,7 @@
         [
           "Data stays text",
           "The potentially meaningful syntax is never parsed as markup.",
-          "javascript",
+          "javascript fragment",
           "const value = '<img src=x onerror=alert(1)>';\noutput.textContent = value;",
           "The source string appears literally and no image element is created."
         ],
@@ -3780,7 +3780,7 @@
       "contrast": {
         "heading": "the same string assigned with innerHTML",
         "setup": "Only the property changes from worked example 1. Inspect the output element after each assignment.",
-        "lang": "js",
+        "lang": "js fragment",
         "code": "const value = '<img src=x onerror=alert(1)>';\noutput.innerHTML = value;\n// compare\noutput.textContent = value;",
         "reading": "With `innerHTML`, the browser parses the string as markup and creates an `img` element. Loading the relative URL x fails, so the `onerror` attribute runs as script in the page's context. Whether the alert box itself appears depends on the sandbox, since a sandbox without modals blocks it, but the handler code still runs. With `textContent` the Elements panel shows one text node containing the literal characters, and nothing executes. Do not run this against any real site."
       }
@@ -3819,7 +3819,7 @@
         [
           "An actionable assertion",
           "Failure stops the claimed successful path.",
-          "javascript",
+          "javascript fragment",
           "if (document.querySelectorAll('main').length !== 1) {\n  throw new Error('Expected one main region');\n}",
           "A structural mismatch becomes an explicit failure."
         ],
@@ -3912,7 +3912,7 @@
       "contrast": {
         "heading": "console.assert as the only check",
         "setup": "Both snippets inspect the same broken page that has two `main` elements. Compare how the test run ends.",
-        "lang": "js",
+        "lang": "js fragment",
         "code": "// logs and continues\nconsole.assert(document.querySelectorAll('main').length === 1, 'Expected one main region');\nconsole.log('All checks done');\n\n// stops the run\nif (document.querySelectorAll('main').length !== 1) {\n  throw new Error('Expected one main region');\n}",
         "reading": "When its condition is false, `console.assert` writes an Assertion failed message to the console and then lets execution continue, so All checks done still prints and anyone reading only the last line believes the page passed. The `throw` version stops at the first broken invariant, and the uncaught Error is reported as a failure with its message. A test runner that inspects exceptions or exit status can detect only the second form. Keep `console.assert` for quick local hints, not for quality evidence."
       }
@@ -4437,7 +4437,7 @@
         [
           "A filtered list",
           "Reindexing preserves the intended list shape.",
-          "php",
+          "php fragment",
           "$visible = array_values(array_filter($rows, fn(array $row): bool => $row['minutes'] >= 40));",
           "The result uses consecutive list indices."
         ]
@@ -4767,7 +4767,7 @@
       "contrast": {
         "heading": "byte slicing a multibyte label",
         "setup": "Both lines try to keep the first four characters of a short label, then encode it as JSON.",
-        "lang": "php",
+        "lang": "php expect-error",
         "code": "$label = 'café';\n$bytes = substr($label, 0, 4);\n$chars = mb_substr($label, 0, 4, 'UTF-8');\n\necho json_encode(['label' => $chars], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE), \"\\n\";\necho json_encode(['label' => $bytes], JSON_THROW_ON_ERROR), \"\\n\";",
         "reading": "In UTF-8 'café' is five bytes because é uses two. `substr` counts bytes, so `$bytes` keeps c, a, f and only the first byte of é, which is not valid UTF-8. `mb_substr` counts code points and keeps the full word. The first `json_encode` prints the label normally. The second throws a `JsonException` for malformed UTF-8 because JSON requires valid Unicode. Without the throw flag, it would return false instead, which is easy to miss."
       }
@@ -4930,7 +4930,7 @@
         [
           "Cleanup independent of success",
           "Finally expresses ownership of a cleanup step.",
-          "php",
+          "php fragment",
           "try { $result = requirePositive(0); }\ncatch (InvalidArgumentException $error) { echo $error->getMessage(); }\nfinally { echo \"\\nAttempt finished\\n\"; }",
           "The useful error is shown and the final step still runs."
         ]
@@ -5053,7 +5053,7 @@
         [
           "Derived behavior",
           "The method computes from the object's state.",
-          "php",
+          "php fragment",
           "$duration = new Duration(45);\necho $duration->minutes . ' minutes';",
           "The value is readable without exposing a mutation operation."
         ]
@@ -5136,7 +5136,7 @@
       "contrast": {
         "heading": "readonly is shallow",
         "setup": "The property cannot be reassigned, but it holds an object. Try both changes and note which one PHP refuses.",
-        "lang": "php",
+        "lang": "php expect-error",
         "code": "final class Plan {\n  public function __construct(public readonly ArrayObject $topics) {}\n}\n\n$plan = new Plan(new ArrayObject(['HTML']));\n$plan->topics[] = 'SQL';\necho count($plan->topics), \"\\n\";\n\n$plan->topics = new ArrayObject();",
         "reading": "Appending SQL succeeds, because `readonly` stops reassignment of the property, not changes inside the object it points to, so the count prints 2. The final line tries to replace the property and throws an `Error` saying the readonly property cannot be modified. A class that promises an unchangeable topic list therefore needs to copy the input into an array, or keep the collection private, instead of exposing a mutable object."
       }
@@ -5426,7 +5426,7 @@
         [
           "A display conversion",
           "The instant stays the same while its local representation changes.",
-          "php",
+          "php fragment",
           "$local = $instant->setTimezone(new DateTimeZone('America/New_York'));\necho $local->format('Y-m-d H:i P');",
           "The winter local representation is 2024-01-01 07:00 -05:00."
         ]
@@ -5546,14 +5546,14 @@
         [
           "An independent expected value",
           "The result is hand-derived for a tiny fixture.",
-          "php",
+          "php fragment",
           "check(totalMinutes([20, 30]) === 50, 'Wrong total');",
           "The test compares against an independently known answer."
         ],
         [
           "A declared failure",
           "Only the intended exception counts as success.",
-          "php",
+          "php fragment",
           "$rejected = false;\ntry { totalMinutes([-1]); } catch (InvalidArgumentException) { $rejected = true; }\ncheck($rejected, 'Negative input accepted');",
           "The invalid-input contract is explicitly exercised."
         ]
@@ -5636,7 +5636,7 @@
       "contrast": {
         "heading": "an exception test that accepts any failure",
         "setup": "This test was meant to prove that negative minutes are rejected. A refactor then introduced an unrelated bug inside `totalMinutes`.",
-        "lang": "php",
+        "lang": "php fragment",
         "code": "function totalMinutes(array $items): int {\n  throw new RuntimeException('Bug: storage not ready');\n}\n\n$rejected = false;\ntry {\n  totalMinutes([-1]);\n} catch (Exception) {\n  $rejected = true;\n}\ncheck($rejected, 'Negative input accepted');",
         "reading": "`RuntimeException` is a subclass of `Exception`, so the broad catch records `$rejected = true` and the check passes even though the function never looked at the input. The test now reports that negative minutes are rejected for a reason that has nothing to do with validation. Catching `InvalidArgumentException` narrowly, as in worked example 2, lets the unrelated `RuntimeException` escape and fail the run with its own message. A test should accept only the outcome it was written to prove."
       }
@@ -5673,7 +5673,7 @@
         [
           "A bounded template",
           "Only the fixed structure is authored markup.",
-          "php",
+          "php fragment",
           "$html = '<p>Hello, ' . e($name) . '</p>';",
           "The greeting structure is fixed and the name stays text."
         ]
@@ -5760,7 +5760,7 @@
       "contrast": {
         "heading": "escaped text in an unquoted attribute",
         "setup": "Both templates call the same `e` helper. Only the quotes around the attribute value differ. Print both strings in the CLI worker.",
-        "lang": "php",
+        "lang": "php fragment",
         "code": "$value = 'x onfocus=alert(1) autofocus';\n\necho '<input value=' . e($value) . '>', \"\\n\";\necho '<input value=\"' . e($value) . '\">', \"\\n\";",
         "reading": "`htmlspecialchars` converts `<`, `>`, `&` and quotes, but this value contains none of them, so `e` returns it unchanged. In the first line the output is `<input value=x onfocus=alert(1) autofocus>`, which an HTML parser would read as three attributes, including an event handler. In the second line the same characters sit inside double quotes, so a parser treats them as one value. The helper's contract is HTML text and quoted attributes, and this case shows why the quotes are part of that contract."
       }
@@ -6004,7 +6004,7 @@
       "contrast": {
         "heading": "trimming before checking the shape",
         "setup": "This validator is shorter than worked examples 1 and 2. Send it a normal request and one with `topic[]=HTML` and `minutes=12abc`.",
-        "lang": "php",
+        "lang": "php expect-error",
         "code": "function validateLoose(array $input): array {\n  $topic = trim($input['topic'] ?? '');\n  $minutes = (int) ($input['minutes'] ?? 0);\n  return ['topic' => $topic, 'minutes' => $minutes];\n}\n\nvalidateLoose(['topic' => ['HTML'], 'minutes' => '12abc']);",
         "reading": "When `topic[]=HTML` arrives, `$input['topic']` is an array, and `trim` throws a `TypeError` because internal string functions do not accept arrays in PHP 8. The caller sees an uncaught error instead of a Choose a topic message. If the topic were a string, the `(int)` cast would turn '12abc' into 12 and accept it, and a missing value would become 0. The reference checks `is_string` first and matches the minutes text against a digits pattern before converting, so each case returns a field error."
       }
@@ -6414,7 +6414,7 @@
         [
           "A value parameter",
           "The SQL structure is fixed before the name is supplied.",
-          "php",
+          "php fragment",
           "$stmt = $db->prepare('INSERT INTO notes (title) VALUES (:title)');\n$stmt->execute(['title' => \"Ada's notes\"]);",
           "The apostrophe is stored as data rather than breaking the query."
         ],
@@ -6505,7 +6505,7 @@
       "contrast": {
         "heading": "a search string concatenated into SQL",
         "setup": "Both queries search the notes table for an exact title. Store two notes, then search with the value x' OR '1'='1.",
-        "lang": "php",
+        "lang": "php fragment",
         "code": "$q = \"x' OR '1'='1\";\n\n$rows = $db->query(\n  \"SELECT title FROM notes WHERE title = '\" . $q . \"'\"\n)->fetchAll();\n\n$stmt = $db->prepare('SELECT title FROM notes WHERE title = :title');\n$stmt->execute(['title' => $q]);\n$bound = $stmt->fetchAll();",
         "reading": "In the first query the quote inside the search text closes the string literal, and the rest becomes SQL, so the WHERE clause reads title = 'x' OR '1'='1'. That condition is true for every row, so both notes come back even though neither has that title. In the second query the whole value travels as one parameter, the database compares it with each title as text, and the result is empty. The prepared statement keeps the query structure fixed before any value arrives, which is exactly what concatenation gives up."
       }
@@ -6549,7 +6549,7 @@
         [
           "Rollback ownership",
           "Failure prevents a partial unit from being accepted.",
-          "php",
+          "php fragment",
           "$db->beginTransaction();\ntry { /* related writes */ $db->commit(); }\ncatch (Throwable $error) { if ($db->inTransaction()) $db->rollBack(); throw $error; }",
           "The transaction is rolled back before the failure propagates."
         ]
@@ -6632,7 +6632,7 @@
       "contrast": {
         "heading": "two writes from the same stale version",
         "setup": "Two editors loaded plan 1 at version 3. Each submits a change. Run both updates in sequence with the same expected version.",
-        "lang": "php",
+        "lang": "php fragment",
         "code": "$sql = 'UPDATE plans SET minutes = :minutes, version = version + 1\n        WHERE id = :id AND version = :expected_version';\n$stmt = $db->prepare($sql);\n\n$stmt->execute(['minutes' => 30, 'id' => 1, 'expected_version' => 3]);\n$first = $stmt->rowCount();\n\n$stmt->execute(['minutes' => 45, 'id' => 1, 'expected_version' => 3]);\n$second = $stmt->rowCount();",
         "reading": "The first update matches the row, sets minutes to 30 and moves the version to 4, so `$first` is 1. The second update still expects version 3, which no longer exists, so it matches nothing and `$second` is 0. Without the version predicate the second editor's 45 would silently overwrite the 30. With it the application learns about the conflict, but only if it reads the affected row count and reports it. A zero count with no exception is the whole signal."
       }
@@ -6679,7 +6679,7 @@
         [
           "Separate input roles",
           "A requested object is untrusted input; actor identity has a different origin.",
-          "php",
+          "php fragment",
           "$title = loadOwnedNote($db, $trustedActorId, $requestedNoteId);",
           "The API makes the trust distinction visible."
         ]
@@ -6765,7 +6765,7 @@
       "contrast": {
         "heading": "a lookup scoped by id alone",
         "setup": "Actor 7 owns note 10. Actor 8 owns note 11. Actor 7 changes the id in the URL from 10 to 11.",
-        "lang": "php",
+        "lang": "php fragment",
         "code": "// id only\n$stmt = $db->prepare('SELECT title FROM notes WHERE id = :id');\n$stmt->execute(['id' => 11]);\n\n// id and owner\n$stmt = $db->prepare(\n  'SELECT title FROM notes WHERE id = :id AND owner_id = :actor_id'\n);\n$stmt->execute(['id' => 11, 'actor_id' => 7]);",
         "reading": "Both statements are prepared and immune to injection, yet the first returns actor 8's title to actor 7. Prepared statements protect query structure, not access policy. The second statement includes the trusted actor id in the predicate, so the database returns no row for a note owned by someone else. The application then answers as if the note does not exist, which avoids confirming that id 11 belongs to another account."
       }
@@ -7055,7 +7055,7 @@
         [
           "Separate trust roles",
           "Identity is supplied by a trusted adapter, not copied from input.",
-          "php",
+          "php fragment",
           "$result = createPlan($db, $trustedActorId, $untrustedInput);",
           "The use-case boundary shows which values require validation."
         ],

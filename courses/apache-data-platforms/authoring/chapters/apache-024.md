@@ -48,7 +48,7 @@ Run its explicit preparation only when the compatible project environment is rea
 
 The complete native client is short:
 
-<!-- include: projects/ballista/rust-client/src/main.rs rust -->
+<!-- include: projects/ballista/rust-client/src/main.rs rust external -->
 
 `SessionContext::remote` comes from `ballista::prelude` and returns an ordinary
 DataFusion `SessionContext` whose queries are planned for the remote scheduler, so

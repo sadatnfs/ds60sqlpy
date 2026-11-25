@@ -34,7 +34,7 @@ and the workshop configuration chooses where they are kept:
 The running sum lives in keyed managed state, so a checkpoint records it together
 with the source position:
 
-<!-- include: projects/flink/src/WorkshopJobs.java from="public static final class ManagedTotal" until="public static final class Payload" java -->
+<!-- include: projects/flink/src/WorkshopJobs.java from="public static final class ManagedTotal" until="public static final class Payload" java fragment -->
 
 After the explicit TaskManager restart, the job's recovery evidence must identify
 an actual restored checkpoint, not merely a new successful run. The final sink

@@ -23,7 +23,8 @@ INCLUDE = re.compile(
     r"^<!-- include: (?P<path>[\w./-]+)(?: #(?P<symbol>\w+))?"
     r"""(?: from=(?P<q1>["'])(?P<start>.+?)(?P=q1))?"""
     r"""(?: to=(?P<q2>["'])(?P<end>.+?)(?P=q2))?"""
-    r"""(?: until=(?P<q3>["'])(?P<until>.+?)(?P=q3))? (?P<language>[\w+-]+) -->$""",
+    r"""(?: until=(?P<q3>["'])(?P<until>.+?)(?P=q3))? (?P<language>[\w+-]+)"""
+    r"(?P<flags>(?: [\w=./-]+)*) -->$",
     re.M,
 )
 CASE = re.compile(r"^## Worked case(?: (\w+))?: (.+)$", re.M)
@@ -109,7 +110,10 @@ def excerpt(match: re.Match[str]) -> str:
         raise ValueError(f"Include {relative} cannot be fenced")
     if match["language"] == "python":
         body = python_excerpt(relative, text, first, last, body)
-    return f"From [`{relative}`](../{relative}):\n\n```{match['language']}\n{body}\n```"
+    if match["flags"] and not FENCE_FLAGS.fullmatch(match["flags"].strip()):
+        raise ValueError(f"Include {relative} has unsupported fence flags")
+    info = match["language"] + match["flags"]
+    return f"From [`{relative}`](../{relative}):\n\n```{info}\n{body}\n```"
 
 
 def lab(prose: str, language: str) -> str:
@@ -160,7 +164,11 @@ def key_terms(key: str, entries: Any) -> str:
     return "## Key terms\n\n" + "\n".join(bullets)
 
 
-EXAMPLE_FIELDS = {"title", "language", "code", "output", "interpretation"}
+EXAMPLE_FIELDS = {"title", "language", "code", "output", "interpretation", "fence"}
+FENCE_FLAGS = re.compile(
+    r"(?:fragment|external|expect-error|isolated|prelude=[\w./-]+|profile=[\w-]+)"
+    r"(?: (?:fragment|external|expect-error|isolated|prelude=[\w./-]+|profile=[\w-]+))*"
+)
 
 
 def worked_examples(key: str, entries: Any) -> str:
@@ -183,6 +191,10 @@ def worked_examples(key: str, entries: Any) -> str:
             raise ValueError(f"{key} worked example fields must be non-empty trimmed strings")
         title, language, code = entry["title"], entry["language"], entry["code"]
         interpretation = entry["interpretation"]
+        fence = entry.get("fence", "")
+        if fence and not FENCE_FLAGS.fullmatch(fence):
+            raise ValueError(f"{key} worked example {title} has an unsupported fence: {fence}")
+        info = language + (" " + fence if fence else "")
         if "\n" in title + interpretation or not interpretation.endswith("."):
             raise ValueError(f"{key} worked example {title} needs a one-paragraph interpretation")
         if not re.fullmatch(r"[a-z][a-z0-9+-]*", language) or "```" in code + entry.get(
@@ -200,7 +212,7 @@ def worked_examples(key: str, entries: Any) -> str:
                 raise ValueError(f"{key} worked example {title} is not in canonical Ruff style")
         titles.add(title.casefold())
         codes.add(code)
-        block = f"### {title}\n\n```{language}\n{code}\n```\n\n"
+        block = f"### {title}\n\n```{info}\n{code}\n```\n\n"
         if "output" in entry:
             block += f"```text\n{entry['output']}\n```\n\n"
         blocks.append(block + interpretation)

@@ -227,7 +227,7 @@ contain each other; never assume one “extensions” image has every version.
 
 DBA-only SQL inside that isolated target might include:
 
-```sql
+```sql external
 CREATE EXTENSION pg_trgm;
 
 CREATE EXTENSION citext;

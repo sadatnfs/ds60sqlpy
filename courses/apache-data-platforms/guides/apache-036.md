@@ -43,7 +43,7 @@ The three transactions are written once, when the topic is empty:
 
 From [`projects/streaming/TransactionProbe.java`](../projects/streaming/TransactionProbe.java):
 
-```java
+```java fragment
 private static void produceWhenEmpty() throws Exception {
   if (lastOffset() != 0) {
     return; // Retain existing evidence; validation below rejects partial or unexpected data.

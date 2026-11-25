@@ -82,7 +82,7 @@ If an aggregate is wrong, inspect the generated SQL, grouping grain and input ro
 
 Run this complete finite program in the prepared Python web profile. It exercises real framework clients and bounded local fixtures, then exits. It does not open a browser or start an externally reachable HTTP server. Long-running applications use the separately documented owned projects. Runtime: `python-web`.
 
-```python
+```python isolated
 """Finite Django investigation; fresh process owns settings and disposable fixtures."""
 
 import json

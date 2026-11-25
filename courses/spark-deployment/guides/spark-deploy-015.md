@@ -22,7 +22,7 @@ The supplied `notebook-service.yaml` is a headless Service template for driver R
 
 Inside the prepared notebook kernel, after resolving the actual namespace and Pod name:
 
-```python
+```python external
 from pyspark.sql import SparkSession
 
 spark = (

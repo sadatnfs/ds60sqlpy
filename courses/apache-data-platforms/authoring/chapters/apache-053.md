@@ -32,7 +32,7 @@ The consistency level is set per statement. The check reads the same partition a
 ONE and QUORUM, then requires a TWO read to fail with the driver's `Unavailable`
 error:
 
-<!-- include: projects/cassandra/client.py from='for consistency in [ConsistencyLevel.ONE' to='raise AssertionError("Two-replica' python -->
+<!-- include: projects/cassandra/client.py from='for consistency in [ConsistencyLevel.ONE' to='raise AssertionError("Two-replica' python fragment -->
 
 With one replica, a quorum is \(\lfloor 1/2 \rfloor + 1 = 1\) replica, so QUORUM
 succeeds while TWO needs two live replicas and reports `required_replicas` 2 and

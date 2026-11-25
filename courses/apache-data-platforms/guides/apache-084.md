@@ -100,7 +100,7 @@ Iceberg already records which snapshot is current, and Atlas records who produce
 
 ### Read the snapshot from the table catalog
 
-```python
+```python fragment
 table = catalog.load_table("demo.orders")
 snapshot = table.current_snapshot()
 print(snapshot.snapshot_id, snapshot.summary.operation)

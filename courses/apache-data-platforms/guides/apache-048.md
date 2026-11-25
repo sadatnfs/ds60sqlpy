@@ -56,7 +56,7 @@ with the source position:
 
 From [`projects/flink/src/WorkshopJobs.java`](../projects/flink/src/WorkshopJobs.java):
 
-```java
+```java fragment
 public static final class ManagedTotal extends RichMapFunction<Long, String> {
 
   private transient ValueState<Long> total;

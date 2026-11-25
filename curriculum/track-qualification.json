@@ -29,7 +29,7 @@
             "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
           }
         ],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -105,7 +105,7 @@
             "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
           }
         ],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -172,7 +172,7 @@
           }
         },
         "unavailable": [],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -249,7 +249,7 @@
           }
         },
         "unavailable": [],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -315,7 +315,7 @@
           }
         },
         "unavailable": [],
-        "guide_examples": "Lesson and solution files are checked by the core course checks; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Lesson and solution files are checked by the core course checks; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": false
       },
       "walkthrough": {
@@ -374,7 +374,7 @@
           }
         },
         "unavailable": [],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -448,7 +448,7 @@
             "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
           }
         ],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase. C++ worked examples are also compiled and compared with documented expected outputs by tests/test_cpp_worked_examples.py when a host compiler is present.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them. C++ worked examples are also compiled and compared with documented expected outputs by tests/test_cpp_worked_examples.py when a host compiler is present.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -513,7 +513,7 @@
           }
         },
         "unavailable": [],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -582,7 +582,7 @@
             "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
           }
         ],
-        "guide_examples": "No ordinary executable reference exists for this track; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "No ordinary executable reference exists for this track; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": false
       },
       "walkthrough": {
@@ -642,7 +642,7 @@
           }
         },
         "unavailable": [],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -724,7 +724,7 @@
           }
         },
         "unavailable": [],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -791,7 +791,7 @@
           }
         },
         "unavailable": [],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -860,7 +860,7 @@
             "reason": "Offline source editing and hand-derived references; no DAX execution engine."
           }
         ],
-        "guide_examples": "No ordinary executable reference exists for this track; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "No ordinary executable reference exists for this track; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": false
       },
       "walkthrough": {
@@ -919,7 +919,7 @@
           }
         },
         "unavailable": [],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -993,7 +993,7 @@
             "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
           }
         ],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -1072,7 +1072,7 @@
             "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
           }
         ],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -1141,7 +1141,7 @@
             "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
           }
         ],
-        "guide_examples": "No ordinary executable reference exists for this track; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "No ordinary executable reference exists for this track; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": false
       },
       "walkthrough": {
@@ -1201,7 +1201,7 @@
           }
         },
         "unavailable": [],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -1266,7 +1266,7 @@
           }
         },
         "unavailable": [],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -1353,7 +1353,7 @@
             "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
           }
         ],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase. JavaScript guide fences are also syntax checked with node --check by tests/test_javascript_lessons.py when a host Node is present.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them. JavaScript guide fences are also syntax checked with node --check by tests/test_javascript_lessons.py when a host Node is present.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -1427,7 +1427,7 @@
             "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
           }
         ],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -1492,7 +1492,7 @@
           }
         },
         "unavailable": [],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -1569,7 +1569,7 @@
             "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
           }
         ],
-        "guide_examples": "No ordinary executable reference exists for this track; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "No ordinary executable reference exists for this track; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": false
       },
       "walkthrough": {
@@ -1643,7 +1643,7 @@
             "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
           }
         ],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -1713,7 +1713,7 @@
           }
         },
         "unavailable": [],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -1792,7 +1792,7 @@
             "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
           }
         ],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -1857,7 +1857,7 @@
           }
         },
         "unavailable": [],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -1922,7 +1922,7 @@
           }
         },
         "unavailable": [],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -1987,7 +1987,7 @@
           }
         },
         "unavailable": [],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -2051,7 +2051,7 @@
           }
         },
         "unavailable": [],
-        "guide_examples": "Lesson and solution files are checked by the core course checks; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Lesson and solution files are checked by the core course checks; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": false
       },
       "walkthrough": {
@@ -2119,7 +2119,7 @@
             "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
           }
         ],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -2186,7 +2186,7 @@
           }
         },
         "unavailable": [],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -2251,7 +2251,7 @@
           }
         },
         "unavailable": [],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -2335,7 +2335,7 @@
             "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
           }
         ],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -2404,7 +2404,7 @@
             "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
           }
         ],
-        "guide_examples": "No ordinary executable reference exists for this track; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "No ordinary executable reference exists for this track; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": false
       },
       "walkthrough": {
@@ -2465,7 +2465,7 @@
           }
         },
         "unavailable": [],
-        "guide_examples": "Lesson and solution files are checked by the core course checks; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Lesson and solution files are checked by the core course checks; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": false
       },
       "walkthrough": {
@@ -2529,7 +2529,7 @@
           }
         },
         "unavailable": [],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase. Statistics book fences are also checked for AST parity with the executed examples by scripts/sync_example_fences.py.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them. Statistics book fences are also checked for AST parity with the executed examples by scripts/sync_example_fences.py.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -2596,7 +2596,7 @@
           }
         },
         "unavailable": [],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -2661,7 +2661,7 @@
           }
         },
         "unavailable": [],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",
@@ -2745,7 +2745,7 @@
             "reason": "Reading or separately documented manual workflow; no ordinary worker execution."
           }
         ],
-        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
+        "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are run or statically checked by scripts/check_guide_examples.py, which reports documentation, fragment, external and GPU blocks without running them.",
         "walkthrough_outputs_checked": true,
         "evidence": {
           "ci_run": "45399494825",

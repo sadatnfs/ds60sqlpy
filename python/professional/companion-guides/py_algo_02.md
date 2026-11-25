@@ -75,6 +75,8 @@ Sorting by the whole tuple uses label as a second key and puts a before z. Sorti
 ### Example 2
 
 ```python
+from bisect import bisect_left, bisect_right
+
 values = [1, 2, 2, 2, 5]
 start = bisect_left(values, 2)
 stop = bisect_right(values, 2)

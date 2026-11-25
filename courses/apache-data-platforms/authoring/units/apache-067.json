@@ -34,7 +34,8 @@
       "title": "Confirm a second reader sees the same snapshot",
       "language": "python",
       "code": "table = catalog.load_table(\"ds60.orders_iceberg\")\nsnapshot = table.current_snapshot()\nprint(snapshot.snapshot_id, table.metadata_location)\nprint(sorted(table.scan().to_arrow()[\"id\"].to_pylist()))",
-      "interpretation": "This PyIceberg fragment assumes a catalog object already configured against the same Hive metastore. A compatible second reader should print the same metadata_location that Hive stored and the IDs [1, 2, 3]. Matching rows with a different metadata location means the reader used another catalog or a stale pointer. Treat this as a prepared extension until both readers have actually run against the owned table."
+      "interpretation": "This PyIceberg fragment assumes a catalog object already configured against the same Hive metastore. A compatible second reader should print the same metadata_location that Hive stored and the IDs [1, 2, 3]. Matching rows with a different metadata location means the reader used another catalog or a stale pointer. Treat this as a prepared extension until both readers have actually run against the owned table.",
+      "fence": "fragment"
     }
   ],
   "evidence": "Prepared actual Hive4.2.1/JDK21/PostgreSQL project; live SQL, independent Java Thrift, lifecycle, Iceberg and restore observations remain distinct acceptance gates.",

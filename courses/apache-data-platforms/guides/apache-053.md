@@ -46,7 +46,7 @@ error:
 
 From [`projects/cassandra/client.py`](../projects/cassandra/client.py):
 
-```python
+```python fragment
 for consistency in [ConsistencyLevel.ONE, ConsistencyLevel.QUORUM]:
     statement = SimpleStatement(
         ID_QUERY,

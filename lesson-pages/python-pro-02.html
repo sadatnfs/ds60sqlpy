@@ -572,7 +572,9 @@ results<span class="syntax-punctuation">,</span> peak <span class="syntax-operat
 <p><strong>Verify:</strong> adapt blocking I/O; use ThreadPoolExecutor(max workers=N) for deterministic time.sleep jobs; compare sequential and threaded elapsed time with generous bounds, then verify ordered results rather than treating speed as the correctness assertion; explain why a thread pool requires a deliberate max workers, even if the remote service could theoretically accept more requests.</p>
 <h5 id="guide--exercise-5-isolate-cpu-work">Exercise 5: isolate CPU work<a class="heading-anchor" href="#guide--exercise-5-isolate-cpu-work" aria-label="Link to this section">#</a></h5>
 <p>Make the CPU function a top-level function with serializable arguments and results. Use:</p>
-<pre class="highlighted-code"><code class="language-python">multiprocessing<span class="syntax-operator">.</span>get_context<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spawn</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> multiprocessing
+
+multiprocessing<span class="syntax-operator">.</span>get_context<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spawn</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>and <code>ProcessPoolExecutor</code>. Run process creation only beneath:</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
     <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span></code></pre>

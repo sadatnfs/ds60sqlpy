@@ -28,7 +28,8 @@
       "title": "Read component health instead of an HTTP status",
       "language": "python",
       "code": "import json\nimport urllib.request\n\nurl = \"http://127.0.0.1:8080/api/v2/monitor/health\"\nwith urllib.request.urlopen(url, timeout=5) as response:\n    data = json.loads(response.read(16_385))\ncomponents = (\"metadatabase\", \"scheduler\", \"dag_processor\", \"triggerer\")\nprint({name: data[name][\"status\"] for name in components})",
-      "interpretation": "This mirrors the project health.py, which runs inside the Airflow container. A healthy deployment prints four entries, each with the status healthy. The endpoint can answer with HTTP 200 while the scheduler entry says unhealthy, because the API server is a separate process from the scheduler; a probe that stops at the status code would report a stalled platform as fine. If only dag_processor is unhealthy, new or edited DAG files will not appear even though existing runs continue."
+      "interpretation": "This mirrors the project health.py, which runs inside the Airflow container. A healthy deployment prints four entries, each with the status healthy. The endpoint can answer with HTTP 200 while the scheduler entry says unhealthy, because the API server is a separate process from the scheduler; a probe that stops at the status code would report a stalled platform as fine. If only dag_processor is unhealthy, new or edited DAG files will not appear even though existing runs continue.",
+      "fence": "external"
     },
     {
       "title": "Stop, resume and compare saved history",

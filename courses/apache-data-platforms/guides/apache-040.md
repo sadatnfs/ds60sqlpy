@@ -89,7 +89,7 @@ explicit compatibility rules when adding values that old rows never contained.
 
 ### Confirm a rename keeps the field identifier
 
-```python
+```python fragment
 before = table.schema().find_field("amount").field_id
 with table.update_schema() as update:
     update.rename_column("amount", "revenue")
@@ -101,7 +101,7 @@ Both identifiers print the same small integer and the comparison is True, becaus
 
 ### Add an optional column without rewriting old rows
 
-```python
+```python fragment
 from pyiceberg.types import LongType
 
 with table.update_schema() as update:

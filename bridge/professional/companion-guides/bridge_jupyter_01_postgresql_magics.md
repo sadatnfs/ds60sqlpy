@@ -278,7 +278,7 @@ safe identifier boundary.
 
 With `autopandas=False`:
 
-```python
+```python fragment
 orders_frame = orders_result.DataFrame()
 ```
 

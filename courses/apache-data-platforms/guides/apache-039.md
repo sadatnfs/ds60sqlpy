@@ -93,7 +93,7 @@ independently selectable earlier snapshot, both pointing to real local files.
 
 ### List the files a scan will read
 
-```python
+```python fragment
 for task in table.scan().plan_files():
     print(task.file.file_path, task.file.record_count, task.file.file_format)
 ```
@@ -102,7 +102,7 @@ Run after the first append in the lesson program, this prints one line per data 
 
 ### Reopen the catalog and read by snapshot
 
-```python
+```python fragment
 reopened = load_catalog(
     "lesson",
     type="sql",

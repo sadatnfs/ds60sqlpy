@@ -63,6 +63,8 @@ The exercises connect these mechanisms to categorical aggregation, row selection
 ### Example 1
 
 ```python
+import numpy as np
+
 values = np.array([10, 20, 30, 40])
 selected = values[np.array([3, 1, 1])]
 selected[0] = -1

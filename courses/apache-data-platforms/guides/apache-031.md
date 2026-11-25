@@ -41,7 +41,7 @@ The whole check is one task in the connection DAG:
 
 From [`projects/airflow/dags/classroom_workflows.py`](../projects/airflow/dags/classroom_workflows.py):
 
-```python
+```python fragment
 @dag(
     dag_id="classroom_connections",
     schedule=None,

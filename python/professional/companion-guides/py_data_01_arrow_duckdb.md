@@ -152,7 +152,7 @@ elapsed profiles establish what was actually skipped.
 
 ### Micro-example A: observe CSV's string-only boundary
 
-```python
+```python external
 import csv
 from pathlib import Path
 

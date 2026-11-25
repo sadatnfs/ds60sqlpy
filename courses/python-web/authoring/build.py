@@ -184,7 +184,9 @@ def outputs() -> dict[Path, str]:
         )
         refs = "\n".join(f"- [{label}]({url})" for label, url in unit["sources"])
         example = (
-            program.rstrip() if reading else f"```{unit['language']}\n" + program.rstrip() + "\n```"
+            program.rstrip()
+            if reading
+            else f"```{unit['language']} isolated\n" + program.rstrip() + "\n```"
         )
         text = (
             header

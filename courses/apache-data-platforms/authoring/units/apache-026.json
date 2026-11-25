@@ -34,7 +34,8 @@
       "title": "Limit rows and bytes before collecting",
       "language": "python",
       "code": "records = ctx.sql(\"SELECT id, amount FROM orders ORDER BY id LIMIT 3\").to_arrow_table().to_pylist()\nif len(json.dumps(records).encode()) > 2048:\n    raise ValueError(\"Output exceeds byte budget\")",
-      "interpretation": "This fragment from the project client puts the LIMIT in the query so executors stop early and the client receives at most three rows, then enforces a byte budget on what it will print. Collecting a full table and slicing in Python would move every row through the scheduler first. Treat a row limit and a byte limit as separate controls, since three rows with large text values can still exceed a safe response size."
+      "interpretation": "This fragment from the project client puts the LIMIT in the query so executors stop early and the client receives at most three rows, then enforces a byte budget on what it will print. Collecting a full table and slicing in Python would move every row through the scheduler first. Treat a row limit and a byte limit as separate controls, since three rows with large text values can still exceed a safe response size.",
+      "fence": "fragment"
     }
   ],
   "evidence": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger.",

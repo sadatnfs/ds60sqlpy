@@ -43,7 +43,7 @@ The probe's producer configuration states the delivery contract explicitly:
 
 From [`projects/streaming/TransactionProbe.java`](../projects/streaming/TransactionProbe.java):
 
-```java
+```java fragment
 private static Properties producerProperties() {
   var properties = new Properties();
   properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP);
@@ -113,7 +113,7 @@ with no invented network-failure qualification or cross-system exactly-once clai
 
 ### Configure an idempotent transactional producer
 
-```java
+```java fragment
 var properties = new Properties();
 properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP);
 properties.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");

@@ -63,6 +63,8 @@ All timestamps in these fixtures are already timezone-aware UTC. The functions r
 ### Example 1
 
 ```python
+import pandas as pd
+
 events = pd.DataFrame({"event_id": [1, 2, 3], "customer_id": ["a", "b", "c"]})
 dimension = pd.DataFrame({"customer_id": ["a", "b"], "segment": ["small", "large"]})
 joined = events.merge(

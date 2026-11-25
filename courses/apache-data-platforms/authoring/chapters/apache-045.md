@@ -29,12 +29,12 @@ client submission alone is not accepted as execution evidence.
 
 The bounded mode of the Java job builds this pipeline:
 
-<!-- include: projects/flink/src/WorkshopJobs.java from="var source = FileSource" to="region-total" java -->
+<!-- include: projects/flink/src/WorkshopJobs.java from="var source = FileSource" to="region-total" java fragment -->
 
 `keyBy` sends every order for one region to the same parallel instance, and the
 keyed function below keeps one running total per region:
 
-<!-- include: projects/flink/src/WorkshopJobs.java from="public static final class RunningTotal" until="public static final class WindowTotals" java -->
+<!-- include: projects/flink/src/WorkshopJobs.java from="public static final class RunningTotal" until="public static final class WindowTotals" java fragment -->
 
 A running aggregate can emit several updates for one key. The first east record
 produces one partial total and the later east record advances it. Those updates
@@ -59,7 +59,7 @@ than a disagreement about the source amounts.
 The SQL mode registers the fixture as a filesystem table and asks the grouped
 question in batch mode:
 
-<!-- include: projects/flink/src/WorkshopJobs.java from="TableEnvironment table = TableEnvironment.create" until="var lines = new ArrayList" java -->
+<!-- include: projects/flink/src/WorkshopJobs.java from="TableEnvironment table = TableEnvironment.create" until="var lines = new ArrayList" java fragment -->
 
 The `CREATE TEMPORARY TABLE` statement names the same columns as the Java source,
 and `GROUP BY region` returns one final row per region instead of a stream of

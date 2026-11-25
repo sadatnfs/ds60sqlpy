@@ -98,7 +98,7 @@ The retry settings live on the task decorator in the DAG shown in apache-027:
 
 From [`projects/airflow/dags/classroom_workflows.py`](../projects/airflow/dags/classroom_workflows.py):
 
-```python
+```python fragment
 @task(retries=1, retry_delay=timedelta(seconds=1), execution_timeout=timedelta(seconds=30))
 ```
 

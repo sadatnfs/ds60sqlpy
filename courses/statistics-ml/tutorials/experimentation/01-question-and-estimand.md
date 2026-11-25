@@ -45,7 +45,7 @@ A valid triggered comparison can condition on the recorded pretreatment opportun
 
 Append this block to [experiment_01.py](examples/experiment_01.py) after its helper functions. It reuses `experiment_fixture` and `welch_summary` and estimates both targets from the same randomized records.
 
-```python
+```python prelude=examples/experiment_01.py
 users, _, untreated, effect = experiment_fixture()
 for label, rows in [("all assigned", users), ("triggered only", users[users.trigger])]:
     est, se, ci = welch_summary(

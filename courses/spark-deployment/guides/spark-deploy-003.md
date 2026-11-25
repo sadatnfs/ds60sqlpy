@@ -26,7 +26,7 @@ The two workers share one YAML anchor and differ only in name, command and limit
 
 From [`projects/cluster-lab/compose.yaml`](../projects/cluster-lab/compose.yaml):
 
-```yaml
+```yaml fragment
 worker-a:
   <<: *runtime
   hostname: worker-a

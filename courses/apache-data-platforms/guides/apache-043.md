@@ -91,7 +91,7 @@ and retention plan.
 
 ### Delete one order from the current snapshot
 
-```python
+```python fragment
 first = table.current_snapshot().snapshot_id
 table.delete("id = 1")
 current = table.scan().to_arrow()
@@ -102,7 +102,7 @@ The current view lists ids 2 and 3 while the first snapshot still returns three 
 
 ### Expire the historical snapshot
 
-```python
+```python fragment
 table.maintenance.expire_snapshots().by_id(first).commit()
 print(first in {snapshot.snapshot_id for snapshot in table.snapshots()})
 print(sorted(table.scan().to_arrow()["id"].to_pylist()))

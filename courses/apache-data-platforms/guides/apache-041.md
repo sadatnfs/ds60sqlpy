@@ -95,7 +95,7 @@ row-level correctness remains mandatory.
 
 ### Add an identity partition on region
 
-```python
+```python fragment
 from pyiceberg.transforms import IdentityTransform
 
 original = table.spec().spec_id
@@ -108,7 +108,7 @@ The spec identifier increases, typically from 0 to 1, and the printed spec lists
 
 ### Inspect spec identifiers in an east scan
 
-```python
+```python fragment
 selected = table.scan(row_filter="region = 'east'")
 print(sorted(task.file.spec_id for task in selected.plan_files()))
 print(sorted(selected.to_arrow()["id"].to_pylist()))

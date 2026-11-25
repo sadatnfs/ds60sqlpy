@@ -102,7 +102,7 @@ read-only verification query. IDs must be unique and lexically ordered. Once a
 checksum is recorded, editing that migration is drift and must stop delivery.
 Create a new migration instead.
 
-```python
+```python prelude=../solutions/bridge_ops_01_migration_observability_solution.py
 Migration(
     migration_id="20260730_002_release_source",
     description="Expand the lab with an additive source label",

@@ -89,7 +89,7 @@ The [complete Airflow workshop](../projects/airflow/README.md) provides the main
 
 ### Read component health instead of an HTTP status
 
-```python
+```python external
 import json
 import urllib.request
 

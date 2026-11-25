@@ -27,7 +27,7 @@ are explicit rather than inherited:
 
 From [`projects/cluster-lab/kubernetes/submit.py`](../projects/cluster-lab/kubernetes/submit.py):
 
-```python
+```python fragment
 return [
     args.spark_submit,
     "--master",

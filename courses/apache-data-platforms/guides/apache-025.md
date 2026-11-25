@@ -103,7 +103,7 @@ The failure check stops the only executor, submits a fresh capacity-failure requ
 
 ### Refuse to replay a pending receipt
 
-```python
+```python fragment
 folder = ROOT / "receipts"
 if list(folder.glob("*.pending")):
     raise ValueError("A pending receipt needs reconciliation; no query was replayed")

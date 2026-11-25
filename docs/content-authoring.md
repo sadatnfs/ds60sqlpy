@@ -80,6 +80,35 @@ must preserve selectable text and work without a CDN. Unknown languages should
 remain readable escaped text; do not mislabel them as Python merely to obtain
 colors. Adding a syntax lexer does not implement execution for a new language.
 
+Guide examples are executed by `scripts/check_guide_examples.py` (see
+[Validation](validation.md#guide-example-execution)), so a fence states how its
+code should be treated. Put space separated annotations after the language tag:
+
+- `fragment`: an intentionally partial excerpt; reported, not run.
+- `external`: needs a browser, GPU, cluster, network, secret or a prepared
+  local artifact such as a trained model; reported, not run.
+- `expect-error`: the code must fail, as in a contrast example that shows the
+  error a learner would see.
+- `isolated`: a complete program that sets process-wide state (Django settings,
+  say) and must start in a fresh session.
+- `prelude=<path>`: a companion file, relative to the guide, whose definitions
+  load into the Python, R or Scala session before the block. A Python prelude
+  skips its `__main__` entry point; an R or Scala prelude runs in full, so it
+  should only define things.
+- `profile=<name>`: the worker profile that runs the block, for code whose
+  lesson image lacks its libraries (a pandas sketch in a Spark lesson, say).
+
+Blocks without an annotation must run as written. Python, R and Julia blocks in
+one guide share a cumulative session, so a later block may use an earlier
+definition; compiled and scripting languages run each block as a complete
+program. Annotate honestly: `fragment` and `external` are for code that cannot
+run in the classroom, not for code that is merely broken. Generated guides carry
+the same annotations from their sources. A JSON worked example takes them in its
+optional `fence` field, a Markdown include marker
+(`<!-- include: projects/... python fragment -->`) takes them after the
+language, and a web contrast example takes `fragment`, `external` or
+`expect-error` after its `lang` value. The builders reject any other token.
+
 `curriculum/math-prose.json` is the reviewed migration source for older ASCII
 formulas. `scripts/normalize_math_prose.py` applies only exact scoped mappings,
 preserving existing math, links, inline code, fenced code, notebook code cells

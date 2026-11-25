@@ -18,7 +18,7 @@ The workshop's own submit call in `lab.py` runs `spark-submit` inside the driver
 
 From [`projects/cluster-lab/lab.py`](../projects/cluster-lab/lab.py):
 
-```python
+```python fragment
 options = [
     "--hold-seconds",
     str(args.hold_seconds),
@@ -138,7 +138,7 @@ The script reads the same argument list that lab.py passes to spark-submit and a
 
 ## Worked example: recording driver and task placement from inside the application
 
-```python
+```python external
 import os
 import socket
 
@@ -162,7 +162,7 @@ finally:
     spark.stop()
 ```
 
-This PySpark block is shown without output because the authoring machine has no Spark installation, so any host names or PIDs printed here would be invented. On the workshop driver, expect the first line to report driver and the partition rows to name worker-a and worker-b, each with Python worker PIDs that may repeat across containers because every container has its own PID namespace. That repetition is why the bounded job records host and PID together. Eight partitions of 800 rows should each report a count of 100. If every partition reports the same host, either one worker failed to register or the executors were placed on one worker by the resource request; compare the executor inventory from the driver UI before blaming the network. A placement trace like this establishes which container ran which partition, which is narrower than proving separate physical hosts, since both workers share one laptop.
+This PySpark block is shown without output because it must run on the workshop's Standalone cluster, and host names or PIDs copied from any other machine would mislead. On the workshop driver, expect the first line to report driver and the partition rows to name worker-a and worker-b, each with Python worker PIDs that may repeat across containers because every container has its own PID namespace. That repetition is why the bounded job records host and PID together. Eight partitions of 800 rows should each report a count of 100. If every partition reports the same host, either one worker failed to register or the executors were placed on one worker by the resource request; compare the executor inventory from the driver UI before blaming the network. A placement trace like this establishes which container ran which partition, which is narrower than proving separate physical hosts, since both workers share one laptop.
 
 ## Diagnose and transfer
 

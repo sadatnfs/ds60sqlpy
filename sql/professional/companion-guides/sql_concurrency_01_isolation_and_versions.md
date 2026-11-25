@@ -296,7 +296,7 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training
 
 In A, establish a view and leave the transaction open:
 
-```sql
+```sql external
 BEGIN ISOLATION LEVEL READ COMMITTED;
 SET LOCAL statement_timeout = '10s';
 
@@ -312,7 +312,7 @@ WHERE
 
 Expect `(A,5,1)`. In B, make and commit one guarded write:
 
-```sql
+```sql external
 BEGIN;
 SET LOCAL lock_timeout = '2s';
 
@@ -343,7 +343,7 @@ visibility evidence; the single-session default script is not.
 For a contrasting run, reset only the fixture row in B using the following
 statement when both previous transactions have ended:
 
-```sql
+```sql external
 UPDATE
   sql_concurrency_live.stock
 SET

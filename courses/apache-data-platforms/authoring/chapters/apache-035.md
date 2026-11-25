@@ -27,7 +27,7 @@ the records and the group had no committed progress that advanced past them.
 
 Each read in the probe uses these consumer settings and this bounded loop:
 
-<!-- include: projects/streaming/ConsumerProbe.java from="private static Properties settings" until="public static void main" java -->
+<!-- include: projects/streaming/ConsumerProbe.java from="private static Properties settings" until="public static void main" java fragment -->
 
 `enable.auto.commit=false` means that progress is recorded only by the explicit
 `commitSync` call, and `auto.offset.reset=earliest` decides where a group with no

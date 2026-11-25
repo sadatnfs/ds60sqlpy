@@ -66,7 +66,7 @@ These are local classic Spark 4.3.0 tests. They qualify the finite semantics and
 
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
-```scala
+```scala prelude=../solutions/spark-037_solution.scala
 import org.apache.spark.sql.functions._
 import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
@@ -108,7 +108,7 @@ val invalidPaths = prepareCase(
 )
 ```
 
-```python
+```python prelude=../solutions/spark-037_solution.py
 from pyspark.sql import functions as F
 from pathlib import Path
 import tempfile

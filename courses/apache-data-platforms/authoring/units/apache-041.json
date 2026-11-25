@@ -32,13 +32,15 @@
       "title": "Add an identity partition on region",
       "language": "python",
       "code": "from pyiceberg.transforms import IdentityTransform\n\noriginal = table.spec().spec_id\nwith table.update_spec() as update:\n    update.add_field(\"region\", IdentityTransform(), \"region_partition\")\nprint(original, table.spec().spec_id, table.spec())",
-      "interpretation": "The spec identifier increases, typically from 0 to 1, and the printed spec lists region_partition with an identity transform. Files written before the change keep spec 0 and stay unpartitioned; only new appends use the new layout. Iceberg records which spec wrote each file, so nothing has to be moved, but old files cannot be pruned by region until they are rewritten."
+      "interpretation": "The spec identifier increases, typically from 0 to 1, and the printed spec lists region_partition with an identity transform. Files written before the change keep spec 0 and stay unpartitioned; only new appends use the new layout. Iceberg records which spec wrote each file, so nothing has to be moved, but old files cannot be pruned by region until they are rewritten.",
+      "fence": "fragment"
     },
     {
       "title": "Inspect spec identifiers in an east scan",
       "language": "python",
       "code": "selected = table.scan(row_filter=\"region = 'east'\")\nprint(sorted(task.file.spec_id for task in selected.plan_files()))\nprint(sorted(selected.to_arrow()[\"id\"].to_pylist()))",
-      "interpretation": "The planned files carry both spec identifiers: the old unpartitioned file must be read because it might contain east rows, while the new west partition file is skipped. The row ids are 1, 3 and 4, which matches the full data regardless of layout. When pruning seems weak after a partition change, count planned files per spec; many old-spec files mean a rewrite is the missing step."
+      "interpretation": "The planned files carry both spec identifiers: the old unpartitioned file must be read because it might contain east rows, while the new west partition file is skipped. The row ids are 1, 3 and 4, which matches the full data regardless of layout. When pruning seems weak after a partition change, count planned files per spec; many old-spec files mean a rewrite is the missing step.",
+      "fence": "fragment"
     }
   ],
   "evidence": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded.",

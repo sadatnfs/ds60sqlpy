@@ -27,7 +27,7 @@ and waits for the two known historical data intervals. Each interval selects
 synthetic source orders using a half-open window \([a,b)\), writes a versioned
 partition and returns a small source-bound reference.
 
-<!-- include: projects/airflow/dags/classroom_workflows.py #orders_workflow python -->
+<!-- include: projects/airflow/dags/classroom_workflows.py #orders_workflow python fragment -->
 
 The `@dag` decorator turns `orders_workflow` into a DAG definition, and each
 `@task` function becomes a task. Calling `fail_once()` inside the DAG body does not

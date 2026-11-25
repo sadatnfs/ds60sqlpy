@@ -62,7 +62,7 @@ The server exposes one descriptor and one ticket and rejects every other value:
 
 From [`projects/arrow-flight/service.py`](../projects/arrow-flight/service.py):
 
-```python
+```python fragment
 class FixtureServer(flight.FlightServerBase):  # type: ignore[misc]
     def __init__(self, state: Path, host: str, port: int) -> None:
         super().__init__((host, port))

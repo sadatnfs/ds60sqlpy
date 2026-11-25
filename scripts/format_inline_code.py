@@ -1255,7 +1255,7 @@ def web_example_slots(value: Any, path: str) -> dict[tuple[str | int, ...], str]
                 not isinstance(example, list)
                 or len(example) != 5
                 or not all(isinstance(item, str) for item in example)
-                or re.fullmatch(r"[A-Za-z0-9_+-]+", example[2]) is None
+                or re.fullmatch(r"[A-Za-z0-9_+-]+(?: [A-Za-z0-9_+=./-]+)*", example[2]) is None
             ):
                 raise FormatFailure(
                     "Web examples require heading, intro, language, code and expected text"

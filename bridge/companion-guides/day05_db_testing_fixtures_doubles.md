@@ -68,6 +68,11 @@ Suppose the rule is “sum all stored order amounts for this customer.” The
 business function needs only this behavior:
 
 ```python
+from collections.abc import Sequence
+from decimal import Decimal
+from typing import Protocol
+
+
 class AmountSource(Protocol):
     def for_customer(self, customer_id: int) -> Sequence[Decimal]: ...
 ```

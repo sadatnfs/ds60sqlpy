@@ -32,19 +32,22 @@
       "title": "Reject a commit based on stale metadata",
       "language": "python",
       "code": "from pyiceberg.exceptions import CommitFailedException\nfrom pyiceberg.types import LongType\n\nstale = catalog.load_table(\"demo.orders\")\nwith table.update_schema() as update:\n    update.add_column(\"note\", LongType())\ntry:\n    with stale.update_schema() as update:\n        update.add_column(\"stale_field\", LongType())\nexcept CommitFailedException as error:\n    print(\"rejected:\", type(error).__name__)",
-      "interpretation": "The second writer loaded the table before the note column existed, so its commit asserts a schema that is no longer current, and the SQL catalog refuses the pointer swap. The output names CommitFailedException. Silent success here would mean the catalog accepted a last-writer-wins update and lost note. The same check protects concurrent appends from replacing each other's snapshots."
+      "interpretation": "The second writer loaded the table before the note column existed, so its commit asserts a schema that is no longer current, and the SQL catalog refuses the pointer swap. The output names CommitFailedException. Silent success here would mean the catalog accepted a last-writer-wins update and lost note. The same check protects concurrent appends from replacing each other's snapshots.",
+      "fence": "fragment"
     },
     {
       "title": "Reload, revalidate and retry the intended change",
       "language": "python",
       "code": "current = catalog.load_table(\"demo.orders\")\nnames = current.schema().column_names\nif \"stale_field\" not in names:\n    with current.update_schema() as update:\n        update.add_column(\"stale_field\", LongType())\nprint(catalog.load_table(\"demo.orders\").schema().column_names)",
-      "interpretation": "The retry starts from freshly loaded metadata and checks whether its change is still needed before committing, so the final column list contains id, region, amount, note and stale_field. Blindly retrying the old update object would fail again, and retrying a data append without revalidation can double write rows. Decide per operation whether a conflict should retry, merge or stop for a human."
+      "interpretation": "The retry starts from freshly loaded metadata and checks whether its change is still needed before committing, so the final column list contains id, region, amount, note and stale_field. Blindly retrying the old update object would fail again, and retrying a data append without revalidation can double write rows. Decide per operation whether a conflict should retry, merge or stop for a human.",
+      "fence": "fragment"
     },
     {
       "title": "Inspect the metadata pointer after each commit",
       "language": "python",
       "code": "print(catalog.load_table(\"demo.orders\").metadata_location)\nwith current.update_schema() as update:\n    update.add_column(\"reviewed\", LongType())\nprint(catalog.load_table(\"demo.orders\").metadata_location)",
-      "interpretation": "Each line prints a different metadata JSON path under the table metadata directory, with an incremented version prefix. The SQL catalog row stores only this pointer, so a commit is a compare-and-swap on that row. When diagnosing a conflict, compare the location a writer loaded with the current one; if they differ, the writer was stale."
+      "interpretation": "Each line prints a different metadata JSON path under the table metadata directory, with an incremented version prefix. The SQL catalog row stores only this pointer, so a commit is a compare-and-swap on that row. When diagnosing a conflict, compare the location a writer loaded with the current one; if they differ, the writer was stale.",
+      "fence": "fragment"
     }
   ],
   "evidence": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded.",

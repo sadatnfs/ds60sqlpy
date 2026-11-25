@@ -85,20 +85,16 @@ ROUTE_LABELS = {
     "gpu-separate": "not validated on this platform",
 }
 WALKTHROUGH_ROUTES = frozenset({"live-python", "live-sql", "hand-derived", "authored", "na"})
-NOT_EXECUTED = "are not executed in this phase"
+GUIDE_RUNNER = (
+    "guide code blocks are run or statically checked by scripts/check_guide_examples.py, "
+    "which reports documentation, fragment, external and GPU blocks without running them"
+)
 GUIDE_PREFIX = {
     "core": (
-        "Lesson and solution files are checked by the core course checks; guide code "
-        "blocks are covered by content rendering checks and " + NOT_EXECUTED + "."
+        "Lesson and solution files are checked by the core course checks; " + GUIDE_RUNNER + "."
     ),
-    "reference": (
-        "Executable reference checked by the CI corpus; guide code blocks are covered "
-        "by content rendering checks and " + NOT_EXECUTED + "."
-    ),
-    "none": (
-        "No ordinary executable reference exists for this track; guide code blocks are "
-        "covered by content rendering checks and " + NOT_EXECUTED + "."
-    ),
+    "reference": "Executable reference checked by the CI corpus; " + GUIDE_RUNNER + ".",
+    "none": "No ordinary executable reference exists for this track; " + GUIDE_RUNNER + ".",
 }
 DASHES = ("\u2014", "\u2013")
 TRACK_NAME = re.compile(r"[a-z][a-z0-9-]{0,60}")

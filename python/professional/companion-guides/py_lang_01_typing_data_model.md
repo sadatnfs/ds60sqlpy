@@ -189,7 +189,7 @@ except StopIteration:
 Implement the three promised return behaviors. Reject boolean text other than
 `true` and `false`. In VS Code, inspect the inferred type of:
 
-```python
+```python prelude=../solutions/py_lang_01_typing_data_model_solution.py
 number = parse_scalar("12", "int")
 flag = parse_scalar("true", "bool")
 ```

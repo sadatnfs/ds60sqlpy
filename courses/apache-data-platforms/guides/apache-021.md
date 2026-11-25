@@ -45,7 +45,7 @@ runs the grouped query, then repeats the query in an embedded DataFusion session
 
 From [`projects/ballista/client.py`](../projects/ballista/client.py):
 
-```python
+```python fragment
 def context() -> BallistaSessionContext:
     return BallistaSessionContext(
         "df://localhost:50050", cluster_config={"datafusion.execution.target_partitions": "2"}

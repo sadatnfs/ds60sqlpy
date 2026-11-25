@@ -66,6 +66,13 @@ By the end, you can:
 ## Worked example: conversion is part of validation
 
 ```python
+from decimal import ROUND_HALF_EVEN, Decimal
+
+
+class RowValidationError(ValueError):
+    """A source row that cannot become a Sale."""
+
+
 raw_amount = "12.345"
 amount = Decimal(raw_amount)
 if not amount.is_finite() or amount <= 0:

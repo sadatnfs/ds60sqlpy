@@ -95,7 +95,10 @@ def check_contrast(n: int, item: object) -> None:
         raise ValueError(f"web-{n:03d} contrast heading cannot contain ':' or '*'")
     plain_text(n, "contrast setup", item["setup"])
     plain_text(n, "contrast reading", item["reading"])
-    if item["lang"] not in {"html", "css", "js", "php", "text", "http", "sh", "sql", "yaml"}:
+    lang, *flags = str(item["lang"]).split(" ")
+    if lang not in {"html", "css", "js", "php", "text", "http", "sh", "sql", "yaml"} or any(
+        flag not in {"fragment", "external", "expect-error"} for flag in flags
+    ):
         raise ValueError(f"web-{n:03d} contrast lang is not a supported fence language")
     code = item["code"]
     if not isinstance(code, str) or not code.strip() or "```" in code:

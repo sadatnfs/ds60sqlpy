@@ -6,10 +6,15 @@ from __future__ import annotations
 import argparse
 import ast
 import json
+import re
 from pathlib import Path
 
 BASE = Path(__file__).resolve().parents[1]
 ROOT = BASE.parents[1]
+FENCE_FLAGS = re.compile(
+    r"(?:fragment|external|expect-error|isolated|prelude=[\w./-]+|profile=[\w-]+)"
+    r"(?: (?:fragment|external|expect-error|isolated|prelude=[\w./-]+|profile=[\w-]+))*"
+)
 
 
 def key_terms(unit: dict) -> str:
@@ -31,6 +36,9 @@ def worked_examples(unit: dict, prose: str, seen: set[str]) -> str:
             raise ValueError(unit["id"] + " worked examples need title, language, code and reading")
         if any(set(v) & set("\u2013\u2014") for v in values):
             raise ValueError(unit["id"] + " worked examples must not use em or en dashes")
+        fence = item.get("fence", "")
+        if fence and not (isinstance(fence, str) and FENCE_FLAGS.fullmatch(fence)):
+            raise ValueError(unit["id"] + " has an unsupported worked example fence")
         for v in (item["title"], item["code"], item["interpretation"]):
             if v.casefold() in seen:
                 raise ValueError(unit["id"] + " repeats worked example content")
@@ -39,7 +47,8 @@ def worked_examples(unit: dict, prose: str, seen: set[str]) -> str:
         raise ValueError(unit["id"] + " needs at least two worked treatments")
     parts = []
     for item in examples:
-        block = f"## Worked example: {item['title']}\n\n```{item['language']}\n"
+        info = item["language"] + (" " + item["fence"] if item.get("fence") else "")
+        block = f"## Worked example: {item['title']}\n\n```{info}\n"
         block += item["code"].rstrip() + "\n```\n\n"
         if item.get("output", "").strip():
             block += "Observed output:\n\n```text\n" + item["output"].rstrip() + "\n```\n\n"

@@ -66,7 +66,7 @@ subword IDs and masks.
 
 ## Worked example: make the model choice explicit
 
-```python
+```python external
 from pathlib import Path
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 

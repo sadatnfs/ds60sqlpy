@@ -41,7 +41,7 @@ The pressure mode builds a deliberately slow second stage:
 
 From [`projects/flink/src/WorkshopJobs.java`](../projects/flink/src/WorkshopJobs.java):
 
-```java
+```java fragment
 } else if (mode.equals("pressure")) {
   result = environment
     .fromSource(
@@ -65,7 +65,7 @@ cross a network buffer between them, and `SlowConsumer` sleeps 10 ms per record:
 
 From [`projects/flink/src/WorkshopJobs.java`](../projects/flink/src/WorkshopJobs.java):
 
-```java
+```java fragment
 public static final class SlowConsumer implements MapFunction<String, String> {
 
   public String map(String value) throws Exception {
@@ -125,7 +125,7 @@ unsupported production performance forecast.
 
 ### The pressure topology with chaining disabled
 
-```java
+```java fragment
 result = environment
   .fromSource(
     new NumberSequenceSource(0, 499),

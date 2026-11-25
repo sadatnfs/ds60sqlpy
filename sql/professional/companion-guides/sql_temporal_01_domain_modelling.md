@@ -173,7 +173,7 @@ allowed, and who may correct history.
 
 Per-key exclusion normally uses `btree_gist`:
 
-```sql
+```sql fragment
 -- Optional, only after btree_gist is approved and installed:
 EXCLUDE USING gist (
     customer_key WITH =,

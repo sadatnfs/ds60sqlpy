@@ -24,7 +24,7 @@ code that runs against it is in the project: after the listings, it requests the
 pinned version and refuses any protocol other than `minReaderVersion` 1 before it
 fetches a data file:
 
-<!-- include: projects/delta-sharing/client.py from="_, metadata_headers, metadata_body = control(" to="Pinned table version was not confirmed" python -->
+<!-- include: projects/delta-sharing/client.py from="_, metadata_headers, metadata_body = control(" to="Pinned table version was not confirmed" python fragment -->
 
 ## Worked case A: read the exact bounded table
 

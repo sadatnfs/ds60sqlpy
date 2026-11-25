@@ -65,7 +65,7 @@ By the end, you can:
 
 ## Worked example: concurrency needs a measurable limit
 
-```python
+```python fragment
 semaphore = asyncio.Semaphore(limit)
 
 
@@ -264,7 +264,7 @@ support that ownership.
 Psycopg 3 provides `AsyncConnection.connect()`. Use one disposable connection
 and a read-only cursor:
 
-```python
+```python fragment
 connection = await psycopg.AsyncConnection.connect(database_url)
 try:
     async with connection.cursor() as cursor:

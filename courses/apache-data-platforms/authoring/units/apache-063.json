@@ -35,7 +35,8 @@
       "title": "Read metadata through Thrift without Beeline",
       "language": "java",
       "code": "Table table = client.getTable(\"ds60\", \"orders\");\nPartition partition = client.getPartition(\"ds60\", \"orders\", List.of(\"2026-01-01\"));\nSystem.out.println(table.getSd().getLocation());\nSystem.out.println(partition.getSd().getLocation());",
-      "interpretation": "This simplified fragment from MetadataProbe.java talks directly to the metastore, so it works even when HiveServer2 is down. It should print file:/warehouse/orders and file:/warehouse/orders/day=2026-01-01. The probe also asks for a table that does not exist and expects an error, which shows the metastore answers truthfully rather than with a default. Seeing the right locations here while a Beeline query fails narrows the problem to HiveServer2 or the files, not the catalog."
+      "interpretation": "This simplified fragment from MetadataProbe.java talks directly to the metastore, so it works even when HiveServer2 is down. It should print file:/warehouse/orders and file:/warehouse/orders/day=2026-01-01. The probe also asks for a table that does not exist and expects an error, which shows the metastore answers truthfully rather than with a default. Seeing the right locations here while a Beeline query fails narrows the problem to HiveServer2 or the files, not the catalog.",
+      "fence": "fragment"
     }
   ],
   "evidence": "Prepared actual Hive4.2.1/JDK21/PostgreSQL project; live SQL, independent Java Thrift, lifecycle, Iceberg and restore observations remain distinct acceptance gates.",

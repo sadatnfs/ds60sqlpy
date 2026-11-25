@@ -101,7 +101,7 @@ By the end, you can:
 
 The application owns two small contracts:
 
-```python
+```python prelude=../solutions/bridge_ai_01_application_engineering_solution.py
 class EmbeddingModel(Protocol):
     def embed(self, text: str) -> Sequence[float]: ...
 

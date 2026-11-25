@@ -80,7 +80,8 @@ def test_routes_and_reasons_are_derived() -> None:
                 )
         assert runtime["unavailable"] == expected_unavailable, track
         assert all(item["reason"].strip() for item in runtime["unavailable"])
-        assert qualification.NOT_EXECUTED in runtime["guide_examples"]
+        assert qualification.GUIDE_RUNNER in runtime["guide_examples"]
+        assert "not executed" not in runtime["guide_examples"]
     with pytest.raises(ValueError):
         qualification.expected_route("module", "not-a-profile")
     record = copy.deepcopy(RECORDS["kubernetes"])

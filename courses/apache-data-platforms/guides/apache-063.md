@@ -114,7 +114,7 @@ These statements from initialize.hql only write metadata to the PostgreSQL-backe
 
 ### Read metadata through Thrift without Beeline
 
-```java
+```java fragment
 Table table = client.getTable("ds60", "orders");
 Partition partition = client.getPartition("ds60", "orders", List.of("2026-01-01"));
 System.out.println(table.getSd().getLocation());

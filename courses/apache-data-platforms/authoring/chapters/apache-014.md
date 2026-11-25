@@ -49,7 +49,7 @@ value, and an unknown descriptor; each must be rejected by the actual service.
 
 The server exposes one descriptor and one ticket and rejects every other value:
 
-<!-- include: projects/arrow-flight/service.py #FixtureServer python -->
+<!-- include: projects/arrow-flight/service.py #FixtureServer python fragment -->
 
 `list_flights` and `get_flight_info` describe the dataset, and `do_get` streams it
 only for the ticket that `get_flight_info` returned. The client follows the same

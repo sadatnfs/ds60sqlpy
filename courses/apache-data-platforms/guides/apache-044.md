@@ -90,7 +90,7 @@ bridge, a direct connector and a remote catalog protocol.
 
 ### Register one snapshot as an engine relation
 
-```python
+```python fragment
 from datafusion import SessionContext
 
 first = table.current_snapshot().snapshot_id
@@ -105,7 +105,7 @@ Expect east with 11 and west with 9. PyIceberg resolves the snapshot and reads f
 
 ### Show the registered relation does not refresh
 
-```python
+```python fragment
 table.append(pa.table({"id": [4], "region": ["west"], "amount": [2]}))
 print(ctx.sql(query).to_pylist())
 refreshed = table.scan().to_arrow().to_batches()

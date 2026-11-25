@@ -33,7 +33,7 @@
     {
       "title": "The metastore database connection",
       "language": "xml",
-      "code": "<property>\n  <name>javax.jdo.option.ConnectionURL</name>\n  <value>jdbc:postgresql://postgres:5432/metastore</value>\n</property>\n<property>\n  <name>hive.metastore.warehouse.dir</name>\n  <value>file:///warehouse</value>\n</property>",
+      "code": "<configuration>\n  <property>\n    <name>javax.jdo.option.ConnectionURL</name>\n    <value>jdbc:postgresql://postgres:5432/metastore</value>\n  </property>\n  <property>\n    <name>hive.metastore.warehouse.dir</name>\n    <value>file:///warehouse</value>\n  </property>\n</configuration>",
       "interpretation": "This excerpt of conf/hive-site.xml shows the two places that must survive separately: the PostgreSQL metastore database and the warehouse directory. Backing up only one is a common mistake. Restoring the database without the files leaves tables that point at empty locations, and restoring files without the database leaves Parquet that no query can find. Use a consistent pg_dump with the matching file copy and record both identities together."
     },
     {

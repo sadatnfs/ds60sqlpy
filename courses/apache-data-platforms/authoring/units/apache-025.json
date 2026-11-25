@@ -34,7 +34,8 @@
       "title": "Refuse to replay a pending receipt",
       "language": "python",
       "code": "folder = ROOT / \"receipts\"\nif list(folder.glob(\"*.pending\")):\n    raise ValueError(\"A pending receipt needs reconciliation; no query was replayed\")\npaths = sorted(folder.glob(\"*.json\"))",
-      "interpretation": "This fragment from the project client stops before running anything when a receipt was left pending by an interrupted run. An automatic replay would hide whether the earlier attempt finished. The operator must decide whether the pending request completed, failed or is unknown, and record that decision. The same rule caps stored receipts at 64, so evidence cannot grow without bound across many failure drills."
+      "interpretation": "This fragment from the project client stops before running anything when a receipt was left pending by an interrupted run. An automatic replay would hide whether the earlier attempt finished. The operator must decide whether the pending request completed, failed or is unknown, and record that decision. The same rule caps stored receipts at 64, so evidence cannot grow without bound across many failure drills.",
+      "fence": "fragment"
     }
   ],
   "evidence": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger.",

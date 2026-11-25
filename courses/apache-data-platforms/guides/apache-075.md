@@ -63,7 +63,7 @@ for table metadata:
 
 From [`projects/delta-sharing/client.py`](../projects/delta-sharing/client.py):
 
-```python
+```python fragment
 code, _, body = control("/shares?maxResults=100")
 if share not in {row["name"] for row in json.loads(body).get("items", [])}:
     raise ValueError("Expected owned share absent from bounded listing")

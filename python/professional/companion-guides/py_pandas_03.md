@@ -63,6 +63,8 @@ The lesson uses tiny frames with explicit event_id, customer_id, UTC timestamps 
 ### Example 1
 
 ```python
+import pandas as pd
+
 frame = pd.DataFrame({"customer_id": ["a", "a", "b"], "amount": [1.0, 3.0, 8.0]})
 total = frame.groupby("customer_id", sort=False)["amount"].transform("sum")
 share = frame.amount / total

@@ -2668,7 +2668,7 @@ Rotate a credential by updating the controlled source and applying the appropria
     (
         "Validate presence without disclosure",
         "The application should report a safe readiness fact.",
-        "python",
+        "python external",
         'from pathlib import Path\nvalue = Path("/run/secrets/demo").read_text().strip()\nif not value:\n    raise ValueError("demo secret is empty")\nprint("demo input is present")',
         "The secret bytes are not printed; validation distinguishes empty input from a usable configured value.",
     ),

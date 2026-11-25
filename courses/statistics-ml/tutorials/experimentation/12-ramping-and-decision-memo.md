@@ -55,7 +55,7 @@ The raw seven-day value estimate is 1.584 points with interval [.356,2.812], whi
 
 The decay curve used in `examples/experiment_12.py` starts at 2 on the first day and settles near 0.2. Averaging it over different reading windows shows how much the stopping day alone can move the headline.
 
-```python
+```python prelude=examples/experiment_12.py
 ages = np.arange(1, 29)
 effect = 0.2 + 1.8 * np.exp(-(ages - 1) / 7)
 for horizon in [1, 7, 14, 28]:

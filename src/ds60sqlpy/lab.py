@@ -390,7 +390,7 @@ class LabServer(CourseHTTPServer):
         if cursor is not None and (type(cursor) is not int or cursor < 0):
             raise ValueError("Choose a cursor position inside the code.")
         solution = purpose == "solution"
-        trusted_setup: str | None = None
+        solution_setup: str | None = None
         if language == "sql":
             # Parse first: a statement the walkthrough cannot trace never reaches
             # course preparation, the SQL worker or a saved-pad path.
@@ -400,7 +400,7 @@ class LabServer(CourseHTTPServer):
             if rejected is not None:
                 return rejected
             if solution:
-                trusted_setup = self._solution_setup(lesson, payload.get("exercise"), code)
+                solution_setup = self._solution_setup(lesson, payload.get("exercise"), code)
         if not self.execution_lock.acquire(blocking=False):
             raise ValueError("A pad is already running. Wait for its result before running again.")
         try:
@@ -415,7 +415,7 @@ class LabServer(CourseHTTPServer):
                 code,
                 cursor_offset=cursor if language == "sql" else None,
                 timeout_seconds=timeout,
-                trusted_setup=trusted_setup,
+                solution_setup=solution_setup,
             )
             if preparation:
                 response["database_preparation"] = preparation

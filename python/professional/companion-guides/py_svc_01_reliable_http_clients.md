@@ -185,7 +185,7 @@ assert decisions == [True, False, True, False]
 
 ### Micro-example B: reject a pagination cursor loop
 
-```python
+```python expect-error
 pages = {
     None: {"items": [1, 2], "next_cursor": "a"},
     "a": {"items": [3], "next_cursor": "a"},

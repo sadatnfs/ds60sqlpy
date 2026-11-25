@@ -46,7 +46,7 @@ statements:
 
 From [`projects/cassandra/client.py`](../projects/cassandra/client.py):
 
-```python
+```python fragment
 if local["data_center"] != "datacenter1":
     raise AssertionError("Pinned single-datacenter fixture changed")
 session.execute(
@@ -95,7 +95,7 @@ After a bounded clustering-range read, the check sends the filter and accepts on
 
 From [`projects/cassandra/client.py`](../projects/cassandra/client.py):
 
-```python
+```python fragment
 window = list(session.execute(ID_QUERY + " AND ordered_at >= '2026-01-01T00:30:00Z'"))
 if window != [{"order_id": 3}]:
     raise AssertionError("Bounded clustering timestamp range changed")

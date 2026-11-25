@@ -41,7 +41,7 @@ Each read in the probe uses these consumer settings and this bounded loop:
 
 From [`projects/streaming/ConsumerProbe.java`](../projects/streaming/ConsumerProbe.java):
 
-```java
+```java fragment
 private static Properties settings(String group) {
   var p = new Properties();
   p.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");

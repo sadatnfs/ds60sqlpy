@@ -63,7 +63,7 @@ timer on every event and emits the total when the watermark passes the deadline:
 
 From [`projects/flink/src/WorkshopJobs.java`](../projects/flink/src/WorkshopJobs.java):
 
-```java
+```java fragment
 public static final class Inactivity extends KeyedProcessFunction<String, Event, String> {
 
   private transient ValueState<Long> total;

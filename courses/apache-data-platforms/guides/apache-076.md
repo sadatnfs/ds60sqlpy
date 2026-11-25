@@ -38,7 +38,7 @@ fetches a data file:
 
 From [`projects/delta-sharing/client.py`](../projects/delta-sharing/client.py):
 
-```python
+```python fragment
 _, metadata_headers, metadata_body = control(path + "/metadata")
 _, headers, body = control(path + "/query", {"version": contract["version"], "predicateHints": []})
 rows = [json.loads(line) for line in body.splitlines() if line.strip()]

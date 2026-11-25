@@ -112,10 +112,10 @@ The repeated event a stands for a producer retry that Kafka delivered twice. Key
 
 ```bash
 kafka-consumer-groups.sh --bootstrap-server kafka:9092 \
-  --describe --group <flink-consumer-group>
+  --describe --group "$GROUP_ID"
 ```
 
-The output lists each partition with CURRENT-OFFSET, LOG-END-OFFSET and LAG. Flink stores its real source positions in checkpoints and only commits offsets to Kafka for monitoring, so these numbers can trail what a restore would use. Record both the checkpoint ID and the committed offsets in the receipt, and compare serving row IDs against the source range they claim to cover.
+With GROUP_ID set to the Flink consumer group, the output lists each partition with CURRENT-OFFSET, LOG-END-OFFSET and LAG. Flink stores its real source positions in checkpoints and only commits offsets to Kafka for monitoring, so these numbers can trail what a restore would use. Record both the checkpoint ID and the committed offsets in the receipt, and compare serving row IDs against the source range they claim to cover.
 
 ## Complete worked source
 

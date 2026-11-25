@@ -87,7 +87,7 @@ If reconnects lose events, inspect identity persistence, retention and cursor in
 
 Run this complete finite program in the prepared Python web profile. It exercises real framework clients and bounded local fixtures, then exits. It does not open a browser or start an externally reachable HTTP server. Long-running applications use the separately documented owned projects. Runtime: `python-web`.
 
-```python
+```python isolated
 """Complete finite FastAPI investigation with original bounded fixtures."""
 
 import json

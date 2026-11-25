@@ -29,7 +29,7 @@ not to a requested physical-message count.
 
 The probe asks for compaction when it creates the topic through the Admin API:
 
-<!-- include: projects/streaming/RetentionProbe.java from="var wanted = Map.of(" to=");" java -->
+<!-- include: projects/streaming/RetentionProbe.java from="var wanted = Map.of(" to=");" java fragment -->
 
 `cleanup.policy=compact` lets the log cleaner eventually keep only the latest record
 for each key, while the two `-1` values disable time and size deletion. Compaction

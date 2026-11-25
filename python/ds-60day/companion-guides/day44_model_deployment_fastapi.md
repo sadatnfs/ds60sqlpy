@@ -40,7 +40,7 @@ safer in a real service.
 
 ## Worked example: validate the feature count
 
-```python
+```python external
 from typing import Annotated
 
 import joblib

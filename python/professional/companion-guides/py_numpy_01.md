@@ -61,6 +61,8 @@ The exercises distinguish inspection, independent extraction, transformation, ac
 ### Example 1
 
 ```python
+import numpy as np
+
 a = np.arange(6, dtype=np.int64)
 view = a[::2]
 view[1] = 99

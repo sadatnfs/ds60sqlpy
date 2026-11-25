@@ -204,6 +204,8 @@ Then express properties:
 Generate lists of bounded integer endpoint pairs. Use:
 
 ```python
+from hypothesis import settings
+
 settings(max_examples=100, derandomize=True, database=None, deadline=None)
 ```
 

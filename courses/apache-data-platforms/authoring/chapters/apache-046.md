@@ -30,12 +30,12 @@ from two records and west total 9 from one record.
 The timeline source emits events and watermarks itself, which is why the job passes
 `WatermarkStrategy.noWatermarks()` instead of generating watermarks from timestamps:
 
-<!-- include: projects/flink/src/TimelineSource.java from="if (command.event == null)" to="else output.collect" java -->
+<!-- include: projects/flink/src/TimelineSource.java from="if (command.event == null)" to="else output.collect" java fragment -->
 
 The windowed branch of the job then groups events by key into two-second event-time
 windows and routes records that arrive after their window closed to a side output:
 
-<!-- include: projects/flink/src/WorkshopJobs.java from="var windows = events" to="result = windows.union" java -->
+<!-- include: projects/flink/src/WorkshopJobs.java from="var windows = events" to="result = windows.union" java fragment -->
 
 A source that derives watermarks from timestamps would instead use a strategy such
 as `WatermarkStrategy.forBoundedOutOfOrderness(Duration.ofMillis(500))`, whose

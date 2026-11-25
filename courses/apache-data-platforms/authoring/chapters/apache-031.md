@@ -28,7 +28,7 @@ real deployments can place passwords in those representations.
 
 The whole check is one task in the connection DAG:
 
-<!-- include: projects/airflow/dags/classroom_workflows.py #connection_workflow python -->
+<!-- include: projects/airflow/dags/classroom_workflows.py #connection_workflow python fragment -->
 
 `Connection.get` resolves a connection identifier through Airflow's configured
 secrets backends at run time. The recorded result contains only Boolean outcomes

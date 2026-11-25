@@ -29,7 +29,7 @@ key/value lists, so an accidental empty topic cannot pass the visibility check.
 
 The three transactions are written once, when the topic is empty:
 
-<!-- include: projects/streaming/TransactionProbe.java from="private static void produceWhenEmpty()" until="private static List<String> read(" java -->
+<!-- include: projects/streaming/TransactionProbe.java from="private static void produceWhenEmpty()" until="private static List<String> read(" java fragment -->
 
 The readers differ only in `isolation.level`: `read_committed` skips records from
 aborted transactions, and `read_uncommitted` returns every record in the log.

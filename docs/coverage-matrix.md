@@ -42,20 +42,20 @@ lessons are complete worked chapters and carry no exercise contract.
 
 | Family | Track | Lessons | Practice | Tutorial | Runnable | Reading | Operations | Capstones | Median words | Templated words | No gaps |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| core | Python and PostgreSQL engineering (`bridge`) | 13 | 13 | 0 | 13 | 0 | 0 | 0 | 2408 | 3192 | 13 |
+| core | Python and PostgreSQL engineering (`bridge`) | 13 | 13 | 0 | 13 | 0 | 0 | 0 | 2409 | 3192 | 13 |
 | core | Python and data science (`python`) | 102 | 102 | 0 | 102 | 0 | 0 | 0 | 2217 | 57268 | 102 |
 | core | PostgreSQL (`sql`) | 86 | 86 | 0 | 86 | 0 | 0 | 0 | 3007 | 194391 | 86 |
-| module | Advanced Spark modeling: likelihoods, autodiff and engine internals (`advanced-spark-modeling`) | 38 | 0 | 38 | 21 | 17 | 0 | 0 | 1356 | 2585 | 38 |
-| module | Apache and open data platforms (`apache-data-platforms`) | 88 | 0 | 88 | 24 | 64 | 0 | 0 | 1221 | 7970 | 88 |
+| module | Advanced Spark modeling: likelihoods, autodiff and engine internals (`advanced-spark-modeling`) | 38 | 0 | 38 | 21 | 17 | 0 | 0 | 1357 | 2585 | 38 |
+| module | Apache and open data platforms (`apache-data-platforms`) | 88 | 0 | 88 | 24 | 64 | 0 | 0 | 1224 | 7970 | 88 |
 | module | Applied science: identification, prediction and decisions (`applied-science`) | 24 | 0 | 24 | 24 | 0 | 0 | 0 | 1497 | 1071 | 24 |
 | module | Bayesian computing: exact inference, PyMC and Stan (`bayesian-computing`) | 24 | 0 | 24 | 24 | 0 | 0 | 0 | 1397 | 1389 | 24 |
 | module | C: memory, systems and reliable native programs (`c`) | 42 | 42 | 0 | 42 | 0 | 0 | 0 | 2503 | 24148 | 42 |
 | module | C++20: from first program to reliable systems (`cpp`) | 42 | 42 | 0 | 41 | 1 | 0 | 3 | 1499 | 8105 | 42 |
 | module | C#: from the first program to reliable .NET applications (`csharp`) | 48 | 48 | 0 | 48 | 0 | 0 | 0 | 1314 | 26305 | 48 |
 | module | GPU computing: CUDA, Python, machine learning and Spark (`cuda`) | 128 | 128 | 0 | 0 | 128 | 0 | 0 | 1376 | 69931 | 128 |
-| module | Custom likelihoods in PyTorch (`custom-likelihood-pytorch`) | 20 | 0 | 20 | 20 | 0 | 0 | 0 | 1508 | 1067 | 20 |
+| module | Custom likelihoods in PyTorch (`custom-likelihood-pytorch`) | 20 | 0 | 20 | 20 | 0 | 0 | 0 | 1509 | 1067 | 20 |
 | module | Data and ML Engineering (`data-ml-engineering`) | 72 | 0 | 72 | 72 | 0 | 0 | 0 | 2253 | 2560 | 72 |
-| module | Scientific visualization with Plotly: Python and JavaScript (`data-visualization`) | 8 | 8 | 0 | 8 | 0 | 0 | 0 | 1157 | 640 | 8 |
+| module | Scientific visualization with Plotly: Python and JavaScript (`data-visualization`) | 8 | 8 | 0 | 8 | 0 | 0 | 0 | 1159 | 640 | 8 |
 | module | DAX: semantic models, context and analytical reasoning (`dax`) | 60 | 60 | 0 | 60 | 0 | 0 | 0 | 1181 | 26172 | 60 |
 | module | dbt and analytics engineering (`dbt`) | 26 | 26 | 0 | 26 | 0 | 0 | 0 | 1439 | 10128 | 26 |
 | module | Deep Learning with PyTorch: tensors to reliable model releases (`deep-learning-pytorch`) | 36 | 36 | 0 | 35 | 1 | 0 | 0 | 2728 | 19980 | 36 |
@@ -73,14 +73,14 @@ lessons are complete worked chapters and carry no exercise contract.
 | module | Machine learning engineering (`ml-engineering`) | 18 | 18 | 0 | 18 | 0 | 0 | 0 | 1209 | 4301 | 18 |
 | module | Natural Language Processing: from text to reliable language systems (`nlp`) | 24 | 24 | 0 | 24 | 0 | 0 | 0 | 1906 | 2687 | 24 |
 | module | Polars: columnar data engineering (`polars`) | 18 | 18 | 0 | 18 | 0 | 0 | 0 | 1160 | 3719 | 18 |
-| module | Python web development: HTTP, Flask, FastAPI and Django (`python-web`) | 72 | 0 | 72 | 69 | 3 | 0 | 0 | 1184 | 3838 | 72 |
+| module | Python web development: HTTP, Flask, FastAPI and Django (`python-web`) | 72 | 0 | 72 | 69 | 3 | 0 | 0 | 1185 | 3838 | 72 |
 | module | R: programming, statistical computing and visualization (`r`) | 60 | 60 | 0 | 60 | 0 | 0 | 0 | 1229 | 11266 | 60 |
 | module | Rust: ownership, reliable systems and Arrow data engineering (`rust`) | 48 | 48 | 0 | 48 | 0 | 0 | 0 | 1163 | 27935 | 48 |
 | module | Scala and Apache Spark: Correct Data, Measured Execution, Recoverable Products (`scala-spark`) | 42 | 42 | 0 | 39 | 3 | 0 | 3 | 2283 | 13549 | 42 |
-| module | Spark deployment: Compose, notebooks and Kubernetes (`spark-deployment`) | 18 | 0 | 18 | 0 | 18 | 0 | 0 | 1307 | 720 | 18 |
+| module | Spark deployment: Compose, notebooks and Kubernetes (`spark-deployment`) | 18 | 0 | 18 | 0 | 18 | 0 | 0 | 1309 | 720 | 18 |
 | module | Statistics and Machine Learning for Data Scientists End To End (`statistics-ml`) | 69 | 0 | 69 | 69 | 0 | 0 | 0 | 2272 | 2020 | 69 |
 | module | Swift: portable language foundations and Apple app architecture (`swift`) | 48 | 48 | 0 | 48 | 0 | 0 | 0 | 1174 | 27932 | 48 |
-| module | TMB modeling with R and C++ (`tmb-modeling`) | 48 | 0 | 48 | 48 | 0 | 0 | 0 | 1138 | 848 | 48 |
+| module | TMB modeling with R and C++ (`tmb-modeling`) | 48 | 0 | 48 | 48 | 0 | 0 | 0 | 1140 | 848 | 48 |
 | module | Web development: HTML, CSS and PHP (`web-development`) | 60 | 60 | 0 | 56 | 4 | 0 | 0 | 1146 | 17765 | 60 |
 
 ## Gaps by track

@@ -438,7 +438,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tbody></table></div>
 <h4 id="guide--worked-example-test-the-business-rule-at-the-domain-seam">Worked example: test the business rule at the domain seam<a class="heading-anchor" href="#guide--worked-example-test-the-business-rule-at-the-domain-seam" aria-label="Link to this section">#</a></h4>
 <p>Suppose the rule is “sum all stored order amounts for this customer.” The business function needs only this behavior:</p>
-<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">class</span> <span class="syntax-class">AmountSource</span><span class="syntax-punctuation">(</span>Protocol<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Sequence
+<span class="syntax-keyword">from</span> decimal <span class="syntax-keyword">import</span> Decimal
+<span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Protocol
+
+
+<span class="syntax-keyword">class</span> <span class="syntax-class">AmountSource</span><span class="syntax-punctuation">(</span>Protocol<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">def</span> <span class="syntax-function">for_customer</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span> customer_id<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> Sequence<span class="syntax-punctuation">[</span>Decimal<span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span> <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span></code></pre>
 <p>A fake can return two <code>Decimal</code> values and record the requested ID. That proves the summing rule and collaboration without requiring SQL. A separate adapter test proves that the repository sends a parameterized query and maps returned rows. One optional PostgreSQL test proves the actual query against the course schema.</p>
 <div class="table-wrap"><table><thead><tr>

@@ -8,7 +8,7 @@ Group B contains u4,u5,u6,u7. Filtering by group should return those IDs regardl
 
 ## Exercise 2
 
-The masks are `[true, true]`, `[true, false]` and `[false, true]`. Python serializes them in update menus; JavaScript applies them through named native buttons and restyle. Await browser updates before announcing state.
+The masks are [true,true], [true,false], [false,true]. Python serializes them in update menus; JavaScript applies them through named native buttons and restyle. Await browser updates before announcing state.
 
 ## Exercise 3
 

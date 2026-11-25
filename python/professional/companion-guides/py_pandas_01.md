@@ -63,6 +63,8 @@ Finally, concatenation appends rows but does not guarantee that keys remain uniq
 ### Example 1
 
 ```python
+import pandas as pd
+
 left = pd.Series([20, 10], index=["b", "a"])
 right = pd.Series([1, 2], index=["a", "b"])
 result = left - right

@@ -106,7 +106,7 @@ In an owned workshop, the paths report should show actual_ballista and embedded_
 
 ### Register a file, delete it, then query
 
-```python
+```python fragment
 missing = Path(temporary) / "removed.parquet"
 pq.write_table(pa.Table.from_pylist(ROWS[:3]), missing)
 ctx.register_parquet("removed_source", str(missing))

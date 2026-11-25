@@ -233,7 +233,7 @@ must first approve adding `pg_stat_statements` to
 `shared_preload_libraries` and restarting the PostgreSQL service. Only then,
 and only in the intended database, would an administrator run:
 
-```sql
+```sql external
 CREATE EXTENSION pg_stat_statements;
 
 SELECT

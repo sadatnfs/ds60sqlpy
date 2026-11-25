@@ -63,6 +63,8 @@ Finally, choose comparison tolerances from units and scale. Absolute tolerance c
 ### Example 1
 
 ```python
+import numpy as np
+
 scores = np.array([1000.0, 1001.0, 999.0])
 shifted = scores - scores.max()
 probability = np.exp(shifted) / np.exp(shifted).sum()
@@ -76,6 +78,8 @@ The raw exponentials would overflow at these scores, while subtracting 1001 chan
 ### Example 2
 
 ```python
+import math
+
 values = [1e16, 1.0, -1e16]
 ordinary = float(np.sum(values))
 accurate = math.fsum(values)

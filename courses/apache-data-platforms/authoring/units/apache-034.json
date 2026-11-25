@@ -32,7 +32,8 @@
       "title": "Configure an idempotent transactional producer",
       "language": "java",
       "code": "var properties = new Properties();\nproperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP);\nproperties.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, \"true\");\nproperties.put(ProducerConfig.ACKS_CONFIG, \"all\");\nproperties.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, \"ds60-workshop-transaction-writer\");\nproperties.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, \"3000\");\nproperties.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, \"15000\");",
-      "interpretation": "These lines come from the streaming project TransactionProbe.java. Idempotence lets the broker drop a resend of the same producer sequence number, and acks set to all makes the acknowledgement wait for the in-sync replicas, which is one replica in this single-broker workshop. The delivery timeout bounds how long a send can retry before its future fails. None of these settings recognizes two separate send calls with the same business key as duplicates."
+      "interpretation": "These lines come from the streaming project TransactionProbe.java. Idempotence lets the broker drop a resend of the same producer sequence number, and acks set to all makes the acknowledgement wait for the in-sync replicas, which is one replica in this single-broker workshop. The delivery timeout bounds how long a send can retry before its future fails. None of these settings recognizes two separate send calls with the same business key as duplicates.",
+      "fence": "fragment"
     },
     {
       "title": "Read committed and uncommitted views of the topic",

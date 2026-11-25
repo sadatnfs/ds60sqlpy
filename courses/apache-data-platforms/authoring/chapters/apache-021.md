@@ -31,7 +31,7 @@ bounded result from the actual scheduler/executor path.
 The Python client connects to the scheduler, registers the shared Parquet file and
 runs the grouped query, then repeats the query in an embedded DataFusion session:
 
-<!-- include: projects/ballista/client.py #context python -->
+<!-- include: projects/ballista/client.py #context python fragment -->
 
 <!-- include: projects/ballista/client.py from="def execute(mode: str)" to='raise AssertionError("Embedded control differs")' python -->
 

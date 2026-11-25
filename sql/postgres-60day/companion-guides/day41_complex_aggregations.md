@@ -181,7 +181,7 @@ ORDER BY
 
 `CUBE(country, category)` is equivalent to:
 
-```sql
+```sql fragment
 GROUP BY GROUPING SETS (
   (country, category), -- detail
   (country),           -- one country across all categories

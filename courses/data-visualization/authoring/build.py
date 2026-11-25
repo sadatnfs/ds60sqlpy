@@ -206,10 +206,10 @@ def anatomy(number):
     return (
         f"{ANATOMY_START}\n"
         f"Python, from `case_{number:02d}` in the subject's durable Plotly source:\n\n"
-        f"```python\n{python_figure_lines(number)}\n```\n\n"
+        f"```python fragment\n{python_figure_lines(number)}\n```\n\n"
         f"JavaScript, from browser specification {number}, which `renderCase` passes to "
         "`Plotly.newPlot` with the shared caption and table:\n\n"
-        f"```javascript\n{javascript_figure_lines(number)}\n```\n"
+        f"```javascript fragment\n{javascript_figure_lines(number)}\n```\n"
         f"{ANATOMY_END}"
     )
 

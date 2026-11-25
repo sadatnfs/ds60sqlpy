@@ -52,7 +52,7 @@ The primary criterion should follow the product decision. Diagnostics explain me
 
 A ratio metric moves when either its numerator or its denominator moves, so print both per arm before reading the ratio. Paste this into [experiment_02.py](examples/experiment_02.py) below `ratio_summary`.
 
-```python
+```python prelude=examples/experiment_02.py
 users, _, _, _ = experiment_fixture()
 for arm, rows in users.groupby("assigned"):
     ratio, se = ratio_summary(rows.value, rows.visits)

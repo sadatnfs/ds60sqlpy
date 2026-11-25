@@ -59,7 +59,7 @@ secrets:
 
 The application should report a safe readiness fact.
 
-```python
+```python external
 from pathlib import Path
 
 value = Path("/run/secrets/demo").read_text().strip()

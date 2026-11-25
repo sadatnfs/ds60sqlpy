@@ -65,6 +65,8 @@ Complexity claims should identify the state space. Coin change and knapsack tabl
 ### Example 1
 
 ```python
+import math
+
 coins = [1, 3, 4]
 amount = 6
 best = [0] + [math.inf] * amount

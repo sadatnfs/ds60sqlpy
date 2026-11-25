@@ -44,7 +44,7 @@ The final audit returns exact event IDs, net cents and state counts. Each part c
 
 ### Worked example 1
 
-```scala
+```scala prelude=../solutions/spark-006_solution.scala
 val first = Paid("p1", 100L)
 val second = Paid("p2", 100L)
 assert(first != second)
@@ -58,7 +58,7 @@ Structural equality includes identity, so equal cents do not collapse two events
 
 ### Worked example 2
 
-```scala
+```scala prelude=../solutions/spark-006_solution.scala
 def describe(event: Event): String = event match {
   case Paid(id, amount)     => s"paid:$id:$amount"
   case Voided(id, reason)   => s"voided:$id:$reason"

@@ -53,7 +53,7 @@ Post-treatment visits are different: the interface may change them. Adjusting fo
 
 This block computes the CUPED coefficient from pooled data and applies it with a common center. Append it to [experiment_07.py](examples/experiment_07.py).
 
-```python
+```python prelude=examples/experiment_07.py
 users, _, _, _ = experiment_fixture()
 x, y, a = users.baseline, users.value, users.assigned
 theta = np.cov(x, y, ddof=1)[0, 1] / x.var(ddof=1)

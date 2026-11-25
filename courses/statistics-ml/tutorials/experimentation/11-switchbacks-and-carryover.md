@@ -47,7 +47,7 @@ For geography, replace time blocks with markets only if the relevant spillovers 
 
 The switchback simulation in `examples/experiment_11.py` alternates arms within 30 adjacent pairs of periods. Analyzing the same 60 periods as if they were two independent samples ignores the slow baseline drift that pairing removes.
 
-```python
+```python prelude=examples/experiment_11.py
 rng = np.random.default_rng(1111)
 pairs = 30
 order = rng.binomial(1, 0.5, pairs)

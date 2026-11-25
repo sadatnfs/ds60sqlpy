@@ -43,7 +43,7 @@ Record the assignment probabilities, the counted population, the observation tim
 
 Compute Pearson's statistic by hand for a treatment arm that loses a growing number of its 120 users at some downstream stage. Run it in [experiment_05.py](examples/experiment_05.py), where `stats` is already imported.
 
-```python
+```python prelude=examples/experiment_05.py
 for lost in [0, 5, 10, 20, 38]:
     counts = np.array([120, 120 - lost])
     expected = counts.sum() / 2

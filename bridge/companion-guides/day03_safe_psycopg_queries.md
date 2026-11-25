@@ -63,7 +63,7 @@ By the end, you can:
 
 ## Worked example: structure and values stay separate
 
-```python
+```python fragment
 statement = """
 SELECT order_id, total_amount
 FROM training.orders
@@ -79,7 +79,7 @@ because it never becomes part of `statement`.
 
 This is not valid identifier binding:
 
-```python
+```python fragment
 # Wrong: a placeholder cannot stand for a table name.
 cursor.execute("SELECT count(*) FROM %s", ("orders",))
 ```

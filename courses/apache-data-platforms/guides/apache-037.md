@@ -43,7 +43,7 @@ The probe asks for compaction when it creates the topic through the Admin API:
 
 From [`projects/streaming/RetentionProbe.java`](../projects/streaming/RetentionProbe.java):
 
-```java
+```java fragment
 var wanted = Map.of(
   TopicConfig.CLEANUP_POLICY_CONFIG,
   "compact",

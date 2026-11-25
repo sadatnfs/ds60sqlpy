@@ -47,7 +47,7 @@ An early extreme estimate is selected partly for favorable noise. Report the sto
 
 The example's Holm step applies to four metrics. Compare it with Bonferroni and Benjamini-Hochberg in [experiment_08.py](examples/experiment_08.py), where `multipletests` is already imported.
 
-```python
+```python prelude=examples/experiment_08.py
 p = [0.001, 0.02, 0.04, 0.3]
 for method in ["bonferroni", "holm", "fdr_bh"]:
     reject, adjusted, _, _ = multipletests(p, alpha=0.05, method=method)

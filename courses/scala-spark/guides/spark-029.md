@@ -56,7 +56,7 @@ This design is more precise than treating overwrite as atomic publication or tre
 
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
-```scala
+```scala prelude=../solutions/spark-029_solution.scala
 import org.apache.spark.sql.functions._
 import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
@@ -70,7 +70,7 @@ Files.createDirectory(ownedRoot.resolve("runs"))
 val source = spark.range(0L, 30L, 1L, 2).withColumn("value", col("id") * 2L)
 ```
 
-```python
+```python prelude=../solutions/spark-029_solution.py
 from pyspark.sql import functions as F
 from pathlib import Path
 import tempfile

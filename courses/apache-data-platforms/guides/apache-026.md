@@ -104,7 +104,7 @@ Each check writes a receipt with elapsed_seconds and the same source_sha256, so 
 
 ### Limit rows and bytes before collecting
 
-```python
+```python fragment
 records = ctx.sql("SELECT id, amount FROM orders ORDER BY id LIMIT 3").to_arrow_table().to_pylist()
 if len(json.dumps(records).encode()) > 2048:
     raise ValueError("Output exceeds byte budget")

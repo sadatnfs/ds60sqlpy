@@ -93,7 +93,7 @@ explicit workshops.
 
 ### Read a retained snapshot by identifier
 
-```python
+```python fragment
 initial = table.current_snapshot()
 table.append(pa.Table.from_pylist([{"id": 3, "amount": 7}], schema=schema))
 old = table.scan(snapshot_id=initial.snapshot_id).to_arrow()
@@ -105,7 +105,7 @@ This fragment continues the lesson program after the first append, so table and 
 
 ### List the snapshot log after two appends
 
-```python
+```python fragment
 for entry in table.history():
     print(entry.snapshot_id, entry.timestamp_ms)
 print(table.metadata_location)

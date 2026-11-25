@@ -62,7 +62,7 @@ By the end, you can:
 
 ## Worked example: retry is a policy, not a blanket `except`
 
-```python
+```python fragment
 for attempt in range(max_attempts):
     try:
         return operation()

@@ -34,7 +34,8 @@
       "title": "Register a file, delete it, then query",
       "language": "python",
       "code": "missing = Path(temporary) / \"removed.parquet\"\npq.write_table(pa.Table.from_pylist(ROWS[:3]), missing)\nctx.register_parquet(\"removed_source\", str(missing))\nmissing.unlink()\nselected = ctx.sql(\"SELECT id, region, amount FROM removed_source ORDER BY id\")",
-      "interpretation": "This fragment from the project client shows why registration is not proof of availability: the table name exists after the delete, and the failure surfaces only when execution opens the file. Depending on the release, the query either raises a not-found error or returns an empty result, so the client accepts both but rejects any return of the original three rows. Validate file presence at the point of execution, and keep the canonical fixture checksum unchanged."
+      "interpretation": "This fragment from the project client shows why registration is not proof of availability: the table name exists after the delete, and the failure surfaces only when execution opens the file. Depending on the release, the query either raises a not-found error or returns an empty result, so the client accepts both but rejects any return of the original three rows. Validate file presence at the point of execution, and keep the canonical fixture checksum unchanged.",
+      "fence": "fragment"
     }
   ],
   "evidence": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger.",

@@ -14,7 +14,7 @@ In this project the name `driver` comes from the Compose service's `hostname`. I
 
 From [`projects/cluster-lab/compose.yaml`](../projects/cluster-lab/compose.yaml):
 
-```yaml
+```yaml fragment
 driver:
   <<: *runtime
   hostname: driver

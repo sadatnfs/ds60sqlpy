@@ -34,7 +34,8 @@
       "title": "Read the snapshot from the table catalog",
       "language": "python",
       "code": "table = catalog.load_table(\"demo.orders\")\nsnapshot = table.current_snapshot()\nprint(snapshot.snapshot_id, snapshot.summary.operation)",
-      "interpretation": "This PyIceberg fragment reads the current snapshot ID and its operation, such as append, from the same catalog that batch_snapshot.py uses. Compare it with the ID stored in Atlas: a mismatch means the table moved after lineage was registered. Catalog metadata says what the table is; governance metadata says what someone decided about it, and both need to name the same state."
+      "interpretation": "This PyIceberg fragment reads the current snapshot ID and its operation, such as append, from the same catalog that batch_snapshot.py uses. Compare it with the ID stored in Atlas: a mismatch means the table moved after lineage was registered. Catalog metadata says what the table is; governance metadata says what someone decided about it, and both need to name the same state.",
+      "fence": "fragment"
     }
   ],
   "evidence": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests.",

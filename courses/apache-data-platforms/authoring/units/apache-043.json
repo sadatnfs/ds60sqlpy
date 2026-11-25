@@ -32,13 +32,15 @@
       "title": "Delete one order from the current snapshot",
       "language": "python",
       "code": "first = table.current_snapshot().snapshot_id\ntable.delete(\"id = 1\")\ncurrent = table.scan().to_arrow()\nprint(sorted(current[\"id\"].to_pylist()), table.scan(snapshot_id=first).to_arrow().num_rows)",
-      "interpretation": "The current view lists ids 2 and 3 while the first snapshot still returns three rows, so the order is gone logically but the bytes remain readable through history. For a privacy deletion this is not enough. Track which snapshots still reference the deleted row, and treat the request as complete only after those snapshots are expired and the unreferenced files are removed."
+      "interpretation": "The current view lists ids 2 and 3 while the first snapshot still returns three rows, so the order is gone logically but the bytes remain readable through history. For a privacy deletion this is not enough. Track which snapshots still reference the deleted row, and treat the request as complete only after those snapshots are expired and the unreferenced files are removed.",
+      "fence": "fragment"
     },
     {
       "title": "Expire the historical snapshot",
       "language": "python",
       "code": "table.maintenance.expire_snapshots().by_id(first).commit()\nprint(first in {snapshot.snapshot_id for snapshot in table.snapshots()})\nprint(sorted(table.scan().to_arrow()[\"id\"].to_pylist()))",
-      "interpretation": "The membership test prints False and the current ids remain 2 and 3. Expiration removes the snapshot from metadata, so time travel to it now fails, but in the lesson the warehouse files are still on disk afterward. Physical removal depends on cleanup of files no longer referenced by any retained snapshot. Branches or tags that protect a snapshot block its expiration, so check references before promising deletion."
+      "interpretation": "The membership test prints False and the current ids remain 2 and 3. Expiration removes the snapshot from metadata, so time travel to it now fails, but in the lesson the warehouse files are still on disk afterward. Physical removal depends on cleanup of files no longer referenced by any retained snapshot. Branches or tags that protect a snapshot block its expiration, so check references before promising deletion.",
+      "fence": "fragment"
     }
   ],
   "evidence": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded.",

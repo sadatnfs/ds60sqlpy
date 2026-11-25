@@ -683,11 +683,11 @@ class PadRunner:
         *,
         cursor_offset: int | None = None,
         timeout_seconds: int | None = None,
-        trusted_setup: str | None = None,
+        solution_setup: str | None = None,
     ) -> dict[str, Any]:
         """Trace Python line by line, or walk one SELECT clause by clause, without saving.
 
-        ``trusted_setup`` marks a worked SQL solution: that setup and the code before the
+        ``solution_setup`` marks a worked SQL solution: that setup and the code before the
         walked statement replay first, in a transaction that is always rolled back.
         """
 
@@ -716,12 +716,12 @@ class PadRunner:
             path.parent.mkdir(parents=True, exist_ok=True)
             return self._step_through_python(path.parent, code, timeout_seconds)
         plan = stepping.plan_sql(code, cursor_offset)
-        rejected = stepping.sql_unsupported_response(plan, solution=trusted_setup is not None)
+        rejected = stepping.sql_unsupported_response(plan, solution=solution_setup is not None)
         if rejected is not None:
             return rejected
         context = (
-            stepping.sanitize_sql_context(trusted_setup + "\n;\n" + code[: plan.statement_offset])
-            if trusted_setup is not None
+            stepping.sanitize_sql_context(solution_setup + "\n;\n" + code[: plan.statement_offset])
+            if solution_setup is not None
             else []
         )
         path.parent.mkdir(parents=True, exist_ok=True)

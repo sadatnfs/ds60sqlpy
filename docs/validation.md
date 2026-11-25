@@ -652,6 +652,73 @@ binding's `presentation_history`, then update its current presentation hash and
 run the existing parity tests. This records a documentation change, not another
 execution. Never use it to approve changed examples or rewrite runtime receipts.
 
+## Guide example execution
+
+`scripts/check_guide_examples.py` runs the fenced examples in every companion
+guide named by `curriculum/coverage-matrix.json`. It splits each guide with the
+reader's own fence rules and treats every block as one of:
+
+- documentation (text, DAX, shell transcripts and similar), recorded but not run;
+- a static host check (`bash -n`, JSON, YAML or XML parsing);
+- one cumulative SQL script per guide in a disposable PostgreSQL database; a
+  block that fails there but is a verbatim excerpt of its own lesson file passes
+  as an excerpt, because CI runs every SQL lesson in full;
+- a cumulative Python, R or Julia session per guide and language, or one
+  complete program per block for compiled and scripting languages, in the
+  lesson's worker image with no network, a read-only root and a non-root job;
+- a `stanc` compile for Stan models.
+
+The fence annotations that change this treatment are described in
+[Content authoring](content-authoring.md). List the plan without running
+anything:
+
+```bash
+python scripts/check_guide_examples.py --list-only --profiles all
+```
+
+Run selected profiles against the published worker images. `host` covers the
+static checks, `postgres` the SQL blocks, and worker profile names the rest:
+
+```bash
+python scripts/check_guide_examples.py --profiles host,python-core \
+  --image-template 'sadatnfs/ds60sqlpy:{version}-worker-{profile}' \
+  --confirm-disposable --jobs 3 --report work/guide-python-core.json
+```
+
+Nothing executes without `--confirm-disposable`. `--guides` narrows the run
+with an fnmatch pattern such as `courses/cpp/guides/cpp-00*.md`. The options for
+the optional environments are:
+
+- `--psql 'docker exec -i ds60-guide-db psql -U postgres'` runs the SQL blocks
+  through an administrator `psql` prefix. Point it only at a disposable local
+  database; the harness creates and drops its own databases there.
+- `--database-container ds60-guide-db` names a PostgreSQL container started with
+  `--network none`. The harness loads the course seed into a disposable database
+  and runs the Python sessions that read `DS60_DATABASE_URL` in a worker that
+  shares only that container's loopback network.
+- `--advanced-python <interpreter>` runs the `python-advanced` sessions (ml,
+  production, deep learning, NLP and geo extras) on the host, because no
+  published worker image carries those extras. Use an environment synced with
+  every extra, as in CI.
+- `--track-image tmb-modeling=<image>` runs a course in its own project image.
+  Build `courses/tmb-modeling/projects/tmb-local/Dockerfile` locally first; it
+  compiles the TMB models into `TMB_BUILD_DIR`.
+- `--bash` names a Bash 4 or later for the host checks (macOS ships Bash 3.2).
+
+Without an optional environment, its blocks are reported as `skipped` with the
+reason, never as passed. The last line of output is a JSON summary, and
+`--report` writes every block's `status`, `guide`, `line` and `detail`. A run
+must finish with zero `failed` blocks; an `expect-error` block fails if it
+succeeds. Run one harness at a time, because each profile starts `--jobs`
+worker containers. Hosted CI runs the static checks in the core job on Python
+3.12, the SQL blocks in the PostgreSQL job (after the SQL lessons and
+solutions) and the advanced Python sessions in the scheduled or manually
+dispatched advanced imports job. Each `app-build.yml` Docker classroom group runs
+the blocks of its own worker profiles against the images it just built and
+uploads `work/guide-examples-<group>.json`. Blocks that need a database
+container, the advanced Python extras or a course image are skipped there, so a
+local run of `--profiles all` with every option above stays the release gate.
+
 ## Image vulnerability scans
 
 `scripts/image_scan.py` is the release image gate (SEC-01). It runs Trivy

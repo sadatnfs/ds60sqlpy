@@ -49,7 +49,7 @@ replaced just to make the new job run.
 The only source difference between the compatible and incompatible restore is the
 operator UID chosen in the job's final branch:
 
-<!-- include: projects/flink/src/WorkshopJobs.java from="new ManagedTotal()" to=".uid(mode.equals" java -->
+<!-- include: projects/flink/src/WorkshopJobs.java from="new ManagedTotal()" to=".uid(mode.equals" java fragment -->
 
 Savepoint state is mapped to operators by UID, so state saved under `counter-v1`
 has no destination when the restored job names the operator `counter-v2`.

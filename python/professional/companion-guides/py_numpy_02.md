@@ -63,6 +63,8 @@ The exercises make shape validation explicit, preserve inputs, reject undefined 
 ### Example 1
 
 ```python
+import numpy as np
+
 x = np.array([[1.0, 3.0, 5.0], [2.0, 4.0, 9.0]])
 centered = x - x.mean(axis=1, keepdims=True)
 assert centered.shape == (2, 3) and np.allclose(centered.mean(axis=1), 0)

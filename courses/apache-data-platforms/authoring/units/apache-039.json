@@ -32,13 +32,15 @@
       "title": "List the files a scan will read",
       "language": "python",
       "code": "for task in table.scan().plan_files():\n    print(task.file.file_path, task.file.record_count, task.file.file_format)",
-      "interpretation": "Run after the first append in the lesson program, this prints one line per data file: a file URI under the warehouse data directory, a record count of 3, and the format PARQUET. The planner gets this list from the manifests of the current snapshot, not by listing the directory. Sum the record counts and compare with the scan row count; a mismatch usually means delete files are being applied, which the record count of a data file alone does not show."
+      "interpretation": "Run after the first append in the lesson program, this prints one line per data file: a file URI under the warehouse data directory, a record count of 3, and the format PARQUET. The planner gets this list from the manifests of the current snapshot, not by listing the directory. Sum the record counts and compare with the scan row count; a mismatch usually means delete files are being applied, which the record count of a data file alone does not show.",
+      "fence": "fragment"
     },
     {
       "title": "Reopen the catalog and read by snapshot",
       "language": "python",
       "code": "reopened = load_catalog(\n    \"lesson\",\n    type=\"sql\",\n    uri=\"sqlite:///\" + str(root / \"catalog.db\"),\n    warehouse=(root / \"warehouse\").as_uri(),\n)\norders = reopened.load_table(\"demo.orders\")\nprint(len(orders.snapshots()), orders.scan(snapshot_id=first).to_arrow().num_rows)",
-      "interpretation": "After two appends, a fresh catalog object should report two snapshots and three rows for the first one, proving the history lives in the SQLite catalog and the metadata files rather than in Python memory. If the reopened catalog cannot find the table, compare the uri and warehouse values with the writer; a different SQLite path creates a new empty catalog without any error."
+      "interpretation": "After two appends, a fresh catalog object should report two snapshots and three rows for the first one, proving the history lives in the SQLite catalog and the metadata files rather than in Python memory. If the reopened catalog cannot find the table, compare the uri and warehouse values with the writer; a different SQLite path creates a new empty catalog without any error.",
+      "fence": "fragment"
     }
   ],
   "evidence": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded.",

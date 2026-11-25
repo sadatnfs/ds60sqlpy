@@ -530,8 +530,8 @@ def test_solution_sql_step_through_replays_setup_only_for_the_unchanged_answer(
     server = sql_walkthrough_server(tmp_path)
     setups: list[str | None] = []
 
-    def trace(*args: object, trusted_setup: str | None = None, **kwargs: object) -> dict[str, Any]:
-        setups.append(trusted_setup)
+    def trace(*args: object, solution_setup: str | None = None, **kwargs: object) -> dict[str, Any]:
+        setups.append(solution_setup)
         return {"kind": "sql", "steps": [{"clause": "from"}], "error": None}
 
     monkeypatch.setattr("ds60sqlpy.lab.ensure_before_run", lambda *args: None)
@@ -587,10 +587,10 @@ def test_supported_sql_step_through_prepares_before_trace(
         *,
         cursor_offset: int | None = None,
         timeout_seconds: int | None = None,
-        trusted_setup: str | None = None,
+        solution_setup: str | None = None,
     ) -> dict[str, Any]:
         calls.append(("trace", lesson_id, language, code, cursor_offset, timeout_seconds))
-        assert trusted_setup is None
+        assert solution_setup is None
         return {"kind": "sql", "steps": [{"clause": "from"}], "error": None}
 
     monkeypatch.setattr("ds60sqlpy.lab.ensure_before_run", prepare)

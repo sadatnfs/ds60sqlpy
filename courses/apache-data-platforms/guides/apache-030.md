@@ -43,7 +43,7 @@ task is mapped over the two regions:
 
 From [`projects/airflow/dags/classroom_workflows.py`](../projects/airflow/dags/classroom_workflows.py):
 
-```python
+```python fragment
 @dag(
     dag_id="classroom_asset_consumer",
     schedule=[ORDERS],

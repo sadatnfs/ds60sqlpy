@@ -1243,7 +1243,7 @@ def test_live_step_through_solution_replays_setup_and_rolls_it_back(
     )
     query = f"SELECT n, seen FROM {table} WHERE n > 1 ORDER BY n"
     runner = PadRunner(course)
-    walk = runner.step_through("python-01", "sql", query, timeout_seconds=60, trusted_setup=setup)
+    walk = runner.step_through("python-01", "sql", query, timeout_seconds=60, solution_setup=setup)
     assert walk["error"] is None and walk["unsupported"] is None, walk
     assert [step["error"] for step in walk["steps"]] == [None] * len(walk["steps"])
     assert walk["steps"][-1]["rows"] == [[2, "2024-01-02"], [3, "-infinity"]]
@@ -1252,11 +1252,11 @@ def test_live_step_through_solution_replays_setup_and_rolls_it_back(
     assert "does not exist" in practice["steps"][0]["error"], practice
 
     writer = runner.step_through(
-        "python-01", "sql", f"SELECT nextval('{sequence}') AS n", trusted_setup=setup
+        "python-01", "sql", f"SELECT nextval('{sequence}') AS n", solution_setup=setup
     )
     assert writer["steps"][-1]["error"] == stepping.READ_ONLY_STEP, writer
 
-    rejected = runner.step_through("python-01", "sql", f"DELETE FROM {table}", trusted_setup=setup)
+    rejected = runner.step_through("python-01", "sql", f"DELETE FROM {table}", solution_setup=setup)
     assert rejected["unsupported"] == stepping.SOLUTION_NOT_A_QUERY
     with driver.connect(target, autocommit=True) as connection:
         assert connection.execute(f"SELECT to_regclass('{table}')").fetchone() == (None,)

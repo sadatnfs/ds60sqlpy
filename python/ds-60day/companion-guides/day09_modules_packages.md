@@ -191,7 +191,7 @@ demo/
   __main__.py
 ```
 
-```python
+```python fragment
 # demo/formatters.py
 def title(text: str) -> str:
     return text.strip().title()

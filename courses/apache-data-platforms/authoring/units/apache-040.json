@@ -32,13 +32,15 @@
       "title": "Confirm a rename keeps the field identifier",
       "language": "python",
       "code": "before = table.schema().find_field(\"amount\").field_id\nwith table.update_schema() as update:\n    update.rename_column(\"amount\", \"revenue\")\nafter = table.schema().find_field(\"revenue\").field_id\nprint(before, after, before == after)",
-      "interpretation": "Both identifiers print the same small integer and the comparison is True, because Iceberg resolves columns by field ID and the rename only changes metadata. The Parquet files written before the rename still say amount in their own schema, and readers map them through the ID. A tool that matches by name instead of ID would read nulls for revenue in old files, so test renames with the reader you actually deploy."
+      "interpretation": "Both identifiers print the same small integer and the comparison is True, because Iceberg resolves columns by field ID and the rename only changes metadata. The Parquet files written before the rename still say amount in their own schema, and readers map them through the ID. A tool that matches by name instead of ID would read nulls for revenue in old files, so test renames with the reader you actually deploy.",
+      "fence": "fragment"
     },
     {
       "title": "Add an optional column without rewriting old rows",
       "language": "python",
       "code": "from pyiceberg.types import LongType\n\nwith table.update_schema() as update:\n    update.add_column(\"quality\", LongType())\nrows = table.scan().to_arrow().to_pylist()\nprint([row[\"quality\"] for row in rows])",
-      "interpretation": "Existing rows report None for quality because the new field ID is absent from their files, and no data file is rewritten. Adding a required column to a table that already has rows is rejected, since old rows could not satisfy it. If a reader shows zeros instead of None for old rows, a default is being applied downstream and should be documented rather than assumed."
+      "interpretation": "Existing rows report None for quality because the new field ID is absent from their files, and no data file is rewritten. Adding a required column to a table that already has rows is rejected, since old rows could not satisfy it. If a reader shows zeros instead of None for old rows, a default is being applied downstream and should be documented rather than assumed.",
+      "fence": "fragment"
     }
   ],
   "evidence": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded.",

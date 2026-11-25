@@ -66,7 +66,7 @@ The final packet records source and target claims separately. For this run, the 
 
 The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
 
-```scala
+```scala prelude=../solutions/spark-041_solution.scala
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions._
 import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
@@ -94,7 +94,7 @@ val golden = spark.createDataFrame(
 )
 ```
 
-```python
+```python prelude=../solutions/spark-041_solution.py
 from pyspark.sql import functions as F
 from pathlib import Path
 import tempfile

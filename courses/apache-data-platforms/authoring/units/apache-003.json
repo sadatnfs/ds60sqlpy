@@ -28,13 +28,15 @@
       "title": "Read a retained snapshot by identifier",
       "language": "python",
       "code": "initial = table.current_snapshot()\ntable.append(pa.Table.from_pylist([{\"id\": 3, \"amount\": 7}], schema=schema))\nold = table.scan(snapshot_id=initial.snapshot_id).to_arrow()\nnow = table.scan().to_arrow()\nprint(initial.snapshot_id, len(old), len(now))",
-      "interpretation": "This fragment continues the lesson program after the first append, so table and schema are the PyIceberg objects it created. The printed line has the shape of a large integer snapshot identifier followed by 2 and 3: the retained snapshot still shows two rows while the current one shows three. The identifier value differs on every run, so compare row counts and contents rather than the number itself. If the old scan returns three rows, the identifier was captured after the second commit."
+      "interpretation": "This fragment continues the lesson program after the first append, so table and schema are the PyIceberg objects it created. The printed line has the shape of a large integer snapshot identifier followed by 2 and 3: the retained snapshot still shows two rows while the current one shows three. The identifier value differs on every run, so compare row counts and contents rather than the number itself. If the old scan returns three rows, the identifier was captured after the second commit.",
+      "fence": "fragment"
     },
     {
       "title": "List the snapshot log after two appends",
       "language": "python",
       "code": "for entry in table.history():\n    print(entry.snapshot_id, entry.timestamp_ms)\nprint(table.metadata_location)",
-      "interpretation": "The history should list two entries in commit order, one per append, and the metadata location should point at a JSON file under the warehouse metadata directory. A stray Parquet file copied into the warehouse never appears here because nothing committed it. When someone claims data is in the table, ask which snapshot lists the file in its manifests; a readable file on disk is evidence of bytes, not of table membership."
+      "interpretation": "The history should list two entries in commit order, one per append, and the metadata location should point at a JSON file under the warehouse metadata directory. A stray Parquet file copied into the warehouse never appears here because nothing committed it. When someone claims data is in the table, ask which snapshot lists the file in its manifests; a readable file on disk is evidence of bytes, not of table membership.",
+      "fence": "fragment"
     }
   ],
   "evidence": "Exact real-library outputs checked against small independent records, with explicit rejected inputs.",

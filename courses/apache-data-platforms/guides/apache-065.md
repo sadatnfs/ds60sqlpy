@@ -102,14 +102,16 @@ The two metadata reports should match, since the table and partition rows live i
 ### The metastore database connection
 
 ```xml
-<property>
-  <name>javax.jdo.option.ConnectionURL</name>
-  <value>jdbc:postgresql://postgres:5432/metastore</value>
-</property>
-<property>
-  <name>hive.metastore.warehouse.dir</name>
-  <value>file:///warehouse</value>
-</property>
+<configuration>
+  <property>
+    <name>javax.jdo.option.ConnectionURL</name>
+    <value>jdbc:postgresql://postgres:5432/metastore</value>
+  </property>
+  <property>
+    <name>hive.metastore.warehouse.dir</name>
+    <value>file:///warehouse</value>
+  </property>
+</configuration>
 ```
 
 This excerpt of conf/hive-site.xml shows the two places that must survive separately: the PostgreSQL metastore database and the warehouse directory. Backing up only one is a common mistake. Restoring the database without the files leaves tables that point at empty locations, and restoring files without the database leaves Parquet that no query can find. Use a consistent pg_dump with the matching file copy and record both identities together.

@@ -438,7 +438,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tr>
 </tbody></table></div>
 <h4 id="guide--worked-example-conversion-is-part-of-validation">Worked example: conversion is part of validation<a class="heading-anchor" href="#guide--worked-example-conversion-is-part-of-validation" aria-label="Link to this section">#</a></h4>
-<pre class="highlighted-code"><code class="language-python">raw_amount <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">12.345</span><span class="syntax-string">&quot;</span>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> decimal <span class="syntax-keyword">import</span> ROUND_HALF_EVEN<span class="syntax-punctuation">,</span> Decimal
+
+
+<span class="syntax-keyword">class</span> <span class="syntax-class">RowValidationError</span><span class="syntax-punctuation">(</span>ValueError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-string">&quot;&quot;&quot;A source row that cannot become a Sale.&quot;&quot;&quot;</span>
+
+
+raw_amount <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">12.345</span><span class="syntax-string">&quot;</span>
 amount <span class="syntax-operator">=</span> Decimal<span class="syntax-punctuation">(</span>raw_amount<span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> amount<span class="syntax-operator">.</span>is_finite<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> amount <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">raise</span> RowValidationError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount must be finite and positive</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>

@@ -40,7 +40,7 @@ Reconstruct outcomes independently where possible. If outcome data are genuinely
 
 The defect below raises no error. Run it inside [experiment_03.py](examples/experiment_03.py) after the fixture is defined.
 
-```python
+```python prelude=examples/experiment_03.py
 users, events, _, _ = experiment_fixture()
 fanned = users.merge(events, on="unit", how="left")
 print("rows after naive join:", len(fanned))

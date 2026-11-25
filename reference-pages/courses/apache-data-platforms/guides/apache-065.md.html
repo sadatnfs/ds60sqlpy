@@ -227,14 +227,16 @@ bash run.sh metadata
 bash run.sh check</code></pre>
 <p>The two metadata reports should match, since the table and partition rows live in PostgreSQL, not in the metastore process. The metastore service itself is stateless; restarting it only proves it can reconnect to the database. The final check then confirms that the data files still answer through HiveServer2. Never run initialize during this test, because it would recreate missing definitions and make a real loss look like success.</p>
 <h4 id="the-metastore-database-connection">The metastore database connection<a class="heading-anchor" href="#the-metastore-database-connection" aria-label="Link to this section">#</a></h4>
-<pre class="highlighted-code"><code class="language-xml"><span class="syntax-tag">&lt;property</span><span class="syntax-tag">&gt;</span>
-  <span class="syntax-tag">&lt;name</span><span class="syntax-tag">&gt;</span>javax.jdo.option.ConnectionURL<span class="syntax-tag">&lt;/name&gt;</span>
-  <span class="syntax-tag">&lt;value</span><span class="syntax-tag">&gt;</span>jdbc:postgresql://postgres:5432/metastore<span class="syntax-tag">&lt;/value&gt;</span>
-<span class="syntax-tag">&lt;/property&gt;</span>
-<span class="syntax-tag">&lt;property</span><span class="syntax-tag">&gt;</span>
-  <span class="syntax-tag">&lt;name</span><span class="syntax-tag">&gt;</span>hive.metastore.warehouse.dir<span class="syntax-tag">&lt;/name&gt;</span>
-  <span class="syntax-tag">&lt;value</span><span class="syntax-tag">&gt;</span>file:///warehouse<span class="syntax-tag">&lt;/value&gt;</span>
-<span class="syntax-tag">&lt;/property&gt;</span></code></pre>
+<pre class="highlighted-code"><code class="language-xml"><span class="syntax-tag">&lt;configuration</span><span class="syntax-tag">&gt;</span>
+  <span class="syntax-tag">&lt;property</span><span class="syntax-tag">&gt;</span>
+    <span class="syntax-tag">&lt;name</span><span class="syntax-tag">&gt;</span>javax.jdo.option.ConnectionURL<span class="syntax-tag">&lt;/name&gt;</span>
+    <span class="syntax-tag">&lt;value</span><span class="syntax-tag">&gt;</span>jdbc:postgresql://postgres:5432/metastore<span class="syntax-tag">&lt;/value&gt;</span>
+  <span class="syntax-tag">&lt;/property&gt;</span>
+  <span class="syntax-tag">&lt;property</span><span class="syntax-tag">&gt;</span>
+    <span class="syntax-tag">&lt;name</span><span class="syntax-tag">&gt;</span>hive.metastore.warehouse.dir<span class="syntax-tag">&lt;/name&gt;</span>
+    <span class="syntax-tag">&lt;value</span><span class="syntax-tag">&gt;</span>file:///warehouse<span class="syntax-tag">&lt;/value&gt;</span>
+  <span class="syntax-tag">&lt;/property&gt;</span>
+<span class="syntax-tag">&lt;/configuration&gt;</span></code></pre>
 <p>This excerpt of conf/hive-site.xml shows the two places that must survive separately: the PostgreSQL metastore database and the warehouse directory. Backing up only one is a common mistake. Restoring the database without the files leaves tables that point at empty locations, and restoring files without the database leaves Parquet that no query can find. Use a consistent pg_dump with the matching file copy and record both identities together.</p>
 <h4 id="replacement-with-a-fresh-metadata-client">Replacement with a fresh metadata client<a class="heading-anchor" href="#replacement-with-a-fresh-metadata-client" aria-label="Link to this section">#</a></h4>
 <pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">cd</span> work/hive

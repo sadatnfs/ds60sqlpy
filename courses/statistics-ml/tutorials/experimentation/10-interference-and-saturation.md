@@ -51,7 +51,7 @@ If treated buyers obtain scarce inventory that controls would otherwise receive,
 
 The four-user toy world in `examples/experiment_10.py` has pairs (0, 1) and (2, 3) that influence each other. Instead of the Horvitz-Thompson contrasts, apply the naive treated-minus-control mean to every assignment that has at least one unit in each arm.
 
-```python
+```python prelude=examples/experiment_10.py
 neighbor = np.array([1, 0, 3, 2])
 baseline = np.arange(4, dtype=float)
 naive = []

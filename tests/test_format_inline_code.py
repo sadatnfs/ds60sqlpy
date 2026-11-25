@@ -834,6 +834,22 @@ def test_web_example_raw_code_slot_preserves_all_other_values(tmp_path: Path) ->
     assert repeated == changed
 
 
+def test_web_example_language_admits_fence_flags_only(tmp_path: Path) -> None:
+    path = "courses/web-development/authoring/chapters.json"
+
+    def chapters(language: str) -> dict[str, Any]:
+        return {
+            "schema_version": 1,
+            "chapters": [{"examples": [["heading", "intro", language, "x = 1;", "expected"]]}],
+        }
+
+    slots = inline.web_example_slots(chapters("javascript fragment"), path)
+    assert list(slots.values()) == ["javascript fragment"]
+    for bad in ("javascript  fragment", "javascript\nfragment", "javascript fragment "):
+        with pytest.raises(inline.FormatFailure, match="Web examples require"):
+            inline.web_example_slots(chapters(bad), path)
+
+
 def test_raw_web_slot_does_not_admit_other_paths_or_unselected_tools(tmp_path: Path) -> None:
     source = json.dumps(
         {

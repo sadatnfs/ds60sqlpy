@@ -41,7 +41,7 @@ partition and returns a small source-bound reference.
 
 From [`projects/airflow/dags/classroom_workflows.py`](../projects/airflow/dags/classroom_workflows.py):
 
-```python
+```python fragment
 @dag(
     dag_id="classroom_orders",
     schedule=CronDataIntervalTimetable("0 0 * * *", timezone="UTC"),
