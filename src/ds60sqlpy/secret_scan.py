@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import re
 import subprocess
+import tempfile
 from dataclasses import dataclass
 from html import unescape
 from pathlib import Path
@@ -228,13 +229,19 @@ def scan_git_history(repo_root: Path = REPO_ROOT) -> list[HistoryFinding]:
     object_ids = tuple(object_paths)
     if not object_ids:
         return findings
-    batch = subprocess.run(
-        ["git", "cat-file", "--batch"],
-        cwd=root,
-        input=("".join(f"{object_id}\n" for object_id in object_ids)).encode(),
-        check=True,
-        capture_output=True,
-    )
+    # Feed the IDs from a file, not a pipe. With both stdin and stdout piped,
+    # communicate() can block writing to git while git blocks writing blobs
+    # back, which hung the history scan on macOS.
+    with tempfile.TemporaryFile() as requests:
+        requests.write("".join(f"{object_id}\n" for object_id in object_ids).encode())
+        requests.seek(0)
+        batch = subprocess.run(
+            ["git", "cat-file", "--batch"],
+            cwd=root,
+            stdin=requests,
+            check=True,
+            capture_output=True,
+        )
     offset = 0
     for requested_id in object_ids:
         header_end = batch.stdout.find(b"\n", offset)
