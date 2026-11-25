@@ -3,7 +3,7 @@ name = "ds60-pretrained-recipe"
 version = "0.1.0"
 requires-python = ">=3.12,<3.13"
 dependencies = [
-  "torch==2.9.1+cpu",
+  "torch==2.12.1+cpu",
   "transformers==4.57.1",
   "trl==0.24.0",
   "peft==0.17.1",
